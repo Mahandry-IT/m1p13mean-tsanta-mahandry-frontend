@@ -29,7 +29,9 @@ import { HomeFooterComponent } from './home-footer.component';
         <section class="cards">
           <mat-card class="home-card">
             <div class="card-columns">
-              <div class="card-left placeholder-image" aria-hidden="true"></div>
+              <div class="card-left" aria-hidden="true">
+                <img src="/home/store-handler.png" alt="Gérer votre boutique" class="card-image" />
+              </div>
               <div class="card-right">
                 <h2>Gérer votre propre boutique</h2>
                 <p>Créez et administrez votre boutique, gérez vos produits, vos commandes et suivez vos ventes facilement.</p>
@@ -40,7 +42,9 @@ import { HomeFooterComponent } from './home-footer.component';
 
           <mat-card class="home-card">
             <div class="card-columns">
-              <div class="card-left placeholder-image" aria-hidden="true"></div>
+              <div class="card-left" aria-hidden="true">
+                <img src="/home/customer.png" alt="Acheter des produits" class="card-image" />
+              </div>
               <div class="card-right">
                 <h2>Acheter vos produits préférés</h2>
                 <p>Parcourez le catalogue et trouvez les meilleures offres pour vos achats quotidiens.</p>
@@ -64,7 +68,8 @@ import { HomeFooterComponent } from './home-footer.component';
     .home-card { padding: 0; width: 100%; box-sizing: border-box; }
     .card-columns { display: grid; grid-template-columns: 1fr 1fr; }
     @media (max-width: 900px) { .card-columns { grid-template-columns: 1fr; } }
-    .card-left { min-height: 200px; background: repeating-linear-gradient(45deg,#eee,#eee 10px,#ddd 10px,#ddd 20px); width: 100%; }
+    .card-left { min-height: 200px; width: 100%; display:flex; align-items:center; justify-content:center; background: #fafafa; }
+    .card-image { max-width: 100%; height: auto; object-fit: contain; }
     @media (max-width: 600px) { .card-left { min-height: 140px; } }
     .card-right { padding: 24px; display:flex; flex-direction:column; gap:12px; box-sizing: border-box; }
     img, svg { max-width: 100%; height: auto; display: block; }
