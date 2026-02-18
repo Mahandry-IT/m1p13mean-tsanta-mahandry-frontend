@@ -30,8 +30,8 @@ import { RouterModule } from '@angular/router';
   `,
   styles: [
     `
-    .home-footer { position: fixed; bottom: 0; left: 0; right: 0; background: #000; color: #f1f1f1; }
-    .footer-content { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; padding: 24px 20px; max-width: 1200px; margin: 0 auto; }
+      .home-footer { background: #000; color: #f1f1f1; }
+      .footer-content { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; padding: 24px 20px; max-width: 1200px; margin: 0 auto; }
     @media (max-width: 900px) { .footer-content { grid-template-columns: 1fr; gap: 24px; } }
 
     .footer-col { display: flex; flex-direction: column; gap: 12px; }
@@ -46,7 +46,6 @@ import { RouterModule } from '@angular/router';
 
     .footer-copy { text-align: center; padding: 12px 16px; font-size: 13px; color: #bdbdbd; border-top: 1px solid rgba(255,255,255,0.08); }
 
-    /* Prévention d’overflow horizontal */
     img, svg { max-width: 100%; height: auto; }
     `
   ]

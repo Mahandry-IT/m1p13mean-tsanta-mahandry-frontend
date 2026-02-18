@@ -1,10 +1,13 @@
 import { HttpInterceptorFn } from '@angular/common/http';
 import { tap, finalize } from 'rxjs/operators';
-let pending = 0;
+import { inject } from '@angular/core';
+import { LoadingService } from '../services/loading.service';
+
 export const loadingInterceptor: HttpInterceptorFn = (req, next) => {
-  pending++;
+  const loading = inject(LoadingService);
+  loading.start();
   return next(req).pipe(
     tap({}),
-    finalize(() => { pending--; })
+    finalize(() => { loading.stop(); })
   );
 };
