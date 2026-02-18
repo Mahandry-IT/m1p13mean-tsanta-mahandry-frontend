@@ -8,35 +8,46 @@ import { RouterModule } from '@angular/router';
   template: `
     <footer class="home-footer">
       <div class="footer-content">
-        <div class="footer-left">
-          <img src="/mean.png" alt="MEAN" class="footer-logo" />
-          <div class="footer-links">
+        <section class="footer-col footer-left">
+          <h3 class="footer-title">MEAN</h3>
+          <nav class="footer-links">
             <a routerLink="/users">Gérer votre boutique</a>
             <a routerLink="/auth/login">Acheter des produits</a>
-          </div>
-        </div>
-        <div class="footer-right">
-          <ul>
+          </nav>
+        </section>
+
+        <section class="footer-col footer-right">
+          <h3 class="footer-title">Équipe</h3>
+          <ul class="footer-list">
             <li>Tsanta Mialitiana Fenosoa RANDRIAMIHARY</li>
             <li>Mahandry ANDRIANANTENAINA</li>
             <!-- Ajoutez d'autres noms si nécessaire -->
           </ul>
-        </div>
+        </section>
       </div>
       <div class="footer-copy">© 2026 MEAN — Tous droits réservés</div>
     </footer>
   `,
   styles: [
     `
-    .home-footer { margin-top: 48px; border-top: 1px solid #e0e0e0; background: #1b1f24; color: #e6e6e6; }
-    .footer-content { display:flex; justify-content: space-between; padding: 24px; gap: 24px; }
-    .footer-left { display:flex; flex-direction:column; gap:12px; align-items:flex-start; }
-    .footer-logo { height: 48px; filter: brightness(0) invert(1); }
-    .footer-links { display:flex; flex-direction:column; gap:8px; }
-    .footer-links a { color: #90caf9; text-decoration: none; }
-    .footer-links a:hover { text-decoration: underline; }
-    .footer-right ul { list-style:none; margin:0; padding:0; }
-    .footer-copy { text-align:center; padding: 12px; font-size: 12px; color: #b0b0b0; }
+    .home-footer { position: fixed; bottom: 0; left: 0; right: 0; background: #000; color: #f1f1f1; }
+    .footer-content { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; padding: 24px 20px; max-width: 1200px; margin: 0 auto; }
+    @media (max-width: 900px) { .footer-content { grid-template-columns: 1fr; gap: 24px; } }
+
+    .footer-col { display: flex; flex-direction: column; gap: 12px; }
+    .footer-title { font-size: 24px; line-height: 1.2; margin: 0; font-weight: 700; letter-spacing: 0.2px; color: #fff; }
+
+    .footer-links { display: flex; flex-direction: column; gap: 8px; }
+    .footer-links a { color: #d6d6d6; text-decoration: none; font-weight: 500; }
+    .footer-links a:hover { color: #ffffff; text-decoration: underline; }
+
+    .footer-list { list-style: none; margin: 0; padding: 0; }
+    .footer-list li { margin: 6px 0; color: #d6d6d6; }
+
+    .footer-copy { text-align: center; padding: 12px 16px; font-size: 13px; color: #bdbdbd; border-top: 1px solid rgba(255,255,255,0.08); }
+
+    /* Prévention d’overflow horizontal */
+    img, svg { max-width: 100%; height: auto; }
     `
   ]
 })
