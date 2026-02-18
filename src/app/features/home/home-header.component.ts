@@ -28,8 +28,13 @@ import { MatMenuModule } from '@angular/material/menu';
     .home-header { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; display: flex; justify-content: space-between; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
     .home-header.mat-toolbar { min-height: 72px; }
     .header-left { display:flex; align-items:center; }
-    .header-right { display:flex; gap: 12px; align-items:center; }
-    .app-logo { height: 32px; }
+    .header-right { display:flex; gap: 12px; align-items:center; flex-wrap: wrap; }
+    .app-logo { height: 128px; max-height: 128px; width: auto; object-fit: contain; }
+    @media (max-width: 600px) {
+      .home-header.mat-toolbar { min-height: 56px; }
+      .app-logo { height: 40px; max-height: 40px; }
+      .header-right { gap: 8px; }
+    }
     `
   ]
 })

@@ -17,7 +17,8 @@ import { RouterModule } from '@angular/router';
         </div>
         <div class="footer-right">
           <ul>
-            <li>Tsanta Mahandry</li>
+            <li>Tsanta Mialitiana Fenosoa RANDRIAMIHARY</li>
+            <li>Mahandry ANDRIANANTENAINA</li>
             <!-- Ajoutez d'autres noms si nécessaire -->
           </ul>
         </div>
