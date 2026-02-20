@@ -1,0 +1,33 @@
+<ng-container *ngIf="routerLink; else normalButton">
+  <a
+    [routerLink]="routerLink"
+    [queryParams]="queryParams"
+    [ngClass]="['app-button', className, fullWidth ? 'app-button--full' : '']"
+    [ngStyle]="style"
+    (click)="onClick($event)"
+    [attr.aria-label]="ariaLabel || text"
+    [attr.aria-disabled]="disabled"
+  >
+    {{ text }}
+  </a>
+</ng-container>
+
+<ng-template #normalButton>
+  <button
+    [attr.type]="type"
+    [disabled]="disabled"
+    [ngClass]="['app-button', className, fullWidth ? 'app-button--full' : '']"
+    [ngStyle]="style"
+    (click)="onClick($event)"
+    [attr.aria-label]="ariaLabel || text"
+    [attr.color]="color"
+
+    [attr.mat-raised-button]="variant === 'raised' ? '' : null"
+    [attr.mat-stroked-button]="variant === 'stroked' ? '' : null"
+    [attr.mat-flat-button]="variant === 'flat' ? '' : null"
+    [attr.mat-button]="variant === 'basic' ? '' : null"
+  >
+    <span *ngIf="!loading">{{ text }}</span>
+    <mat-spinner *ngIf="loading" diameter="18" [strokeWidth]="3"></mat-spinner>
+  </button>
+</ng-template>

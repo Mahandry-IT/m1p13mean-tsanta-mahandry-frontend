@@ -9,37 +9,41 @@ export type ToastType = 'success' | 'warning' | 'error' | 'info';
 export class ToastService {
   constructor(private readonly snackBar: MatSnackBar) {}
 
-  success(message: string, action = 'OK', config?: MatSnackBarConfig): void {
+  success(message: string, action = '', config?: MatSnackBarConfig): void {
     this.open(message, action, 'success', config);
   }
 
-  warning(message: string, action = 'OK', config?: MatSnackBarConfig): void {
+  warning(message: string, action = '', config?: MatSnackBarConfig): void {
     this.open(message, action, 'warning', config);
   }
 
-  error(message: string, action = 'OK', config?: MatSnackBarConfig): void {
+  error(message: string, action = '', config?: MatSnackBarConfig): void {
     this.open(message, action, 'error', config);
   }
 
-  info(message: string, action = 'OK', config?: MatSnackBarConfig): void {
+  info(message: string, action = '', config?: MatSnackBarConfig): void {
     this.open(message, action, 'info', config);
   }
 
   open(
     message: string,
-    action = 'OK',
+    action = '',
     type: ToastType = 'info',
     config?: MatSnackBarConfig,
   ): void {
+    const typeClass = `toast-${type}`;
+
+    const existing = (config?.panelClass ?? []) as string | string[];
+    const existingClasses = Array.isArray(existing) ? existing : [existing];
+
     const finalConfig: MatSnackBarConfig = {
       duration: 5000,
       horizontalPosition: 'right',
       verticalPosition: 'top',
-      panelClass: [`toast-${type}`],
+      panelClass: [typeClass, ...existingClasses].filter(Boolean),
       ...config,
     };
 
     this.snackBar.open(message, action, finalConfig);
   }
 }
-

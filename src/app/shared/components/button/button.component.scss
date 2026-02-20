@@ -1,0 +1,31 @@
+.app-button--full {
+  width: 100%;
+}
+
+/* Aligner correctement le spinner dans un bouton Material */
+button.app-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+mat-spinner {
+  display: inline-block;
+}
+
+/* Style minimal pour le mode <a> (routerLink) pour ressembler à un bouton */
+a.app-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  border-radius: 4px;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+a.app-button[aria-disabled='true'] {
+  pointer-events: none;
+  opacity: 0.6;
+}
