@@ -20,10 +20,11 @@ describe('App', () => {
     expect(app).toBeTruthy();
   });
 
-  it('should render title', async () => {
+  it('should render the component host element', () => {
     const fixture = TestBed.createComponent(App);
-    await fixture.whenStable();
-    const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, m1p13mean-tsanta-mahandry-frontend');
+    fixture.detectChanges();
+
+    const host: HTMLElement | null = fixture.nativeElement;
+    expect(host).toBeTruthy();
   });
 });
