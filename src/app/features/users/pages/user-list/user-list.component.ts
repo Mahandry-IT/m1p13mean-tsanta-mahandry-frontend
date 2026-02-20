@@ -1,34 +1,45 @@
-import { Component } from '@angular/core';
-import { MatTableModule } from '@angular/material/table';
+import { Component, OnInit } from '@angular/core';
+import { ApiService } from '../../../../core/services/api.service';
+import { ApiError } from '../../../../core/models/api-error.model';
+
+interface UserDto {
+  id: string;
+  name: string;
+  email: string;
+}
 
 @Component({
   selector: 'app-user-list',
-  standalone: true,
-  imports: [MatTableModule],
-  template: `
-    <table mat-table [dataSource]="data" class="mat-elevation-z1">
-      <!-- Colonne: name -->
-      <ng-container matColumnDef="name">
-        <th mat-header-cell *matHeaderCellDef> Nom </th>
-        <td mat-cell *matCellDef="let user"> {{ user.name }} </td>
-      </ng-container>
-
-      <!-- Colonne: email -->
-      <ng-container matColumnDef="email">
-        <th mat-header-cell *matHeaderCellDef> Email </th>
-        <td mat-cell *matCellDef="let user"> {{ user.email }} </td>
-      </ng-container>
-
-      <!-- Header & Rows -->
-      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-    </table>
-  `,
+  templateUrl: './user-list.component.html',
+  styleUrls: ['./user-list.component.scss'],
+  standalone: false,
 })
-export class UserListComponent {
-  displayedColumns = ['name', 'email'];
-  data = [
-    { name: 'Alice', email: 'alice@example.com' },
-    { name: 'Bob', email: 'bob@example.com' },
-  ];
+export class UserListComponent implements OnInit {
+  users: UserDto[] = [];
+  loading = false;
+  error?: ApiError;
+
+  constructor(private readonly api: ApiService) {}
+
+  ngOnInit(): void {
+    this.load();
+  }
+
+  load(): void {
+    this.loading = true;
+    this.error = undefined;
+
+    // Exemple d'appel API (à adapter à votre backend)
+    this.api.get<UserDto[]>('/users').subscribe({
+      next: (data) => {
+        this.users = data;
+        this.loading = false;
+      },
+      error: (err: ApiError) => {
+        // err vient de l'ErrorInterceptor
+        this.error = err;
+        this.loading = false;
+      },
+    });
+  }
 }

@@ -1,0 +1,48 @@
+<mat-form-field
+  [appearance]="appearance"
+  class="app-input"
+  [ngClass]="className"
+  [ngStyle]="style"
+>
+  <mat-label *ngIf="label">{{ label }}</mat-label>
+
+  <input
+    matInput
+    [type]="type"
+    [formControl]="control"
+    [name]="name"
+    [id]="name"
+    [placeholder]="placeholder"
+    [required]="required"
+    [disabled]="disabled"
+    [attr.minlength]="minLength ?? null"
+    [attr.maxlength]="maxLength ?? null"
+    [attr.min]="min ?? null"
+    [attr.max]="max ?? null"
+    [attr.step]="step ?? null"
+    [attr.pattern]="pattern ?? null"
+    [attr.autocomplete]="autocomplete ?? null"
+    (input)="onInput()"
+  />
+
+  <mat-hint *ngIf="hint && !showExternalError">{{ hint }}</mat-hint>
+
+  <!-- Erreurs de validation Angular (Reactive Forms) -->
+  <mat-error *ngIf="showValidationError">
+    <ng-container *ngIf="control.hasError('required')">Champ obligatoire.</ng-container>
+    <ng-container *ngIf="control.hasError('email')">Email invalide.</ng-container>
+    <ng-container *ngIf="control.hasError('minlength')">
+      Minimum {{ control.getError('minlength')?.requiredLength }} caractères.
+    </ng-container>
+    <ng-container *ngIf="control.hasError('maxlength')">
+      Maximum {{ control.getError('maxlength')?.requiredLength }} caractères.
+    </ng-container>
+    <ng-container *ngIf="control.hasError('min')">Valeur minimum: {{ control.getError('min')?.min }}.</ng-container>
+    <ng-container *ngIf="control.hasError('max')">Valeur maximum: {{ control.getError('max')?.max }}.</ng-container>
+    <ng-container *ngIf="control.hasError('pattern')">Format invalide.</ng-container>
+  </mat-error>
+
+  <!-- Erreur externe (API): prioritaire -->
+  <mat-error *ngIf="showExternalError">{{ externalErrorMessage }}</mat-error>
+</mat-form-field>
+
