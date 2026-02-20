@@ -1,0 +1,203 @@
+<app-page headTitle="Accueil">
+
+  <!-- ── NAVBAR ── -->
+  <header class="navbar">
+    <div class="navbar__logo">
+      <img src="/mean-logo.png" alt="MEAN" class="navbar__brand-logo" />
+    </div>
+
+    <nav class="navbar__actions">
+      <app-button
+        text="Se connecter"
+        [isenabled]="true"
+        variant="stroked"
+        color="primary"
+        routerLink="/auth/login"
+      ></app-button>
+
+      <div class="register-group">
+        <app-button
+          text="S'inscrire"
+          [isenabled]="true"
+          variant="raised"
+          color="accent"
+          [routerLink]="['/auth/register']"
+        ></app-button>
+        <button mat-icon-button [matMenuTriggerFor]="registerMenu" class="dropdown-trigger" aria-label="Choisir un type d'inscription">
+          <mat-icon>expand_more</mat-icon>
+        </button>
+      </div>
+
+      <mat-menu #registerMenu="matMenu" class="register-menu">
+        <button mat-menu-item [routerLink]="['/auth/register/manager']">
+          <mat-icon>store</mat-icon>
+          <span>Gérant</span>
+        </button>
+        <button mat-menu-item [routerLink]="['/auth/register/user']">
+          <mat-icon>shopping_bag</mat-icon>
+          <span>Acheteur</span>
+        </button>
+      </mat-menu>
+    </nav>
+  </header>
+
+  <!-- ── HERO ── -->
+  <section class="hero">
+    <div class="hero__bg-shapes">
+      <div class="shape shape--1"></div>
+      <div class="shape shape--2"></div>
+      <div class="shape shape--3"></div>
+    </div>
+
+    <div class="hero__content">
+      <p class="hero__eyebrow">Bienvenue sur MEAN</p>
+      <h1 class="hero__title">
+        La place de marché<br />
+        <span class="hero__title--accent">qui vous connecte</span>
+      </h1>
+      <p class="hero__subtitle">
+        Gérez votre boutique, découvrez des produits uniques et rejoignez une communauté de vendeurs et d'acheteurs passionnés.
+      </p>
+      <div class="hero__cta">
+        <a routerLink="/auth/register" class="btn-hero btn-hero--primary">
+          Commencer gratuitement
+          <mat-icon>arrow_forward</mat-icon>
+        </a>
+        <a routerLink="/dashboard/api-test" class="btn-hero btn-hero--ghost">
+          Explorer les boutiques
+        </a>
+      </div>
+    </div>
+
+    <div class="hero__visual">
+      <div class="mockup-card">
+        <div class="mockup-card__header">
+          <span class="dot dot--red"></span>
+          <span class="dot dot--yellow"></span>
+          <span class="dot dot--green"></span>
+          <span class="mockup-card__url">MEAN.app / boutiques</span>
+        </div>
+        <div class="mockup-card__body">
+          <div class="mockup-stat">
+            <span class="mockup-stat__value">1 248</span>
+            <span class="mockup-stat__label">Boutiques actives</span>
+          </div>
+          <div class="mockup-divider"></div>
+          <div class="mockup-stat">
+            <span class="mockup-stat__value">34 K</span>
+            <span class="mockup-stat__label">Produits disponibles</span>
+          </div>
+          <div class="mockup-divider"></div>
+          <div class="mockup-stat">
+            <span class="mockup-stat__value">98 %</span>
+            <span class="mockup-stat__label">Satisfaction client</span>
+          </div>
+          <div class="mockup-bar-group">
+            <div class="mockup-bar" style="height: 40%"></div>
+            <div class="mockup-bar" style="height: 65%"></div>
+            <div class="mockup-bar" style="height: 50%"></div>
+            <div class="mockup-bar mockup-bar--accent" style="height: 85%"></div>
+            <div class="mockup-bar" style="height: 70%"></div>
+            <div class="mockup-bar" style="height: 55%"></div>
+            <div class="mockup-bar mockup-bar--accent" style="height: 90%"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── FEATURES STRIP ── -->
+  <div class="features-strip">
+    <div class="feature-chip">
+      <mat-icon>verified</mat-icon>
+      <span>Vendeurs vérifiés</span>
+    </div>
+    <div class="feature-chip">
+      <mat-icon>box</mat-icon>
+      <span>Produits varifiés</span>
+    </div>
+    <div class="feature-chip">
+      <mat-icon>business_center</mat-icon>
+      <span>Gestion sécurisée</span>
+    </div>
+  </div>
+
+  <!-- ── CARDS ── -->
+  <main class="home-main">
+    <h2 class="section-title">Par où commencer ?</h2>
+
+    <div class="cards">
+      <!-- Card 1 -->
+      <div class="home-card">
+        <div class="home-card__image-wrap">
+          <img src="/home/manage-store.jpg" alt="Gérer sa boutique" class="home-card__image" />
+          <div class="home-card__image-overlay"></div>
+          <div class="home-card__badge">
+            <mat-icon>store</mat-icon>
+            Gérants
+          </div>
+        </div>
+        <div class="home-card__body">
+          <h3 class="home-card__title">Gérer sa boutique</h3>
+          <p class="home-card__desc">Créez, activez et gérez votre boutique en quelques clics. Suivez vos ventes en temps réel et boostez votre activité.</p>
+          <a routerLink="/stores" class="card-cta">
+            Commencer maintenant
+            <mat-icon>chevron_right</mat-icon>
+          </a>
+        </div>
+      </div>
+
+      <!-- Card 2 -->
+      <div class="home-card home-card--accent">
+        <div class="home-card__image-wrap">
+          <img src="/home/buy-products.jpg" alt="Acheter des produits" class="home-card__image" />
+          <div class="home-card__image-overlay"></div>
+          <div class="home-card__badge home-card__badge--light">
+            <mat-icon>shopping_bag</mat-icon>
+            Acheteurs
+          </div>
+        </div>
+        <div class="home-card__body">
+          <h3 class="home-card__title">Acheter des produits</h3>
+          <p class="home-card__desc">Découvrez des boutiques uniques, comparez les produits et commandez en toute confiance grâce à nos avis vérifiés.</p>
+          <a routerLink="/dashboard/api-test" class="card-cta card-cta--accent">
+            Explorer les boutiques
+            <mat-icon>chevron_right</mat-icon>
+          </a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ── FOOTER ── -->
+  <footer class="home-footer">
+    <div class="footer__brand">
+      <div class="footer__logo">
+        <img src="/mean.png" alt="MEAN" class="footer__brand-logo" />
+      </div>
+      <p class="footer__tagline">La place de marché qui vous connecte.</p>
+    </div>
+
+    <div class="footer__col">
+      <h4 class="footer__heading">Navigation</h4>
+      <nav class="footer__links">
+        <a routerLink="/stores">Gérer sa boutique</a>
+        <a routerLink="/products">Acheter des produits</a>
+        <a routerLink="/auth/login">Se connecter</a>
+      </nav>
+    </div>
+
+    <div class="footer__col">
+      <h4 class="footer__heading">Équipe</h4>
+      <ul class="footer__team">
+        <li>Tsanta Mialitiana Fenosoa RANDRIAMIHARY</li>
+        <li>Mahandry ANDRIANANTENAINA</li>
+      </ul>
+    </div>
+
+    <div class="footer__bottom">
+      <span>© 2026 MEAN — Tous droits réservés</span>
+    </div>
+  </footer>
+
+</app-page>

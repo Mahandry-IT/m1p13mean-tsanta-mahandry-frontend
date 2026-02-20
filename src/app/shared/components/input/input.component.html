@@ -1,20 +1,20 @@
 <mat-form-field
   [appearance]="appearance"
+  [floatLabel]="floatLabel"
   class="app-input"
-  [ngClass]="className"
+  [ngClass]="[className, (showValidationError || showExternalError) ? 'app-input--error' : '']"
   [ngStyle]="style"
 >
   <mat-label *ngIf="label">{{ label }}</mat-label>
 
   <input
     matInput
-    [type]="type"
+    [type]="effectiveType"
     [formControl]="control"
     [name]="name"
     [id]="name"
     [placeholder]="placeholder"
     [required]="required"
-    [disabled]="disabled"
     [attr.minlength]="minLength ?? null"
     [attr.maxlength]="maxLength ?? null"
     [attr.min]="min ?? null"
@@ -25,21 +25,34 @@
     (input)="onInput()"
   />
 
+  <button
+    *ngIf="isPasswordField"
+    mat-icon-button
+    matSuffix
+    type="button"
+    class="app-input__toggle"
+    [attr.aria-label]="hidePassword ? 'Afficher le mot de passe' : 'Masquer le mot de passe'"
+    [attr.aria-pressed]="!hidePassword"
+    (click)="togglePasswordVisibility()"
+  >
+    <mat-icon>{{ passwordToggleIcon }}</mat-icon>
+  </button>
+
   <mat-hint *ngIf="hint && !showExternalError">{{ hint }}</mat-hint>
 
   <!-- Erreurs de validation Angular (Reactive Forms) -->
   <mat-error *ngIf="showValidationError">
-    <ng-container *ngIf="control.hasError('required')">Champ obligatoire.</ng-container>
-    <ng-container *ngIf="control.hasError('email')">Email invalide.</ng-container>
+    <ng-container *ngIf="control.hasError('required')">Ce champ est requis.</ng-container>
+    <ng-container *ngIf="control.hasError('email')">Cette email est invalide.</ng-container>
     <ng-container *ngIf="control.hasError('minlength')">
-      Minimum {{ control.getError('minlength')?.requiredLength }} caractères.
+      {{ control.getError('minlength')?.requiredLength }} caractères au minimum.
     </ng-container>
     <ng-container *ngIf="control.hasError('maxlength')">
-      Maximum {{ control.getError('maxlength')?.requiredLength }} caractères.
+      {{ control.getError('maxlength')?.requiredLength }} caractères au maximum.
     </ng-container>
-    <ng-container *ngIf="control.hasError('min')">Valeur minimum: {{ control.getError('min')?.min }}.</ng-container>
-    <ng-container *ngIf="control.hasError('max')">Valeur maximum: {{ control.getError('max')?.max }}.</ng-container>
-    <ng-container *ngIf="control.hasError('pattern')">Format invalide.</ng-container>
+    <ng-container *ngIf="control.hasError('min')">La valeur minimum est de: {{ control.getError('min')?.min }}.</ng-container>
+    <ng-container *ngIf="control.hasError('max')">La valeur maximum est de: {{ control.getError('max')?.max }}.</ng-container>
+    <ng-container *ngIf="control.hasError('pattern')">Le format fournit est invalide.</ng-container>
   </mat-error>
 
   <!-- Erreur externe (API): prioritaire -->

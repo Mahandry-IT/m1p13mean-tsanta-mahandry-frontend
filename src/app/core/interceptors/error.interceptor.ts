@@ -25,9 +25,11 @@ export class ErrorInterceptor implements HttpInterceptor {
           return throwError(() => err);
         }
 
+        const apiMessage = this.extractApiMessage(err);
+
         const apiError: ApiError = {
           status: err.status,
-          message: err.message || this.toMessage(err),
+          message: apiMessage ?? this.toMessage(err),
           details: err.error,
           url: err.url ?? undefined,
         };
@@ -54,12 +56,41 @@ export class ErrorInterceptor implements HttpInterceptor {
     );
   }
 
+  private extractApiMessage(err: HttpErrorResponse): string | null {
+    // Très fréquent avec Express/Nest: { message: '...' }
+    const body: any = err.error;
+
+    if (!body) return null;
+
+    // Si le backend renvoie juste du texte
+    if (typeof body === 'string') {
+      const s = body.trim();
+      return s.length ? s : null;
+    }
+
+    // JSON classique
+    if (typeof body === 'object') {
+      const msg = body.message ?? body.error ?? body.msg;
+      if (typeof msg === 'string' && msg.trim().length) return msg.trim();
+
+      // Parfois: { errors: [{ message: '...' }] }
+      const first = Array.isArray(body.errors) ? body.errors[0] : null;
+      if (first && typeof first.message === 'string' && first.message.trim().length) {
+        return first.message.trim();
+      }
+    }
+
+    return null;
+  }
+
   private toMessage(err: HttpErrorResponse): string {
     switch (err.status) {
       case 0:
         return 'Impossible de joindre le serveur. Vérifiez votre connexion.';
       case 400:
         return 'Votre requête est invalide. Vérifiez les données envoyées.';
+      case 401:
+        return 'Email ou mot de passe incorrect.';
       case 403:
         return 'Vous n\'êtes pas autorisé à accéder à cette ressource.';
       case 404:

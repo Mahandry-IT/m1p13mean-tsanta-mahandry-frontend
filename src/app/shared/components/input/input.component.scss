@@ -1,4 +1,199 @@
-.app-input {
+// ── Tokens ────────────────────────────────────────────────────────────────
+$color-primary:   #667eea;
+$color-secondary: #764ba2;
+$color-error:     #e53e3e;
+$color-text:      #1a1a2e;
+$color-muted:     #9ca3af;
+$color-border:    #d1d5db;
+$color-bg:        #f8f7ff;
+$font:            'Segoe UI', system-ui, sans-serif;
+
+// Pill — cohérent avec les boutons
+$radius: 50px;
+
+// ── Base ──────────────────────────────────────────────────────────────────
+.app-input.mat-mdc-form-field {
   width: 100%;
+  font-family: $font;
+
+  // Shape pill
+  --mdc-outlined-text-field-container-shape: #{$radius};
+
+  // Bordures
+  --mdc-outlined-text-field-outline-color:              #{$color-border};
+  --mdc-outlined-text-field-hover-outline-color:        #{$color-primary};
+  --mdc-outlined-text-field-focus-outline-color:        #{$color-primary};
+  --mdc-outlined-text-field-outline-width:              1.5px;
+  --mdc-outlined-text-field-focus-outline-width:        2px;
+
+  // Texte saisi
+  --mdc-outlined-text-field-input-text-color:           #{$color-text};
+  --mdc-outlined-text-field-input-text-font:            #{$font};
+  --mdc-outlined-text-field-input-text-size:            14px;
+
+  // Label flottant
+  --mdc-outlined-text-field-label-text-color:           #{$color-muted};
+  --mdc-outlined-text-field-focus-label-text-color:     #{$color-primary};
+  --mdc-outlined-text-field-hover-label-text-color:     #{$color-primary};
+  --mdc-outlined-text-field-label-text-font:            #{$font};
+  --mdc-outlined-text-field-label-text-size:            14px;
+  --mdc-outlined-text-field-label-text-weight:          500;
+
+  // Fond transparent (géré en CSS)
+  --mdc-outlined-text-field-container-color: transparent;
+
+  // Hint
+  --mat-form-field-hint-text-color: #{$color-muted};
+  --mat-form-field-hint-text-size:  12px;
+
+  // ── Wrapper principal ──
+  .mat-mdc-text-field-wrapper {
+    border-radius: $radius;
+    background: $color-bg;
+    padding: 0 20px;
+    transition: background 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  // ── Flex interne ──
+  .mat-mdc-form-field-flex {
+    background: transparent;
+    align-items: center;
+    padding-top: 0;
+    min-height: 52px;
+  }
+
+  // ── Inset (zone label + input) ──
+  .mat-mdc-form-field-infix {
+    padding-top: 14px;
+    padding-bottom: 14px;
+    min-height: unset;
+  }
+
+  // ── Bordure outline : coins arrondis forcés ──
+  .mdc-notched-outline__leading {
+    border-radius: $radius 0 0 $radius;
+    min-width: $radius; // assez large pour afficher le coin arrondi
+  }
+
+  .mdc-notched-outline__trailing {
+    border-radius: 0 $radius $radius 0;
+  }
+
+  // ── Encoche du label flottant ──
+  .mdc-notched-outline__notch {
+    border-top: none;
+  }
+
+  // ── Input natif ──
+  input.mat-mdc-input-element {
+    font-family: $font;
+    font-size: 14px;
+    color: $color-text;
+    caret-color: $color-primary;
+    padding: 0;
+
+    &::placeholder {
+      color: $color-muted;
+      opacity: 1;
+      font-size: 14px;
+    }
+  }
+
+  // ── Focus ──
+  &.mat-focused .mat-mdc-text-field-wrapper {
+    background: #fff;
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.13);
+  }
+
+  // ── Hover ──
+  &:not(.mat-focused) .mat-mdc-text-field-wrapper:hover {
+    background: #fff;
+  }
+
+  // ── Subscript ──
+  .mat-mdc-form-field-subscript-wrapper {
+    padding: 0 20px;
+    margin-top: 4px;
+  }
+
+  .mdc-line-ripple { display: none; }
+
+  // Bouton oeil (password)
+  .app-input__toggle {
+    margin-right: -8px; // compense le padding du wrapper
+  }
+
+  .app-input__toggle mat-icon {
+    color: $color-muted;
+  }
+
+  &.mat-focused .app-input__toggle mat-icon {
+    color: $color-primary;
+  }
+
+  &.mat-mdc-form-field-invalid .app-input__toggle mat-icon,
+  &.mat-form-field-invalid .app-input__toggle mat-icon,
+  &.mat-mdc-form-field-invalid .app-input__toggle mat-icon {
+    color: $color-error;
+  }
 }
 
+// ── État : erreur ─────────────────────────────────────────────────────────
+.app-input--error.mat-mdc-form-field,
+.app-input.mat-mdc-form-field.mat-form-field-invalid,
+.app-input.mat-mdc-form-field.mat-mdc-form-field-invalid {
+  --mdc-outlined-text-field-outline-color:           #e53e3e;
+  --mdc-outlined-text-field-hover-outline-color:     #e53e3e;
+  --mdc-outlined-text-field-focus-outline-color:     #e53e3e;
+  --mdc-outlined-text-field-label-text-color:        #e53e3e;
+  --mdc-outlined-text-field-focus-label-text-color:  #e53e3e;
+  --mdc-outlined-text-field-hover-label-text-color:  #e53e3e;
+
+  .mat-mdc-text-field-wrapper {
+    background: rgba(229, 62, 62, 0.04);
+  }
+
+  &.mat-focused .mat-mdc-text-field-wrapper {
+    box-shadow: 0 0 0 4px rgba(229, 62, 62, 0.1);
+  }
+
+  .mat-mdc-form-field-error {
+    font-size: 12px;
+    font-weight: 500;
+    color: #e53e3e;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+
+    &::before {
+      content: '!';
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      background: #e53e3e;
+      color: #fff;
+      font-size: 9px;
+      font-weight: 800;
+    }
+  }
+}
+
+// ── État : désactivé ──────────────────────────────────────────────────────
+.app-input.mat-mdc-form-field.mat-form-field-disabled {
+  --mdc-outlined-text-field-outline-color:       rgba(#d1d5db, 0.5);
+  --mdc-outlined-text-field-label-text-color:    rgba(#9ca3af, 0.5);
+  --mdc-outlined-text-field-input-text-color:    rgba(#1a1a2e, 0.4);
+
+  .mat-mdc-text-field-wrapper {
+    background: rgba(0, 0, 0, 0.03);
+    cursor: not-allowed;
+  }
+
+  input.mat-mdc-input-element {
+    cursor: not-allowed;
+  }
+}

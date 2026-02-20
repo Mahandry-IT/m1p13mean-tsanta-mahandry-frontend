@@ -4,6 +4,8 @@ import {
   Input,
   Output,
   ViewEncapsulation,
+  OnChanges,
+  SimpleChanges,
 } from '@angular/core';
 import { FormControl } from '@angular/forms';
 
@@ -28,8 +30,9 @@ export interface InputError {
   templateUrl: './input.component.html',
   styleUrls: ['./input.component.scss'],
   encapsulation: ViewEncapsulation.None,
+  standalone: false
 })
-export class InputComponent {
+export class InputComponent implements OnChanges {
   /** Type HTML du input */
   @Input() type: InputType = 'text';
 
@@ -93,5 +96,45 @@ export class InputComponent {
   get showValidationError(): boolean {
     return this.control?.invalid && (this.control.dirty || this.control.touched);
   }
-}
 
+  /**
+   * Permet d'éviter le recouvrement visuel label/placeholder quand le champ est vide.
+   * Si un placeholder est fourni, on force le label à flotter dès le départ.
+   */
+  get floatLabel(): 'always' | 'auto' {
+    return this.placeholder ? 'always' : 'auto';
+  }
+
+  /**
+   * Password: état local d'affichage/masquage.
+   * (On ne touche pas la valeur, uniquement le type du champ.)
+   */
+  hidePassword = true;
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['disabled'] && this.control) {
+      if (this.disabled) {
+        this.control.disable();
+      } else {
+        this.control.enable();
+      }
+    }
+  }
+
+  togglePasswordVisibility(): void {
+    this.hidePassword = !this.hidePassword;
+  }
+
+  get isPasswordField(): boolean {
+    return this.type === 'password';
+  }
+
+  get effectiveType(): InputType {
+    if (!this.isPasswordField) return this.type;
+    return this.hidePassword ? 'password' : 'text';
+  }
+
+  get passwordToggleIcon(): string {
+    return this.hidePassword ? 'visibility' : 'visibility_off';
+  }
+}
