@@ -1,0 +1,87 @@
+<app-page headTitle="Inscription manager">
+  <section class="register-manager">
+
+    <div class="register-manager__form-panel">
+      <div class="register-manager__card">
+
+        <header class="register-manager__header">
+          <div class="register-manager__icon">
+            <mat-icon>admin_panel_settings</mat-icon>
+          </div>
+          <h1 class="register-manager__title">Créer un compte manager</h1>
+          <p class="register-manager__subtitle">Créez votre compte manager pour gérer vos boutiques.</p>
+        </header>
+
+        <form class="register-manager__form" [formGroup]="form" (ngSubmit)="onSubmit()">
+
+          <app-input
+            name="username"
+            label="Nom d'utilisateur"
+            placeholder="Votre nom d'utilisateur"
+            type="text"
+            autocomplete="username"
+            [required]="true"
+            [control]="form.controls.username"
+          ></app-input>
+
+          <app-input
+            name="email"
+            label="Email"
+            placeholder="xxx@gmail.com"
+            type="email"
+            autocomplete="email"
+            [required]="true"
+            [control]="form.controls.email"
+          ></app-input>
+
+          <app-input
+            name="password"
+            label="Mot de passe"
+            placeholder="Choisissez un mot de passe"
+            type="password"
+            autocomplete="new-password"
+            [required]="true"
+            [control]="form.controls.password"
+          ></app-input>
+
+          <app-input
+            name="confirmPassword"
+            label="Confirmer le mot de passe"
+            placeholder="Retapez votre mot de passe"
+            type="password"
+            autocomplete="new-password"
+            [required]="true"
+            [control]="form.controls.confirmPassword"
+          ></app-input>
+
+          <p class="register-manager__error" *ngIf="form.hasError('passwordMismatch') && (form.dirty || form.touched)">
+            Les mots de passe ne correspondent pas.
+          </p>
+
+          <div class="register-manager__actions">
+            <app-button
+              text="Créer mon compte manager"
+              variant="raised"
+              color="accent"
+              type="submit"
+              [fullWidth]="true"
+              [loading]="loading"
+              [isenabled]="(isEnabled$ | async) ?? false"
+            ></app-button>
+          </div>
+
+          <div class="register-manager__login">
+            <p>Déjà un compte ?</p>
+            <a routerLink="/auth/login" class="register-manager__login-link">
+              Se connecter
+              <mat-icon>arrow_forward</mat-icon>
+            </a>
+          </div>
+
+        </form>
+      </div>
+    </div>
+
+  </section>
+</app-page>
+
