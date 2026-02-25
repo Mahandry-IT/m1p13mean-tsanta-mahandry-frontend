@@ -61,12 +61,12 @@ export class LoginComponent {
       .login(payload)
       .pipe(finalize(() => this.loadingSubject.next(false)))
       .subscribe({
-        next: ({ token }) => {
+        next: ({ token, raw }) => {
           if (token) {
             this.auth.setToken(token);
           }
           // Redirection post-login
-          this.router.navigateByUrl('/dashboard');
+          this.router.navigateByUrl(raw.data?.homePage as string ?? '/');
         },
         error: () => {
           // L'ErrorInterceptor affiche déjà un toast.
