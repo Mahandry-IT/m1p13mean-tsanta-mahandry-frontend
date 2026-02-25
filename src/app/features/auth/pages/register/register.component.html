@@ -1,0 +1,87 @@
+<app-page headTitle="Inscription">
+  <section class="register">
+
+    <div class="register__form-panel">
+      <div class="register__card">
+
+        <header class="register__header">
+          <div class="register__icon">
+            <mat-icon>person_add</mat-icon>
+          </div>
+          <h1 class="register__title">Créer un compte</h1>
+          <p class="register__subtitle">Rejoignez-nous en quelques secondes.</p>
+        </header>
+
+        <form class="register__form" [formGroup]="form" (ngSubmit)="onSubmit()">
+
+          <app-input
+            name="username"
+            label="Nom d'utilisateur"
+            placeholder="Votre nom d'utilisateur"
+            type="text"
+            autocomplete="username"
+            [required]="true"
+            [control]="form.controls.username"
+          ></app-input>
+
+          <app-input
+            name="email"
+            label="Email"
+            placeholder="xxx@gmail.com"
+            type="email"
+            autocomplete="email"
+            [required]="true"
+            [control]="form.controls.email"
+          ></app-input>
+
+          <app-input
+            name="password"
+            label="Mot de passe"
+            placeholder="Choisissez un mot de passe"
+            type="password"
+            autocomplete="new-password"
+            [required]="true"
+            [control]="form.controls.password"
+          ></app-input>
+
+          <app-input
+            name="confirmPassword"
+            label="Confirmer le mot de passe"
+            placeholder="Retapez votre mot de passe"
+            type="password"
+            autocomplete="new-password"
+            [required]="true"
+            [control]="form.controls.confirmPassword"
+          ></app-input>
+
+          <p class="register__error" *ngIf="form.hasError('passwordMismatch') && (form.dirty || form.touched)">
+            Les mots de passe ne correspondent pas.
+          </p>
+
+          <div class="register__actions">
+            <app-button
+              text="S'inscrire"
+              variant="raised"
+              color="accent"
+              type="submit"
+              [fullWidth]="true"
+              [loading]="loading"
+              [isenabled]="(isEnabled$ | async) ?? false"
+            ></app-button>
+          </div>
+
+          <div class="register__login">
+            <p>Déjà un compte ?</p>
+            <a routerLink="/auth/login" class="register__login-link">
+              Se connecter
+              <mat-icon>arrow_forward</mat-icon>
+            </a>
+          </div>
+
+        </form>
+      </div>
+    </div>
+
+  </section>
+</app-page>
+
