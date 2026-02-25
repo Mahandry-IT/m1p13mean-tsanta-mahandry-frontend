@@ -23,14 +23,28 @@ export interface ResetPasswordRequest {
   email: string;
 }
 
+export interface LoginResponseData {
+  token?: string;
+  accessToken?: string;
+  homePage?: string;
+  user?: unknown;
+  [key: string]: unknown;
+}
+
 /**
  * On garde la réponse flexible pour s'adapter à ton backend.
- * Si ton API renvoie un autre nom (ex: accessToken), on le mappe.
+ * Exemples supportés:
+ * - { token: '...' }
+ * - { accessToken: '...' }
+ * - { data: { token: '...' } }
  */
 export interface LoginResponse {
   token?: string;
   accessToken?: string;
+  data?: LoginResponseData;
   user?: unknown;
+  success?: boolean;
+  message?: string;
   [key: string]: unknown;
 }
 
@@ -45,7 +59,7 @@ export class AuthService {
   login(payload: LoginRequest): Observable<{ token: string; raw: LoginResponse }> {
     return this.api.post<LoginResponse>('/auth/login', payload).pipe(
       map((res) => {
-        const token = (res.token ?? res.accessToken ?? '') as string;
+        const token = (res.data?.token ?? res.token ?? res.accessToken ?? '') as string;
         return { token, raw: res };
       }),
     );
