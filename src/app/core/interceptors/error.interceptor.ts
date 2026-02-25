@@ -39,8 +39,9 @@ export class ErrorInterceptor implements HttpInterceptor {
 
         // Navigation selon code
         if (apiError.status === 403) {
+          let message = apiError.message ?? 'Votre session a expiré. Veuillez vous reconnecter.';
           this.router.navigateByUrl('/auth/login');
-          this.toast.warning('Votre session a expiré. Veuillez vous reconnecter.');
+          this.toast.warning(message);
         } else if (apiError.status === 404) {
           this.toast.warning(apiError.message);
 

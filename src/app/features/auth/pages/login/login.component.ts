@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { finalize, startWith, map, combineLatest, BehaviorSubject } from 'rxjs';
 import { AuthService } from '../../../../core/services/auth.service';
 
@@ -14,7 +14,13 @@ export class LoginComponent {
   constructor(
     private readonly auth: AuthService,
     private readonly router: Router,
-  ) {}
+    private readonly route: ActivatedRoute,
+  ) {
+    const email = this.route.snapshot.queryParamMap.get('email');
+    if (email) {
+      this.form.controls.email.setValue(email);
+    }
+  }
 
   readonly form = new FormGroup({
     email: new FormControl<string>('', {
