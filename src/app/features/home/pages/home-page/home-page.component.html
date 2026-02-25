@@ -29,11 +29,11 @@
       </div>
 
       <mat-menu #registerMenu="matMenu" class="register-menu">
-        <button mat-menu-item [routerLink]="['/auth/register/manager']">
+        <button mat-menu-item [routerLink]="['/auth/register-manager']">
           <mat-icon>store</mat-icon>
           <span>Gérant</span>
         </button>
-        <button mat-menu-item [routerLink]="['/auth/register/user']">
+        <button mat-menu-item [routerLink]="['/auth/register']">
           <mat-icon>shopping_bag</mat-icon>
           <span>Acheteur</span>
         </button>
@@ -59,11 +59,11 @@
         Gérez votre boutique, découvrez des produits uniques et rejoignez une communauté de vendeurs et d'acheteurs passionnés.
       </p>
       <div class="hero__cta">
-        <a routerLink="/auth/register" class="btn-hero btn-hero--primary">
+        <a routerLink="/auth/register-manager" class="btn-hero btn-hero--primary">
           Commencer gratuitement
           <mat-icon>arrow_forward</mat-icon>
         </a>
-        <a routerLink="/dashboard/api-test" class="btn-hero btn-hero--ghost">
+        <a routerLink="/auth/register" class="btn-hero btn-hero--ghost">
           Explorer les boutiques
         </a>
       </div>
@@ -140,7 +140,7 @@
         <div class="home-card__body">
           <h3 class="home-card__title">Gérer sa boutique</h3>
           <p class="home-card__desc">Créez, activez et gérez votre boutique en quelques clics. Suivez vos ventes en temps réel et boostez votre activité.</p>
-          <a routerLink="/stores" class="card-cta">
+          <a routerLink="/auth/register-manager" class="card-cta">
             Commencer maintenant
             <mat-icon>chevron_right</mat-icon>
           </a>
@@ -160,7 +160,7 @@
         <div class="home-card__body">
           <h3 class="home-card__title">Acheter des produits</h3>
           <p class="home-card__desc">Découvrez des boutiques uniques, comparez les produits et commandez en toute confiance grâce à nos avis vérifiés.</p>
-          <a routerLink="/dashboard/api-test" class="card-cta card-cta--accent">
+          <a routerLink="/auth/register" class="card-cta card-cta--accent">
             Explorer les boutiques
             <mat-icon>chevron_right</mat-icon>
           </a>
@@ -181,8 +181,8 @@
     <div class="footer__col">
       <h4 class="footer__heading">Navigation</h4>
       <nav class="footer__links">
-        <a routerLink="/stores">Gérer sa boutique</a>
-        <a routerLink="/products">Acheter des produits</a>
+        <a routerLink="auth/register-manager">Gérer sa boutique</a>
+        <a routerLink="auth/register">Acheter des produits</a>
         <a routerLink="/auth/login">Se connecter</a>
       </nav>
     </div>

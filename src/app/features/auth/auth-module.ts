@@ -5,9 +5,23 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { AuthRoutingModule } from './auth-routing-module';
 import { SharedModule } from '../../shared/shared-module';
 import { LoginComponent } from './pages/login/login.component';
+import { RegisterComponent } from './pages/register/register.component';
+import { RegisterManagerComponent } from './pages/register-manager/register-manager.component';
+import { ActivateComponent } from './pages/activate/activate.component';
+import { NewPasswordComponent } from './pages/new-password/new-password.component';
+import { ForgotPasswordComponent } from './pages/forgot-password/forgot-password.component';
+import { ResetPasswordComponent } from './pages/reset-password/reset-password.component';
 
 @NgModule({
-  declarations: [LoginComponent],
+  declarations: [
+    LoginComponent,
+    RegisterComponent,
+    RegisterManagerComponent,
+    ActivateComponent,
+    NewPasswordComponent,
+    ForgotPasswordComponent,
+    ResetPasswordComponent,
+  ],
   imports: [
     CommonModule,
     ReactiveFormsModule,
