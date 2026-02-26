@@ -106,6 +106,34 @@ export class AuthService {
     return this.api.post<unknown>('/auth/reset-password', payload);
   }
 
+  /**
+   * Essaie d'extraire `homePage` depuis le payload du JWT.
+   * Retourne null si absent / token invalide.
+   */
+  getHomePageFromToken(): string | null {
+    const token = this.getToken();
+    if (!token) return null;
+
+    const parts = token.split('.');
+    if (parts.length < 2) return null;
+
+    try {
+      const payloadBase64Url = parts[1];
+      const payloadBase64 = payloadBase64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const json = decodeURIComponent(
+        atob(payloadBase64)
+          .split('')
+          .map((c) => `%${('00' + c.charCodeAt(0).toString(16)).slice(-2)}`)
+          .join(''),
+      );
+      const payload = JSON.parse(json) as { homePage?: unknown };
+
+      return typeof payload.homePage === 'string' && payload.homePage.trim() ? payload.homePage : null;
+    } catch {
+      return null;
+    }
+  }
+
   setToken(token: string): void {
     localStorage.setItem(AuthService.TOKEN_KEY, token);
   }

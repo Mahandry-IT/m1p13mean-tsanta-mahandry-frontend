@@ -1,0 +1,21 @@
+<app-page headTitle="Vérification de profil">
+  <section class="activate">
+    <div class="activate__card">
+      <div class="activate__icon">
+        <mat-icon>how_to_reg</mat-icon>
+      </div>
+
+      <h1 class="activate__title">Vérification de votre profil…</h1>
+      <p class="activate__subtitle">Merci de patienter, nous vérifions si vous possédez un profil.</p>
+
+      <div class="activate__loader" *ngIf="(loading$ | async) ?? true">
+        <mat-progress-spinner mode="indeterminate" diameter="32"></mat-progress-spinner>
+      </div>
+
+      <p class="activate__hint">
+        Vous allez être redirigé automatiquement vers la tableau de bord.
+      </p>
+    </div>
+  </section>
+</app-page>
+
