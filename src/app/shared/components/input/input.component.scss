@@ -519,3 +519,133 @@ $radius:          50px;
     font-weight: 800;
   }
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// FILE — drag & drop (dans mat-form-field)
+// ─────────────────────────────────────────────────────────────────────────────
+
+.app-input__dropzone {
+  width: 100%;
+  min-height: 52px;
+  border-radius: $radius;
+  border: 1.5px dashed $color-border;
+  background: $color-bg;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 18px;
+  box-sizing: border-box;
+  cursor: pointer;
+  user-select: none;
+  transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    border-color: $color-primary;
+    background: #fff;
+  }
+
+  &:focus {
+    outline: none;
+  }
+
+  // L'élément est focusable (tabindex=0)
+  &:focus-visible {
+    border-color: $color-primary;
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.13);
+    background: #fff;
+  }
+}
+
+.app-input__dropzone--dragover {
+  border-style: solid;
+  border-color: $color-primary;
+  background: #fff;
+  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.13);
+}
+
+.app-input__dropzone--error {
+  border-color: $color-error !important;
+  background: rgba(229, 62, 62, 0.04);
+}
+
+.app-input__dropzone-icon {
+  color: $color-muted;
+  flex-shrink: 0;
+}
+
+.app-input__dropzone-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.app-input__dropzone-title {
+  font-family: $font;
+  font-size: 14px;
+  font-weight: 600;
+  color: $color-text;
+  line-height: 1.2;
+}
+
+.app-input__dropzone-sub {
+  margin-top: 2px;
+  font-family: $font;
+  font-size: 12px;
+  color: $color-muted;
+}
+
+.app-input__dropzone-file {
+  margin-top: 4px;
+  font-family: $font;
+  font-size: 12px;
+  font-weight: 600;
+  color: $color-primary;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.app-input__dropzone-list {
+  list-style: none;
+  padding: 0;
+  margin: 6px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.app-input__dropzone-item {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 0;
+}
+
+.app-input__dropzone-filename {
+  font-family: $font;
+  font-size: 12px;
+  font-weight: 600;
+  color: $color-primary;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 320px;
+}
+
+.app-input__dropzone-filesize {
+  font-family: $font;
+  font-size: 12px;
+  color: $color-muted;
+  flex-shrink: 0;
+}
+
+// input de compatibilité pour l'hydratation (MatFormField attend un <input matInput>)
+.app-input__file-hydration-input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  height: 0;
+  padding: 0;
+  margin: 0;
+}

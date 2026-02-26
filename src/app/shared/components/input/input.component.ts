@@ -94,6 +94,14 @@ export class InputComponent implements OnChanges {
   @Input() accept?: string;
   @Input() multiple = false;
 
+  /** Mode file: UX */
+  @Input() fileDropLabel = 'Glissez-déposez un fichier ici ou cliquez pour parcourir';
+  @Input() fileHelperText = '';
+  @Input() syncFileToControl = false;
+
+  /** Mode file: état UI interne */
+  isDragOver = false;
+
   /** Tel (ngx-intl-tel-input)
    * codes pays ISO2 en minuscule: ex ['mg','fr']
    */
@@ -117,6 +125,9 @@ export class InputComponent implements OnChanges {
   /** Émet la valeur complète du téléphone (mode="tel") */
   @Output() telChange = new EventEmitter<any>();
 
+  /** Liste des fichiers sélectionnés (pour affichage) */
+  selectedFiles: File[] = [];
+
   onInput(): void {
     this.valueChange.emit(this.control?.value);
     if (this.mode === 'tel') {
@@ -126,20 +137,104 @@ export class InputComponent implements OnChanges {
 
   onFileSelected(files: FileList | null): void {
     if (!files || files.length === 0) {
+      this.selectedFiles = [];
       this.fileChange.emit(null);
+      if (this.syncFileToControl) this.control?.setValue(null);
       return;
     }
 
-    if (this.multiple) {
-      this.fileChange.emit(Array.from(files));
-    } else {
-      this.fileChange.emit(files[0]);
+    const selected = Array.from(files);
+    const filtered = this.filterFilesByAccept(this.multiple ? selected : selected[0]);
+
+    if (filtered === null) {
+      this.selectedFiles = [];
+      this.fileChange.emit(null);
+      if (this.syncFileToControl) this.control?.setValue(null);
+      return;
     }
+
+    // Met à jour la liste pour l'affichage
+    this.selectedFiles = Array.isArray(filtered) ? filtered : [filtered];
+
+    this.fileChange.emit(filtered);
+    if (this.syncFileToControl) this.control?.setValue(filtered as any);
+  }
+
+  onDragOver(event: DragEvent): void {
+    if (this.mode !== 'file') return;
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragOver = true;
+  }
+
+  onDragLeave(event: DragEvent): void {
+    if (this.mode !== 'file') return;
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragOver = false;
+  }
+
+  onDrop(event: DragEvent): void {
+    if (this.mode !== 'file') return;
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragOver = false;
+
+    const dt = event.dataTransfer;
+    if (!dt?.files) return;
+    this.onFileSelected(dt.files);
+  }
+
+  private filterFilesByAccept(input: File | File[]): File | File[] | null {
+    if (!this.accept) return input;
+
+    const accepted = this.accept
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean);
+
+    const matches = (file: File): boolean => {
+      // ex: image/*
+      if (accepted.some((a) => a.endsWith('/*') && file.type?.startsWith(a.replace('/*', '/')))) {
+        return true;
+      }
+      // ex: .pdf
+      if (accepted.some((a) => a.startsWith('.') && file.name.toLowerCase().endsWith(a.toLowerCase()))) {
+        return true;
+      }
+      // ex: application/pdf
+      if (accepted.some((a) => !a.startsWith('.') && !a.endsWith('/*') && file.type === a)) {
+        return true;
+      }
+      return false;
+    };
+
+    if (Array.isArray(input)) {
+      const out = input.filter(matches);
+      return out.length ? out : null;
+    }
+
+    return matches(input) ? input : null;
   }
 
   get fileNameLabel(): string {
     const v = this.control?.value as any;
     if (typeof v === 'string') return v;
+    return '';
+  }
+
+  get selectedFilesLabel(): string {
+    const v = this.control?.value as any;
+
+    if (!v) return '';
+
+    // Si on a choisi de synchroniser le FormControl avec le(s) fichier(s)
+    if (v instanceof File) return v.name;
+    if (Array.isArray(v) && v.length && v[0] instanceof File) {
+      return v.map((f: File) => f.name).join(', ');
+    }
+
+    // Sinon, on n'a pas d'info fiable sur les fichiers (on laisse vide)
     return '';
   }
 
@@ -170,11 +265,20 @@ export class InputComponent implements OnChanges {
   hidePassword = true;
 
   ngOnChanges(changes: SimpleChanges): void {
+    // `control` peut arriver après le 1er rendu dans certains cas (SSR/hydration). On sécurise.
+    if (changes['control'] && this.control) {
+      if (this.disabled) {
+        this.control.disable({ emitEvent: false });
+      } else {
+        this.control.enable({ emitEvent: false });
+      }
+    }
+
     if (changes['disabled'] && this.control) {
       if (this.disabled) {
-        this.control.disable();
+        this.control.disable({ emitEvent: false });
       } else {
-        this.control.enable();
+        this.control.enable({ emitEvent: false });
       }
     }
   }

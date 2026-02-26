@@ -41,6 +41,9 @@
               "src/styles.scss",
               "node_modules/intl-tel-input/build/css/intlTelInput.css"
             ],
+            "allowedCommonJsDependencies": [
+              "google-libphonenumber"
+            ],
             "server": "src/main.server.ts",
             "outputMode": "server",
             "ssr": {

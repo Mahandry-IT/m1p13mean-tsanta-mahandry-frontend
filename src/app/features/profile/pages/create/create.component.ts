@@ -24,7 +24,7 @@ export class CreateProfileComponent {
   readonly form = new FormGroup({
     firstName: new FormControl<string>('', { nonNullable: true, validators: [Validators.required] }),
     lastName: new FormControl<string>('', { nonNullable: true, validators: [Validators.required] }),
-    phone: new FormControl<string>('', { nonNullable: true, validators: [Validators.required] }),
+    phone: new FormControl<any>(null, { validators: [Validators.required] }),
     gender: new FormControl<string>('', { nonNullable: true, validators: [Validators.required] }),
     birthday: new FormControl<string>('', { nonNullable: true, validators: [Validators.required] }),
   });
@@ -61,10 +61,24 @@ export class CreateProfileComponent {
     const home = this.auth.getHomePageFromToken() ?? '/';
 
     const v = this.form.getRawValue();
+
+    // Le champ phone est un objet { internationalNumber, e164Number, ... }
+    const phoneValue = (v as any).phone;
+    const phoneToSend: string =
+      phoneValue?.internationalNumber ??
+      phoneValue?.e164Number ??
+      phoneValue?.number ??
+      '';
+
+    if (!phoneToSend) {
+      this.toast.error('Veuillez entrer un numéro de téléphone valide.');
+      return;
+    }
+
     const fd = new FormData();
     fd.append('firstName', v.firstName);
     fd.append('lastName', v.lastName);
-    fd.append('phone', v.phone);
+    fd.append('phone', phoneToSend);
     fd.append('gender', v.gender);
     fd.append('birthday', v.birthday);
     fd.append('avatar', this.avatarFile);

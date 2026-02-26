@@ -84,22 +84,55 @@
       </mat-option>
     </mat-select>
 
-    <!-- Mode: file (matInput n'est PAS supporté sur type=file) -->
+    <!-- Mode: file (drag & drop) -->
     <ng-container *ngIf="mode === 'file'">
-      <input matInput [value]="fileNameLabel" [placeholder]="placeholder" readonly />
-
-      <button mat-icon-button matSuffix type="button" (click)="filePicker.click()" aria-label="Choisir un fichier">
-        <mat-icon>attach_file</mat-icon>
-      </button>
-
       <input
-        #filePicker
-        type="file"
-        [attr.accept]="accept ?? null"
-        [attr.multiple]="multiple ? '' : null"
-        hidden
-        (change)="onFileSelected($any($event.target).files)"
+        matInput
+        readonly
+        tabindex="-1"
+        class="app-input__file-hydration-input"
+        [value]="selectedFilesLabel || fileNameLabel"
+        aria-hidden="true"
       />
+
+      <div
+        class="app-input__dropzone"
+        [class.app-input__dropzone--dragover]="isDragOver"
+        [class.app-input__dropzone--error]="showValidationError || showExternalError"
+        (dragover)="onDragOver($event)"
+        (dragleave)="onDragLeave($event)"
+        (drop)="onDrop($event)"
+        (click)="filePicker.click()"
+        role="button"
+        tabindex="0"
+        (keydown.enter)="filePicker.click()"
+        (keydown.space)="$event.preventDefault(); filePicker.click()"
+        [attr.aria-label]="label || placeholder || 'Choisir un fichier'"
+      >
+        <mat-icon class="app-input__dropzone-icon">upload</mat-icon>
+
+        <div class="app-input__dropzone-text">
+          <div class="app-input__dropzone-title">{{ fileDropLabel }}</div>
+          <div class="app-input__dropzone-sub" *ngIf="fileHelperText">{{ fileHelperText }}</div>
+
+          <!-- Liste complète des fichiers -->
+          <ul class="app-input__dropzone-list" *ngIf="selectedFiles.length">
+            <li class="app-input__dropzone-item" *ngFor="let f of selectedFiles">
+              <span class="app-input__dropzone-filename">{{ f.name }}</span>
+              <span class="app-input__dropzone-filesize">({{ f.size / 1024 | number : '1.0-0' }} KB)</span>
+            </li>
+          </ul>
+        </div>
+
+        <input
+          #filePicker
+          type="file"
+          [attr.accept]="accept ?? null"
+          [attr.multiple]="multiple ? '' : null"
+          hidden
+          (change)="onFileSelected($any($event.target).files)"
+        />
+      </div>
     </ng-container>
 
     <button
