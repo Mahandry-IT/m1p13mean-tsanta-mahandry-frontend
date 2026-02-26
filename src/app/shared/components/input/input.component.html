@@ -1,24 +1,31 @@
 <ng-container *ngIf="mode === 'tel'; else defaultField">
-  <label class="app-input__label" *ngIf="label">{{ label }}</label>
+  <div
+    class="app-input__tel-wrapper"
+    [class.app-input__tel-wrapper--error]="showValidationError || showExternalError"
+  >
+    <label class="app-input__label" *ngIf="label">{{ label }}</label>
 
-  <ngx-intl-tel-input
-    class="app-input__tel"
-    [formControl]="control"
-    [preferredCountries]="preferredCountries"
-    [separateDialCode]="separateDialCode"
-    [searchCountryFlag]="searchCountryFlag"
-    [enablePlaceholder]="enablePlaceholder"
-    (ngModelChange)="onInput()"
-  ></ngx-intl-tel-input>
+    <ngx-intl-tel-input
+      class="app-input__tel"
+      [formControl]="control"
+      [preferredCountries]="preferredCountries"
+      [separateDialCode]="separateDialCode"
+      [searchCountryFlag]="searchCountryFlag"
+      [enablePlaceholder]="enablePlaceholder"
+      [phoneValidation]="true"
+      [numberFormat]="phoneNumberFormat"
+      (ngModelChange)="onInput()"
+    ></ngx-intl-tel-input>
 
-  <div class="app-input__hint" *ngIf="hint && !showExternalError">{{ hint }}</div>
+    <div class="app-input__hint" *ngIf="hint && !showExternalError">{{ hint }}</div>
 
-  <div class="app-input__error" *ngIf="showValidationError">
-    <ng-container *ngIf="control.hasError('required')">Ce champ est requis.</ng-container>
-    <ng-container *ngIf="control.hasError('pattern')">Le format fournit est invalide.</ng-container>
+    <div class="app-input__error" *ngIf="showValidationError">
+      <ng-container *ngIf="control.hasError('required')">Ce champ est requis.</ng-container>
+      <ng-container *ngIf="control.hasError('validatePhoneNumber')">Le numéro de téléphone est invalide.</ng-container>
+    </div>
+
+    <div class="app-input__error" *ngIf="showExternalError">{{ externalErrorMessage }}</div>
   </div>
-
-  <div class="app-input__error" *ngIf="showExternalError">{{ externalErrorMessage }}</div>
 </ng-container>
 
 <ng-template #defaultField>

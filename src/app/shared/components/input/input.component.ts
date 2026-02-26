@@ -102,8 +102,8 @@ export class InputComponent implements OnChanges {
   @Input() searchCountryFlag = true;
   @Input() enablePlaceholder = true;
 
-  /** Format d'affichage du numéro (NATIONAL = "032 xx xxx xx") */
-  readonly phoneNumberFormat = PhoneNumberFormat.International;
+  /** Format NATIONAL : "032 xx xxx xx" */
+  readonly phoneNumberFormat = PhoneNumberFormat.National;
 
   /** Gestion d'erreur externe (ex: API) */
   @Input() error?: InputError;

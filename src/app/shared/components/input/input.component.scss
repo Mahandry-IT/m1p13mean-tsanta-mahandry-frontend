@@ -290,32 +290,290 @@ $radius:          50px;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// TEL (ngx-intl-tel-input) — rendu hors mat-form-field
+// TEL — ngx-intl-tel-input (separateDialCode = false)
+//
+// Structure HTML réelle générée :
+//   div.app-input__tel-wrapper [.app-input__tel-wrapper--error]
+//     label.app-input__label
+//     ngx-intl-tel-input.app-input__tel
+//       div.iti.iti--allow-dropdown
+//         div.iti__flag-container
+//           div.iti__selected-flag          ← cliquable, position absolute
+//             span.iti__flag.iti__mg
+//             span.iti__selected-dial-code  ← +261
+//             div.iti__arrow
+//           ul.iti__country-list            ← dropdown
+//         input[type=tel]                   ← pleine largeur, pl compensé
+//     div.app-input__hint / div.app-input__error
 // ─────────────────────────────────────────────────────────────────────────────
+
+// ── Wrapper ──────────────────────────────────────────────────────────────────
+.app-input__tel-wrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  font-family: $font;
+}
+
+// ── Label (style cohérent avec mat-label floatLabel=always) ──────────────────
 .app-input__label {
   display: block;
-  margin: 0 0 6px 4px;
+  margin: 0 0 6px 18px;
   font-family: $font;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
   color: $color-muted;
+  line-height: 1;
+  transition: color 0.2s;
+
+  .app-input__tel-wrapper:focus-within & { color: $color-primary; }
+  .app-input__tel-wrapper--error &       { color: $color-error;   }
 }
 
+// ── ngx-intl-tel-input host ───────────────────────────────────────────────────
 .app-input__tel {
   display: block;
-}
+  width: 100%;
 
+  // ── .iti : le pill ──────────────────────────────────────────────────────────
+  .iti {
+    width: 100%;
+    display: block;
+    position: relative;
+    border-radius: $radius;
+    border: 1.5px solid $color-border;
+    background: $color-bg;
+    height: 52px;
+    box-sizing: border-box;
+    transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+
+    // hover
+    &:hover {
+      border-color: $color-primary;
+      background: #fff;
+    }
+
+    // focus (via parent wrapper)
+    .app-input__tel-wrapper:focus-within & {
+      border-color: $color-primary;
+      border-width: 2px;
+      background: #fff;
+      box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.13);
+    }
+
+    // erreur
+    .app-input__tel-wrapper--error & {
+      border-color: $color-error !important;
+      background: rgba(229, 62, 62, 0.04);
+    }
+
+    .app-input__tel-wrapper--error:focus-within & {
+      box-shadow: 0 0 0 4px rgba(229, 62, 62, 0.1);
+    }
+  }
+
+  // ── Flag container ──────────────────────────────────────────────────────────
+  .iti__flag-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    display: flex;
+    align-items: stretch;
+    z-index: 2;
+  }
+
+  // ── Bouton drapeau (cliquable) ──────────────────────────────────────────────
+  .iti__selected-flag {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 14px 0 18px;
+    height: 100%;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    border-right: 1.5px solid $color-border;
+    border-radius: $radius 0 0 $radius;
+    transition: background 0.15s;
+    outline: none;
+    white-space: nowrap;
+
+    &:hover { background: rgba(102, 126, 234, 0.07); }
+
+    // compense la border 2px au focus pour éviter le saut
+    .app-input__tel-wrapper:focus-within & {
+      border-right-color: $color-border;
+    }
+  }
+
+  // ── Drapeau — NE PAS TOUCHER, laisser le sprite de la lib ──────────────────
+  // (ngx-intl-tel-input gère background-image, background-position, width, height)
+  .iti__flag {
+    border-radius: 2px;
+    box-shadow: 0 0 1px rgba(0,0,0,0.3);
+  }
+
+  // ── +261 ────────────────────────────────────────────────────────────────────
+  .iti__selected-dial-code {
+    font-family: $font;
+    font-size: 13px;
+    font-weight: 600;
+    color: $color-text;
+  }
+
+  // ── Flèche ──────────────────────────────────────────────────────────────────
+  .iti__arrow {
+    width: 0;
+    height: 0;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 5px solid $color-muted;
+    flex-shrink: 0;
+    transition: transform 0.2s;
+
+    &.iti__arrow--up {
+      border-top: none;
+      border-bottom: 5px solid $color-primary;
+    }
+  }
+
+  // ── Input natif ─────────────────────────────────────────────────────────────
+  input[type='tel'],
+  input.iti__tel-input {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+    background: transparent;
+    padding: 0 20px 0 115px;
+    font-family: $font;
+    font-size: 14px;
+    color: $color-text;
+    caret-color: $color-primary;
+    outline: none;
+    box-sizing: border-box;
+    border-radius: $radius;
+
+    &::placeholder {
+      color: $color-muted;
+      opacity: 1;
+      font-size: 14px;
+    }
+  }
+
+  // ── Dropdown pays ────────────────────────────────────────────────────────────
+  .iti__country-list {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    min-width: 300px;
+    max-height: 260px;
+    overflow-y: auto;
+    background: #fff;
+    border-radius: 16px;
+    border: 1px solid rgba(102, 126, 234, 0.15);
+    box-shadow: 0 8px 32px rgba(102, 126, 234, 0.15), 0 2px 8px rgba(0,0,0,0.06);
+    z-index: 100;
+    padding: 0;
+    list-style: none;
+    margin: 0;
+    overflow: hidden; // pour que le border-radius s'applique sur la search aussi
+
+    // scrollbar discrète — sur un wrapper interne
+    &::-webkit-scrollbar       { width: 4px; }
+    &::-webkit-scrollbar-track { background: transparent; }
+    &::-webkit-scrollbar-thumb { background: rgba(102,126,234,0.25); border-radius: 4px; }
+
+    // Barre de recherche — doit être DANS le dropdown
+    .iti__search-input {
+      display: block;
+      width: 100%;
+      padding: 12px 16px;
+      border: none;
+      border-bottom: 1px solid rgba(102, 126, 234, 0.1);
+      font-family: $font;
+      font-size: 13px;
+      color: $color-text;
+      background: #fafafa;
+      outline: none;
+      box-sizing: border-box;
+      border-radius: 16px 16px 0 0;
+
+      &::placeholder { color: $color-muted; }
+    }
+
+    // Liste scrollable après la search
+    li { list-style: none; }
+
+    // Item pays
+    .iti__country {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 16px;
+      font-family: $font;
+      font-size: 13px;
+      color: $color-text;
+      cursor: pointer;
+      transition: background 0.12s;
+
+      &:hover          { background: rgba(102, 126, 234, 0.07); }
+      &.iti__highlight {
+        background: rgba(102, 126, 234, 0.1);
+        color: $color-primary;
+        font-weight: 600;
+      }
+    }
+
+    .iti__country-name { flex: 1; }
+
+    .iti__dial-code {
+      font-size: 12px;
+      color: $color-muted;
+      font-family: $font;
+    }
+
+    .iti__divider {
+      height: 1px;
+      background: rgba(102,126,234,0.1);
+      margin: 4px 0;
+      list-style: none;
+    }
+  }
+} // fin .app-input__tel ─────────────────────────────────────────────────────────────────────
 .app-input__hint {
-  margin: 4px 0 0 4px;
+  margin: 6px 0 0 18px;
   font-family: $font;
   font-size: 12px;
   color: $color-muted;
 }
 
+// ── Erreur ───────────────────────────────────────────────────────────────────
 .app-input__error {
-  margin: 4px 0 0 4px;
+  margin: 6px 0 0 18px;
   font-family: $font;
   font-size: 12px;
   font-weight: 500;
   color: $color-error;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+
+  &::before {
+    content: '!';
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background: $color-error;
+    color: #fff;
+    font-size: 9px;
+    font-weight: 800;
+  }
 }
