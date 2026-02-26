@@ -2,6 +2,10 @@
   "name": "m1p13mean-tsanta-mahandry-frontend",
   "version": "0.0.0",
   "scripts": {
+    "generate:env": "node scripts/generate-env.mjs",
+    "prestart": "npm run generate:env",
+    "prebuild": "npm run generate:env",
+    "pretest": "npm run generate:env",
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",

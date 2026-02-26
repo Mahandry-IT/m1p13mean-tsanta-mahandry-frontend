@@ -1,5 +1,6 @@
+import { environmentGenerated } from './environment.generated';
+
 export const environment = {
   production: false,
-  apiUrl: 'http://localhost:3000/api',
+  apiUrl: environmentGenerated.apiUrl,
 };
-
