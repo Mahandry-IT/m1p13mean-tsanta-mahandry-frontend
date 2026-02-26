@@ -102,11 +102,11 @@
         (dragover)="onDragOver($event)"
         (dragleave)="onDragLeave($event)"
         (drop)="onDrop($event)"
-        (click)="filePicker.click()"
+        (click)="fileUseDialog ? openUploadDialog() : filePicker.click()"
         role="button"
         tabindex="0"
-        (keydown.enter)="filePicker.click()"
-        (keydown.space)="$event.preventDefault(); filePicker.click()"
+        (keydown.enter)="fileUseDialog ? openUploadDialog() : filePicker.click()"
+        (keydown.space)="$event.preventDefault(); fileUseDialog ? openUploadDialog() : filePicker.click()"
         [attr.aria-label]="label || placeholder || 'Choisir un fichier'"
       >
         <mat-icon class="app-input__dropzone-icon">upload</mat-icon>
@@ -115,7 +115,7 @@
           <div class="app-input__dropzone-title">{{ fileDropLabel }}</div>
           <div class="app-input__dropzone-sub" *ngIf="fileHelperText">{{ fileHelperText }}</div>
 
-          <!-- Liste complète des fichiers -->
+          <!-- Liste complète des fichiers (affichage rapide) -->
           <ul class="app-input__dropzone-list" *ngIf="selectedFiles.length">
             <li class="app-input__dropzone-item" *ngFor="let f of selectedFiles">
               <span class="app-input__dropzone-filename">{{ f.name }}</span>

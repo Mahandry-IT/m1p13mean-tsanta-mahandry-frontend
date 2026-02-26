@@ -313,6 +313,19 @@ $radius:          50px;
   flex-direction: column;
   width: 100%;
   font-family: $font;
+
+  // Ajustements spécifiques TEL: le plugin ajoute parfois des marges/line-height
+  // qui donnent l'impression que l'input 'descend'.
+  .app-input__label {
+    margin-bottom: 4px; // un peu plus compact que 6px
+    line-height: 1.2;   // évite un calcul de hauteur trop agressif
+  }
+
+  // certains navigateurs donnent une line-height par défaut différente aux inputs tel
+  input[type='tel'],
+  input.iti__tel-input {
+    line-height: 1.2;
+  }
 }
 
 // ── Label (style cohérent avec mat-label floatLabel=always) ──────────────────

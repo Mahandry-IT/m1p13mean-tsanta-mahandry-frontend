@@ -1,0 +1,64 @@
+<h2 mat-dialog-title>{{ data.title || 'Ajouter des fichiers' }}</h2>
+
+<mat-dialog-content class="app-upload-dialog">
+  <div class="app-upload-dialog__helper" *ngIf="data.helperText">{{ data.helperText }}</div>
+
+  <div
+    class="app-upload-dialog__dropzone"
+    [class.app-upload-dialog__dropzone--dragover]="isDragOver"
+    (dragover)="onDragOver($event)"
+    (dragleave)="onDragLeave($event)"
+    (drop)="onDrop($event)"
+    (click)="filePicker.click()"
+    role="button"
+    tabindex="0"
+    (keydown.enter)="filePicker.click()"
+    (keydown.space)="$event.preventDefault(); filePicker.click()"
+    [attr.aria-label]="data.dropLabel || 'Choisir un fichier'"
+  >
+    <div class="app-upload-dialog__dropzone-inner">
+      <div class="app-upload-dialog__icon">
+        <mat-icon>upload</mat-icon>
+      </div>
+      <div class="app-upload-dialog__title">
+        {{ data.dropLabel || 'Parcourir ou glisser-déposer ici' }}
+      </div>
+      <div class="app-upload-dialog__sub" *ngIf="data.accept">Types: {{ data.accept }}</div>
+    </div>
+
+    <input
+      #filePicker
+      type="file"
+      [attr.accept]="data.accept ?? null"
+      [attr.multiple]="data.multiple ? '' : null"
+      hidden
+      (change)="onBrowse($any($event.target).files)"
+    />
+  </div>
+
+  <div class="app-upload-dialog__error" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+  <div class="app-upload-dialog__list" *ngIf="files.length">
+    <div class="app-upload-dialog__item" *ngFor="let f of files; let i = index">
+      <div class="app-upload-dialog__file">
+        <mat-icon class="app-upload-dialog__file-icon">description</mat-icon>
+        <div class="app-upload-dialog__file-meta">
+          <div class="app-upload-dialog__file-name">{{ f.name }}</div>
+          <div class="app-upload-dialog__file-size">{{ formatBytes(f.size) }}</div>
+        </div>
+      </div>
+
+      <button mat-icon-button type="button" (click)="removeFile(i)" aria-label="Supprimer">
+        <mat-icon>delete</mat-icon>
+      </button>
+    </div>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="cancel()">Annuler</button>
+  <button mat-flat-button color="primary" type="button" [disabled]="!canConfirm" (click)="confirm()">
+    Valider
+  </button>
+</mat-dialog-actions>
+

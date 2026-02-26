@@ -1,10 +1,16 @@
 <app-page headTitle="Créer mon profil">
   <section class="profile-create">
     <div class="profile-create__card">
-      <h1 class="profile-create__title">Créer votre profil</h1>
-      <p class="profile-create__subtitle">
-        Complétez vos informations puis validez. Une fois terminé, vous serez redirigé vers l'accueil.
-      </p>
+
+      <header class="profile-create__header">
+        <div class="profile-create__icon">
+          <mat-icon>person_add</mat-icon>
+        </div>
+        <h1 class="profile-create__title">Créer votre profil</h1>
+        <p class="profile-create__subtitle">
+          Complétez vos informations puis validez. Une fois terminé, vous serez redirigé vers l'accueil.
+        </p>
+      </header>
 
       <form class="profile-create__form" [formGroup]="form" (ngSubmit)="onSubmit()">
         <app-input
@@ -70,12 +76,15 @@
           <app-button
             type="submit"
             text="Créer le profil"
+            variant="raised"
+            color="accent"
             [isenabled]="form.valid && !loading"
             [loading]="loading"
             [fullWidth]="true"
           />
         </div>
       </form>
+
     </div>
   </section>
 </app-page>

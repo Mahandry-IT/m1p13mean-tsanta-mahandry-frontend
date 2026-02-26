@@ -9,6 +9,8 @@ import {
 } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { PhoneNumberFormat } from 'ngx-intl-tel-input';
+import { MatDialog } from '@angular/material/dialog';
+import { UploadDialogComponent, UploadDialogResult } from '../upload-dialog/upload-dialog.component';
 
 export type InputType =
   | 'text'
@@ -93,11 +95,16 @@ export class InputComponent implements OnChanges {
   /** File */
   @Input() accept?: string;
   @Input() multiple = false;
+  @Input() maxFiles?: number;
+  @Input() maxFileSizeBytes?: number;
 
   /** Mode file: UX */
   @Input() fileDropLabel = 'Glissez-déposez un fichier ici ou cliquez pour parcourir';
   @Input() fileHelperText = '';
   @Input() syncFileToControl = false;
+
+  /** Ouvre un modal au clic (recommandé pour l’UX “maquette”) */
+  @Input() fileUseDialog = true;
 
   /** Mode file: état UI interne */
   isDragOver = false;
@@ -127,6 +134,8 @@ export class InputComponent implements OnChanges {
 
   /** Liste des fichiers sélectionnés (pour affichage) */
   selectedFiles: File[] = [];
+
+  constructor(private readonly dialog: MatDialog) {}
 
   onInput(): void {
     this.valueChange.emit(this.control?.value);
@@ -160,6 +169,46 @@ export class InputComponent implements OnChanges {
     if (this.syncFileToControl) this.control?.setValue(filtered as any);
   }
 
+  openUploadDialog(): void {
+    if (this.mode !== 'file' || !this.fileUseDialog) return;
+    if (this.disabled) return;
+
+    const ref = this.dialog.open(UploadDialogComponent, {
+      width: '720px',
+      maxWidth: '95vw',
+      autoFocus: true,
+      data: {
+        title: this.label || 'Ajouter des fichiers',
+        accept: this.accept,
+        multiple: this.multiple,
+        helperText: this.fileHelperText,
+        dropLabel: this.fileDropLabel,
+        initialFiles: this.selectedFiles,
+        limits: {
+          maxFiles: this.maxFiles,
+          maxFileSizeBytes: this.maxFileSizeBytes,
+        },
+      },
+    });
+
+    ref.afterClosed().subscribe((result: UploadDialogResult | null | undefined) => {
+      if (!result) return;
+      const files = result.files ?? [];
+
+      this.selectedFiles = files;
+
+      if (!files.length) {
+        this.fileChange.emit(null);
+        if (this.syncFileToControl) this.control?.setValue(null);
+        return;
+      }
+
+      const payload = this.multiple ? files : files[0];
+      this.fileChange.emit(payload);
+      if (this.syncFileToControl) this.control?.setValue(payload as any);
+    });
+  }
+
   onDragOver(event: DragEvent): void {
     if (this.mode !== 'file') return;
     event.preventDefault();
@@ -176,6 +225,15 @@ export class InputComponent implements OnChanges {
 
   onDrop(event: DragEvent): void {
     if (this.mode !== 'file') return;
+    // Si on utilise un dialog, on laisse le drop ouvrir/ajouter via le modal pour une UX uniforme.
+    if (this.fileUseDialog) {
+      event.preventDefault();
+      event.stopPropagation();
+      this.isDragOver = false;
+      this.openUploadDialog();
+      return;
+    }
+
     event.preventDefault();
     event.stopPropagation();
     this.isDragOver = false;
