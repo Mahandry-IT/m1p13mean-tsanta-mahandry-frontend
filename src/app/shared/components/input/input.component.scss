@@ -7,9 +7,7 @@ $color-muted:     #9ca3af;
 $color-border:    #d1d5db;
 $color-bg:        #f8f7ff;
 $font:            'Segoe UI', system-ui, sans-serif;
-
-// Pill — cohérent avec les boutons
-$radius: 50px;
+$radius:          50px;
 
 // ── Base ──────────────────────────────────────────────────────────────────
 .app-input.mat-mdc-form-field {
@@ -17,36 +15,36 @@ $radius: 50px;
   font-family: $font;
 
   // Shape pill
-  --mdc-outlined-text-field-container-shape: #{$radius};
+  --mdc-outlined-text-field-container-shape:               #{$radius};
 
   // Bordures
-  --mdc-outlined-text-field-outline-color:              #{$color-border};
-  --mdc-outlined-text-field-hover-outline-color:        #{$color-primary};
-  --mdc-outlined-text-field-focus-outline-color:        #{$color-primary};
-  --mdc-outlined-text-field-outline-width:              1.5px;
-  --mdc-outlined-text-field-focus-outline-width:        2px;
+  --mdc-outlined-text-field-outline-color:                 #{$color-border};
+  --mdc-outlined-text-field-hover-outline-color:           #{$color-primary};
+  --mdc-outlined-text-field-focus-outline-color:           #{$color-primary};
+  --mdc-outlined-text-field-outline-width:                 1.5px;
+  --mdc-outlined-text-field-focus-outline-width:           2px;
 
-  // Texte saisi
-  --mdc-outlined-text-field-input-text-color:           #{$color-text};
-  --mdc-outlined-text-field-input-text-font:            #{$font};
-  --mdc-outlined-text-field-input-text-size:            14px;
+  // Texte
+  --mdc-outlined-text-field-input-text-color:              #{$color-text};
+  --mdc-outlined-text-field-input-text-font:               #{$font};
+  --mdc-outlined-text-field-input-text-size:               14px;
 
-  // Label flottant
-  --mdc-outlined-text-field-label-text-color:           #{$color-muted};
-  --mdc-outlined-text-field-focus-label-text-color:     #{$color-primary};
-  --mdc-outlined-text-field-hover-label-text-color:     #{$color-primary};
-  --mdc-outlined-text-field-label-text-font:            #{$font};
-  --mdc-outlined-text-field-label-text-size:            14px;
-  --mdc-outlined-text-field-label-text-weight:          500;
+  // Label
+  --mdc-outlined-text-field-label-text-color:              #{$color-muted};
+  --mdc-outlined-text-field-focus-label-text-color:        #{$color-primary};
+  --mdc-outlined-text-field-hover-label-text-color:        #{$color-primary};
+  --mdc-outlined-text-field-label-text-font:               #{$font};
+  --mdc-outlined-text-field-label-text-size:               14px;
+  --mdc-outlined-text-field-label-text-weight:             500;
 
-  // Fond transparent (géré en CSS)
-  --mdc-outlined-text-field-container-color: transparent;
+  // Fond
+  --mdc-outlined-text-field-container-color:               transparent;
 
   // Hint
-  --mat-form-field-hint-text-color: #{$color-muted};
-  --mat-form-field-hint-text-size:  12px;
+  --mat-form-field-hint-text-color:                        #{$color-muted};
+  --mat-form-field-hint-text-size:                         12px;
 
-  // ── Wrapper principal ──
+  // ── Wrapper ──
   .mat-mdc-text-field-wrapper {
     border-radius: $radius;
     background: $color-bg;
@@ -54,7 +52,7 @@ $radius: 50px;
     transition: background 0.2s ease, box-shadow 0.2s ease;
   }
 
-  // ── Flex interne ──
+  // ── Flex ──
   .mat-mdc-form-field-flex {
     background: transparent;
     align-items: center;
@@ -62,24 +60,23 @@ $radius: 50px;
     min-height: 52px;
   }
 
-  // ── Inset (zone label + input) ──
+  // ── Infix ──
   .mat-mdc-form-field-infix {
     padding-top: 14px;
     padding-bottom: 14px;
     min-height: unset;
   }
 
-  // ── Bordure outline : coins arrondis forcés ──
+  // ── Coins arrondis de la bordure outlined ──
   .mdc-notched-outline__leading {
     border-radius: $radius 0 0 $radius;
-    min-width: $radius; // assez large pour afficher le coin arrondi
+    min-width: $radius;
   }
 
   .mdc-notched-outline__trailing {
     border-radius: 0 $radius $radius 0;
   }
 
-  // ── Encoche du label flottant ──
   .mdc-notched-outline__notch {
     border-top: none;
   }
@@ -96,6 +93,20 @@ $radius: 50px;
       color: $color-muted;
       opacity: 1;
       font-size: 14px;
+    }
+  }
+
+  // ── Textarea ──
+  textarea.mat-mdc-input-element {
+    font-family: $font;
+    font-size: 14px;
+    color: $color-text;
+    caret-color: $color-primary;
+    padding: 0;
+
+    &::placeholder {
+      color: $color-muted;
+      opacity: 1;
     }
   }
 
@@ -118,23 +129,102 @@ $radius: 50px;
 
   .mdc-line-ripple { display: none; }
 
-  // Bouton oeil (password)
+  // ── Password toggle ──
   .app-input__toggle {
-    margin-right: -8px; // compense le padding du wrapper
+    margin-right: -8px;
+    mat-icon { color: $color-muted; }
   }
 
-  .app-input__toggle mat-icon {
-    color: $color-muted;
-  }
-
-  &.mat-focused .app-input__toggle mat-icon {
-    color: $color-primary;
-  }
+  &.mat-focused .app-input__toggle mat-icon { color: $color-primary; }
 
   &.mat-mdc-form-field-invalid .app-input__toggle mat-icon,
-  &.mat-form-field-invalid .app-input__toggle mat-icon,
-  &.mat-mdc-form-field-invalid .app-input__toggle mat-icon {
-    color: $color-error;
+  &.mat-form-field-invalid    .app-input__toggle mat-icon { color: $color-error; }
+
+  // ──────────────────────────────────────────────────────────────────────
+  // SELECT  — le wrapper outlined est présent, on réutilise les mêmes règles
+  // ──────────────────────────────────────────────────────────────────────
+  &.mat-mdc-form-field-type-mat-select {
+
+    // Même hauteur que les inputs
+    .mat-mdc-form-field-infix {
+      padding-top: 14px;
+      padding-bottom: 14px;
+      min-height: unset;
+      display: flex;
+      align-items: center;
+    }
+
+    // Trigger (ligne cliquable)
+    .mat-mdc-select-trigger {
+      font-family: $font;
+      font-size: 14px;
+      color: $color-text;
+      display: flex;
+      align-items: center;
+      width: 100%;
+    }
+
+    .mat-mdc-select-value {
+      font-family: $font;
+      font-size: 14px;
+      color: $color-text;
+    }
+
+    .mat-mdc-select-placeholder {
+      color: $color-muted;
+      font-family: $font;
+      font-size: 14px;
+      opacity: 1;
+    }
+
+    // Flèche
+    .mat-mdc-select-arrow-wrapper {
+      transform: none;
+      height: auto;
+    }
+
+    .mat-mdc-select-arrow svg {
+      fill: $color-muted;
+    }
+  }
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// PANEL DU SELECT  (rendu dans cdk-overlay, hors shadow DOM du composant)
+// On cible via la classe globale .mat-mdc-select-panel
+// ──────────────────────────────────────────────────────────────────────────
+.mat-mdc-select-panel {
+  // Coins arrondis propres (pas pill — ça serait trop radical pour une liste)
+  border-radius: 16px !important;
+  overflow: hidden;
+  background: #fff !important;
+  box-shadow: 0 8px 32px rgba(102, 126, 234, 0.15), 0 2px 8px rgba(0,0,0,0.06) !important;
+  border: 1px solid rgba(102, 126, 234, 0.12);
+  // Empêche le panel de se superposer aux champs en dessous
+  margin-top: 4px;
+
+  .mat-mdc-option {
+    font-family: $font;
+    font-size: 14px;
+    color: $color-text;
+    min-height: 44px;
+    padding: 0 20px;
+    transition: background 0.15s ease;
+
+    &:hover:not(.mdc-list-item--disabled) {
+      background: rgba(102, 126, 234, 0.07) !important;
+    }
+
+    &.mdc-list-item--selected:not(.mdc-list-item--disabled) {
+      background: rgba(102, 126, 234, 0.1) !important;
+      color: $color-primary;
+      font-weight: 600;
+
+      .mdc-list-item__primary-text { color: $color-primary; }
+    }
+
+    // Supprime le ripple Material par défaut
+    .mat-ripple { display: none; }
   }
 }
 
@@ -142,12 +232,12 @@ $radius: 50px;
 .app-input--error.mat-mdc-form-field,
 .app-input.mat-mdc-form-field.mat-form-field-invalid,
 .app-input.mat-mdc-form-field.mat-mdc-form-field-invalid {
-  --mdc-outlined-text-field-outline-color:           #e53e3e;
-  --mdc-outlined-text-field-hover-outline-color:     #e53e3e;
-  --mdc-outlined-text-field-focus-outline-color:     #e53e3e;
-  --mdc-outlined-text-field-label-text-color:        #e53e3e;
-  --mdc-outlined-text-field-focus-label-text-color:  #e53e3e;
-  --mdc-outlined-text-field-hover-label-text-color:  #e53e3e;
+  --mdc-outlined-text-field-outline-color:          #e53e3e;
+  --mdc-outlined-text-field-hover-outline-color:    #e53e3e;
+  --mdc-outlined-text-field-focus-outline-color:    #e53e3e;
+  --mdc-outlined-text-field-label-text-color:       #e53e3e;
+  --mdc-outlined-text-field-focus-label-text-color: #e53e3e;
+  --mdc-outlined-text-field-hover-label-text-color: #e53e3e;
 
   .mat-mdc-text-field-wrapper {
     background: rgba(229, 62, 62, 0.04);
@@ -184,16 +274,48 @@ $radius: 50px;
 
 // ── État : désactivé ──────────────────────────────────────────────────────
 .app-input.mat-mdc-form-field.mat-form-field-disabled {
-  --mdc-outlined-text-field-outline-color:       rgba(#d1d5db, 0.5);
-  --mdc-outlined-text-field-label-text-color:    rgba(#9ca3af, 0.5);
-  --mdc-outlined-text-field-input-text-color:    rgba(#1a1a2e, 0.4);
+  --mdc-outlined-text-field-outline-color:      rgba(209, 213, 219, 0.5);
+  --mdc-outlined-text-field-label-text-color:   rgba(156, 163, 175, 0.5);
+  --mdc-outlined-text-field-input-text-color:   rgba(26, 26, 46, 0.4);
 
   .mat-mdc-text-field-wrapper {
     background: rgba(0, 0, 0, 0.03);
     cursor: not-allowed;
   }
 
-  input.mat-mdc-input-element {
+  input.mat-mdc-input-element,
+  textarea.mat-mdc-input-element {
     cursor: not-allowed;
   }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// TEL (ngx-intl-tel-input) — rendu hors mat-form-field
+// ─────────────────────────────────────────────────────────────────────────────
+.app-input__label {
+  display: block;
+  margin: 0 0 6px 4px;
+  font-family: $font;
+  font-size: 13px;
+  font-weight: 500;
+  color: $color-muted;
+}
+
+.app-input__tel {
+  display: block;
+}
+
+.app-input__hint {
+  margin: 4px 0 0 4px;
+  font-family: $font;
+  font-size: 12px;
+  color: $color-muted;
+}
+
+.app-input__error {
+  margin: 4px 0 0 4px;
+  font-family: $font;
+  font-size: 12px;
+  font-weight: 500;
+  color: $color-error;
 }

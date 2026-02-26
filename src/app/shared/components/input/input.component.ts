@@ -8,6 +8,7 @@ import {
   SimpleChanges,
 } from '@angular/core';
 import { FormControl } from '@angular/forms';
+import { PhoneNumberFormat } from 'ngx-intl-tel-input';
 
 export type InputType =
   | 'text'
@@ -19,6 +20,14 @@ export type InputType =
   | 'search'
   | 'date'
   | 'datetime-local';
+
+export type InputMode = 'input' | 'textarea' | 'select' | 'file' | 'tel';
+
+export interface InputOption {
+  value: string | number;
+  label: string;
+  disabled?: boolean;
+}
 
 export interface InputError {
   field: string;
@@ -33,7 +42,10 @@ export interface InputError {
   standalone: false
 })
 export class InputComponent implements OnChanges {
-  /** Type HTML du input */
+  /** Mode d'affichage du composant */
+  @Input() mode: InputMode = 'input';
+
+  /** Type HTML du input (mode="input") */
   @Input() type: InputType = 'text';
 
   /** FormControl à binder (Reactive Forms) */
@@ -75,14 +87,60 @@ export class InputComponent implements OnChanges {
   @Input() pattern?: string;
   @Input() autocomplete?: string;
 
+  /** Select */
+  @Input() options: InputOption[] = [];
+
+  /** File */
+  @Input() accept?: string;
+  @Input() multiple = false;
+
+  /** Tel (ngx-intl-tel-input)
+   * codes pays ISO2 en minuscule: ex ['mg','fr']
+   */
+  @Input() preferredCountries: string[] = ['mg', 'fr'];
+  @Input() separateDialCode = false;
+  @Input() searchCountryFlag = true;
+  @Input() enablePlaceholder = true;
+
+  /** Format d'affichage du numéro (NATIONAL = "032 xx xxx xx") */
+  readonly phoneNumberFormat = PhoneNumberFormat.International;
+
   /** Gestion d'erreur externe (ex: API) */
   @Input() error?: InputError;
 
   /** Émet la valeur brute (optionnel) */
   @Output() valueChange = new EventEmitter<any>();
 
+  /** Émet les fichiers sélectionnés (mode="file") */
+  @Output() fileChange = new EventEmitter<File | File[] | null>();
+
+  /** Émet la valeur complète du téléphone (mode="tel") */
+  @Output() telChange = new EventEmitter<any>();
+
   onInput(): void {
     this.valueChange.emit(this.control?.value);
+    if (this.mode === 'tel') {
+      this.telChange.emit(this.control?.value);
+    }
+  }
+
+  onFileSelected(files: FileList | null): void {
+    if (!files || files.length === 0) {
+      this.fileChange.emit(null);
+      return;
+    }
+
+    if (this.multiple) {
+      this.fileChange.emit(Array.from(files));
+    } else {
+      this.fileChange.emit(files[0]);
+    }
+  }
+
+  get fileNameLabel(): string {
+    const v = this.control?.value as any;
+    if (typeof v === 'string') return v;
+    return '';
   }
 
   get showExternalError(): boolean {
@@ -102,7 +160,7 @@ export class InputComponent implements OnChanges {
    * Si un placeholder est fourni, on force le label à flotter dès le départ.
    */
   get floatLabel(): 'always' | 'auto' {
-    return this.placeholder ? 'always' : 'auto';
+    return (this.placeholder || this.mode === 'select') ? 'always' : 'auto';
   }
 
   /**
@@ -126,7 +184,7 @@ export class InputComponent implements OnChanges {
   }
 
   get isPasswordField(): boolean {
-    return this.type === 'password';
+    return this.mode === 'input' && this.type === 'password';
   }
 
   get effectiveType(): InputType {
