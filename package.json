@@ -28,6 +28,7 @@
   "private": true,
   "packageManager": "npm@11.4.2",
   "dependencies": {
+    "@angular/animations": "^21.1.5",
     "@angular/cdk": "~21.1.5",
     "@angular/common": "^21.1.0",
     "@angular/compiler": "^21.1.0",
@@ -40,6 +41,10 @@
     "@angular/ssr": "^21.1.4",
     "dotenv": "^17.3.1",
     "express": "^5.1.0",
+    "google-libphonenumber": "^3.2.44",
+    "intl-tel-input": "^26.7.6",
+    "ngx-bootstrap": "^21.0.1",
+    "ngx-intl-tel-input": "^17.0.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"
   },
