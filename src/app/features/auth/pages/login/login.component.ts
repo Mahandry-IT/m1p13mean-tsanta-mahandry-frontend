@@ -67,11 +67,14 @@ export class LoginComponent {
             this.auth.setToken(token);
           }
 
+          // homePage est renvoyé par le backend dans la réponse (pas dans le token)
+          this.auth.setHomePage(raw.data?.homePage as string | undefined);
+
           const email = payload.email;
 
           this.userService.checkProfile(email).subscribe({
             next: (res) => {
-              const home = (raw.data?.homePage as string | undefined) ?? '/';
+              const home = this.auth.getHomePage() ?? '/';
               if (res.data?.hasProfile) {
                 this.router.navigateByUrl(home);
               } else {
@@ -80,7 +83,7 @@ export class LoginComponent {
             },
             error: () => {
               // Si le check échoue, on redirige quand même vers la homepage (et l'interceptor affiche le toast)
-              const home = (raw.data?.homePage as string | undefined) ?? '/';
+              const home = this.auth.getHomePage() ?? '/';
               this.router.navigateByUrl(home);
             },
             complete: () => {

@@ -19,8 +19,12 @@
 
     <div class="app-input__hint" *ngIf="hint && !showExternalError">{{ hint }}</div>
 
-    <div class="app-input__error" *ngIf="showValidationError">
-      <ng-container *ngIf="control.hasError('required')">Ce champ est requis.</ng-container>
+    <div
+      class="app-input__error"
+      *ngIf="(control.dirty && control.invalid) || (control.touched && !!control.value && control.invalid)"
+    >
+      <!-- 'required' seulement après modification (dirty), sinon ngx-intl-tel-input le déclenche parfois au chargement -->
+      <ng-container *ngIf="control.dirty && control.hasError('required')">Ce champ est requis.</ng-container>
       <ng-container *ngIf="control.hasError('validatePhoneNumber')">Le numéro de téléphone est invalide.</ng-container>
     </div>
 

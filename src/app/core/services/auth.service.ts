@@ -53,6 +53,7 @@ export interface LoginResponse {
 })
 export class AuthService {
   private static readonly TOKEN_KEY = 'auth_token';
+  private static readonly HOME_PAGE_KEY = 'auth_home_page';
 
   constructor(private readonly api: ApiService) {}
 
@@ -106,9 +107,28 @@ export class AuthService {
     return this.api.post<unknown>('/auth/reset-password', payload);
   }
 
+  /** Stocke la homepage renvoyée par le backend après login */
+  setHomePage(homePage: string | null | undefined): void {
+    if (typeof homePage === 'string' && homePage.trim()) {
+      localStorage.setItem(AuthService.HOME_PAGE_KEY, homePage);
+      return;
+    }
+    localStorage.removeItem(AuthService.HOME_PAGE_KEY);
+  }
+
+  /** Récupère la homepage stockée après login */
+  getHomePage(): string | null {
+    const v = localStorage.getItem(AuthService.HOME_PAGE_KEY);
+    return v && v.trim() ? v : null;
+  }
+
+  clearHomePage(): void {
+    localStorage.removeItem(AuthService.HOME_PAGE_KEY);
+  }
+
   /**
-   * Essaie d'extraire `homePage` depuis le payload du JWT.
-   * Retourne null si absent / token invalide.
+   * (Legacy) Essaie d'extraire `homePage` depuis le payload du JWT.
+   * Préférer `getHomePage()` car chez vous la valeur vient de la réponse login.
    */
   getHomePageFromToken(): string | null {
     const token = this.getToken();

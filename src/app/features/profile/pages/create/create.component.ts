@@ -58,7 +58,7 @@ export class CreateProfileComponent {
       return;
     }
 
-    const home = this.auth.getHomePageFromToken() ?? '/';
+    const home = this.auth.getHomePage() ?? '/';
 
     const v = this.form.getRawValue();
 
@@ -98,4 +98,3 @@ export class CreateProfileComponent {
       });
   }
 }
-
