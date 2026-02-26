@@ -466,82 +466,24 @@ $radius:          50px;
 
   // ── Dropdown pays ────────────────────────────────────────────────────────────
   .iti__country-list {
-    position: absolute;
-    top: calc(100% + 6px);
-    left: 0;
-    min-width: 300px;
-    max-height: 260px;
-    overflow-y: auto;
-    background: #fff;
-    border-radius: 16px;
-    border: 1px solid rgba(102, 126, 234, 0.15);
-    box-shadow: 0 8px 32px rgba(102, 126, 234, 0.15), 0 2px 8px rgba(0,0,0,0.06);
-    z-index: 100;
-    padding: 0;
-    list-style: none;
-    margin: 0;
-    overflow: hidden; // pour que le border-radius s'applique sur la search aussi
+    // La lib positionne déjà le panel par défaut. On se contente de
+    // le rendre "responsive" et aligné avec le champ.
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
 
-    // scrollbar discrète — sur un wrapper interne
-    &::-webkit-scrollbar       { width: 4px; }
-    &::-webkit-scrollbar-track { background: transparent; }
-    &::-webkit-scrollbar-thumb { background: rgba(102,126,234,0.25); border-radius: 4px; }
+    // Le panel doit passer au-dessus des autres inputs mais rester dans l'écran.
+    z-index: 2000;
 
-    // Barre de recherche — doit être DANS le dropdown
-    .iti__search-input {
-      display: block;
-      width: 100%;
-      padding: 12px 16px;
-      border: none;
-      border-bottom: 1px solid rgba(102, 126, 234, 0.1);
-      font-family: $font;
-      font-size: 13px;
-      color: $color-text;
-      background: #fafafa;
-      outline: none;
-      box-sizing: border-box;
-      border-radius: 16px 16px 0 0;
+    // Évite que le panel déborde visuellement (arrondis)
+    box-sizing: border-box;
+  }
 
-      &::placeholder { color: $color-muted; }
-    }
-
-    // Liste scrollable après la search
-    li { list-style: none; }
-
-    // Item pays
-    .iti__country {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 9px 16px;
-      font-family: $font;
-      font-size: 13px;
-      color: $color-text;
-      cursor: pointer;
-      transition: background 0.12s;
-
-      &:hover          { background: rgba(102, 126, 234, 0.07); }
-      &.iti__highlight {
-        background: rgba(102, 126, 234, 0.1);
-        color: $color-primary;
-        font-weight: 600;
-      }
-    }
-
-    .iti__country-name { flex: 1; }
-
-    .iti__dial-code {
-      font-size: 12px;
-      color: $color-muted;
-      font-family: $font;
-    }
-
-    .iti__divider {
-      height: 1px;
-      background: rgba(102,126,234,0.1);
-      margin: 4px 0;
-      list-style: none;
-    }
+  // Le dropdown est dans le flag-container: on évite que son parent le coupe.
+  .iti__flag-container {
+    overflow: visible;
   }
 } // fin .app-input__tel ─────────────────────────────────────────────────────────────────────
 .app-input__hint {
