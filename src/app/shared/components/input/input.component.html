@@ -1,61 +1,175 @@
-<mat-form-field
-  [appearance]="appearance"
-  [floatLabel]="floatLabel"
-  class="app-input"
-  [ngClass]="[className, (showValidationError || showExternalError) ? 'app-input--error' : '']"
-  [ngStyle]="style"
->
-  <mat-label *ngIf="label">{{ label }}</mat-label>
-
-  <input
-    matInput
-    [type]="effectiveType"
-    [formControl]="control"
-    [name]="name"
-    [id]="name"
-    [placeholder]="placeholder"
-    [required]="required"
-    [attr.minlength]="minLength ?? null"
-    [attr.maxlength]="maxLength ?? null"
-    [attr.min]="min ?? null"
-    [attr.max]="max ?? null"
-    [attr.step]="step ?? null"
-    [attr.pattern]="pattern ?? null"
-    [attr.autocomplete]="autocomplete ?? null"
-    (input)="onInput()"
-  />
-
-  <button
-    *ngIf="isPasswordField"
-    mat-icon-button
-    matSuffix
-    type="button"
-    class="app-input__toggle"
-    [attr.aria-label]="hidePassword ? 'Afficher le mot de passe' : 'Masquer le mot de passe'"
-    [attr.aria-pressed]="!hidePassword"
-    (click)="togglePasswordVisibility()"
+<ng-container *ngIf="mode === 'tel'; else defaultField">
+  <div
+    class="app-input__tel-wrapper"
+    [class.app-input__tel-wrapper--error]="showValidationError || showExternalError"
   >
-    <mat-icon>{{ passwordToggleIcon }}</mat-icon>
-  </button>
+    <label class="app-input__label" *ngIf="label">{{ label }}</label>
 
-  <mat-hint *ngIf="hint && !showExternalError">{{ hint }}</mat-hint>
+    <ngx-intl-tel-input
+      class="app-input__tel"
+      [formControl]="control"
+      [preferredCountries]="preferredCountries"
+      [separateDialCode]="separateDialCode"
+      [searchCountryFlag]="searchCountryFlag"
+      [enablePlaceholder]="enablePlaceholder"
+      [phoneValidation]="true"
+      [numberFormat]="phoneNumberFormat"
+      (ngModelChange)="onInput()"
+    ></ngx-intl-tel-input>
 
-  <!-- Erreurs de validation Angular (Reactive Forms) -->
-  <mat-error *ngIf="showValidationError">
-    <ng-container *ngIf="control.hasError('required')">Ce champ est requis.</ng-container>
-    <ng-container *ngIf="control.hasError('email')">Cette email est invalide.</ng-container>
-    <ng-container *ngIf="control.hasError('minlength')">
-      {{ control.getError('minlength')?.requiredLength }} caractères au minimum.
+    <div class="app-input__hint" *ngIf="hint && !showExternalError">{{ hint }}</div>
+
+    <div
+      class="app-input__error"
+      *ngIf="(control.dirty && control.invalid) || (control.touched && !!control.value && control.invalid)"
+    >
+      <!-- 'required' seulement après modification (dirty), sinon ngx-intl-tel-input le déclenche parfois au chargement -->
+      <ng-container *ngIf="control.dirty && control.hasError('required')">Ce champ est requis.</ng-container>
+      <ng-container *ngIf="control.hasError('validatePhoneNumber')">Le numéro de téléphone est invalide.</ng-container>
+    </div>
+
+    <div class="app-input__error" *ngIf="showExternalError">{{ externalErrorMessage }}</div>
+  </div>
+</ng-container>
+
+<ng-template #defaultField>
+  <mat-form-field
+    [appearance]="appearance"
+    [floatLabel]="floatLabel"
+    class="app-input"
+    [ngClass]="[className, (showValidationError || showExternalError) ? 'app-input--error' : '']"
+    [ngStyle]="style"
+  >
+    <mat-label *ngIf="label">{{ label }}</mat-label>
+
+    <!-- Mode: input (comportement actuel) -->
+    <input
+      *ngIf="mode === 'input'"
+      matInput
+      [type]="effectiveType"
+      [formControl]="control"
+      [name]="name"
+      [id]="name"
+      [placeholder]="placeholder"
+      [required]="required"
+      [attr.minlength]="minLength ?? null"
+      [attr.maxlength]="maxLength ?? null"
+      [attr.min]="min ?? null"
+      [attr.max]="max ?? null"
+      [attr.step]="step ?? null"
+      [attr.pattern]="pattern ?? null"
+      [attr.autocomplete]="autocomplete ?? null"
+      (input)="onInput()"
+    />
+
+    <!-- Mode: textarea -->
+    <textarea
+      *ngIf="mode === 'textarea'"
+      matInput
+      [formControl]="control"
+      [name]="name"
+      [id]="name"
+      [placeholder]="placeholder"
+      [required]="required"
+      [attr.minlength]="minLength ?? null"
+      [attr.maxlength]="maxLength ?? null"
+      (input)="onInput()"
+    ></textarea>
+
+    <!-- Mode: select -->
+    <mat-select
+      *ngIf="mode === 'select'"
+      [formControl]="control"
+      [required]="required"
+      (selectionChange)="onInput()"
+    >
+      <mat-option *ngFor="let opt of options" [value]="opt.value" [disabled]="opt.disabled ?? false">
+        {{ opt.label }}
+      </mat-option>
+    </mat-select>
+
+    <!-- Mode: file (drag & drop) -->
+    <ng-container *ngIf="mode === 'file'">
+      <input
+        matInput
+        readonly
+        tabindex="-1"
+        class="app-input__file-hydration-input"
+        [value]="selectedFilesLabel || fileNameLabel"
+        aria-hidden="true"
+      />
+
+      <div
+        class="app-input__dropzone"
+        [class.app-input__dropzone--dragover]="isDragOver"
+        [class.app-input__dropzone--error]="showValidationError || showExternalError"
+        (dragover)="onDragOver($event)"
+        (dragleave)="onDragLeave($event)"
+        (drop)="onDrop($event)"
+        (click)="fileUseDialog ? openUploadDialog() : filePicker.click()"
+        role="button"
+        tabindex="0"
+        (keydown.enter)="fileUseDialog ? openUploadDialog() : filePicker.click()"
+        (keydown.space)="$event.preventDefault(); fileUseDialog ? openUploadDialog() : filePicker.click()"
+        [attr.aria-label]="label || placeholder || 'Choisir un fichier'"
+      >
+        <mat-icon class="app-input__dropzone-icon">upload</mat-icon>
+
+        <div class="app-input__dropzone-text">
+          <div class="app-input__dropzone-title">{{ fileDropLabel }}</div>
+          <div class="app-input__dropzone-sub" *ngIf="fileHelperText">{{ fileHelperText }}</div>
+
+          <!-- Liste complète des fichiers (affichage rapide) -->
+          <ul class="app-input__dropzone-list" *ngIf="selectedFiles.length">
+            <li class="app-input__dropzone-item" *ngFor="let f of selectedFiles">
+              <span class="app-input__dropzone-filename">{{ f.name }}</span>
+              <span class="app-input__dropzone-filesize">({{ f.size / 1024 | number : '1.0-0' }} KB)</span>
+            </li>
+          </ul>
+        </div>
+
+        <input
+          #filePicker
+          type="file"
+          [attr.accept]="accept ?? null"
+          [attr.multiple]="multiple ? '' : null"
+          hidden
+          (change)="onFileSelected($any($event.target).files)"
+        />
+      </div>
     </ng-container>
-    <ng-container *ngIf="control.hasError('maxlength')">
-      {{ control.getError('maxlength')?.requiredLength }} caractères au maximum.
-    </ng-container>
-    <ng-container *ngIf="control.hasError('min')">La valeur minimum est de: {{ control.getError('min')?.min }}.</ng-container>
-    <ng-container *ngIf="control.hasError('max')">La valeur maximum est de: {{ control.getError('max')?.max }}.</ng-container>
-    <ng-container *ngIf="control.hasError('pattern')">Le format fournit est invalide.</ng-container>
-  </mat-error>
 
-  <!-- Erreur externe (API): prioritaire -->
-  <mat-error *ngIf="showExternalError">{{ externalErrorMessage }}</mat-error>
-</mat-form-field>
+    <button
+      *ngIf="isPasswordField"
+      mat-icon-button
+      matSuffix
+      type="button"
+      class="app-input__toggle"
+      [attr.aria-label]="hidePassword ? 'Afficher le mot de passe' : 'Masquer le mot de passe'"
+      [attr.aria-pressed]="!hidePassword"
+      (click)="togglePasswordVisibility()"
+    >
+      <mat-icon>{{ passwordToggleIcon }}</mat-icon>
+    </button>
 
+    <mat-hint *ngIf="hint && !showExternalError">{{ hint }}</mat-hint>
+
+    <!-- Erreurs de validation Angular (Reactive Forms) -->
+    <mat-error *ngIf="showValidationError">
+      <ng-container *ngIf="control.hasError('required')">Ce champ est requis.</ng-container>
+      <ng-container *ngIf="control.hasError('email')">Cette email est invalide.</ng-container>
+      <ng-container *ngIf="control.hasError('minlength')">
+        {{ control.getError('minlength')?.requiredLength }} caractères au minimum.
+      </ng-container>
+      <ng-container *ngIf="control.hasError('maxlength')">
+        {{ control.getError('maxlength')?.requiredLength }} caractères au maximum.
+      </ng-container>
+      <ng-container *ngIf="control.hasError('min')">La valeur minimum est de: {{ control.getError('min')?.min }}.</ng-container>
+      <ng-container *ngIf="control.hasError('max')">La valeur maximum est de: {{ control.getError('max')?.max }}.</ng-container>
+      <ng-container *ngIf="control.hasError('pattern')">Le format fournit est invalide.</ng-container>
+    </mat-error>
+
+    <!-- Erreur externe (API): prioritaire -->
+    <mat-error *ngIf="showExternalError">{{ externalErrorMessage }}</mat-error>
+  </mat-form-field>
+</ng-template>

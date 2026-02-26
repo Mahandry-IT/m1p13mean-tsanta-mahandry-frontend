@@ -53,6 +53,7 @@ export interface LoginResponse {
 })
 export class AuthService {
   private static readonly TOKEN_KEY = 'auth_token';
+  private static readonly HOME_PAGE_KEY = 'auth_home_page';
 
   constructor(private readonly api: ApiService) {}
 
@@ -104,6 +105,53 @@ export class AuthService {
    */
   requestPasswordReset(payload: ResetPasswordRequest): Observable<unknown> {
     return this.api.post<unknown>('/auth/reset-password', payload);
+  }
+
+  /** Stocke la homepage renvoyée par le backend après login */
+  setHomePage(homePage: string | null | undefined): void {
+    if (typeof homePage === 'string' && homePage.trim()) {
+      localStorage.setItem(AuthService.HOME_PAGE_KEY, homePage);
+      return;
+    }
+    localStorage.removeItem(AuthService.HOME_PAGE_KEY);
+  }
+
+  /** Récupère la homepage stockée après login */
+  getHomePage(): string | null {
+    const v = localStorage.getItem(AuthService.HOME_PAGE_KEY);
+    return v && v.trim() ? v : null;
+  }
+
+  clearHomePage(): void {
+    localStorage.removeItem(AuthService.HOME_PAGE_KEY);
+  }
+
+  /**
+   * (Legacy) Essaie d'extraire `homePage` depuis le payload du JWT.
+   * Préférer `getHomePage()` car chez vous la valeur vient de la réponse login.
+   */
+  getHomePageFromToken(): string | null {
+    const token = this.getToken();
+    if (!token) return null;
+
+    const parts = token.split('.');
+    if (parts.length < 2) return null;
+
+    try {
+      const payloadBase64Url = parts[1];
+      const payloadBase64 = payloadBase64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const json = decodeURIComponent(
+        atob(payloadBase64)
+          .split('')
+          .map((c) => `%${('00' + c.charCodeAt(0).toString(16)).slice(-2)}`)
+          .join(''),
+      );
+      const payload = JSON.parse(json) as { homePage?: unknown };
+
+      return typeof payload.homePage === 'string' && payload.homePage.trim() ? payload.homePage : null;
+    } catch {
+      return null;
+    }
   }
 
   setToken(token: string): void {

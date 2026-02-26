@@ -8,6 +8,9 @@ import {
   SimpleChanges,
 } from '@angular/core';
 import { FormControl } from '@angular/forms';
+import { PhoneNumberFormat } from 'ngx-intl-tel-input';
+import { MatDialog } from '@angular/material/dialog';
+import { UploadDialogComponent, UploadDialogResult } from '../upload-dialog/upload-dialog.component';
 
 export type InputType =
   | 'text'
@@ -19,6 +22,14 @@ export type InputType =
   | 'search'
   | 'date'
   | 'datetime-local';
+
+export type InputMode = 'input' | 'textarea' | 'select' | 'file' | 'tel';
+
+export interface InputOption {
+  value: string | number;
+  label: string;
+  disabled?: boolean;
+}
 
 export interface InputError {
   field: string;
@@ -33,7 +44,10 @@ export interface InputError {
   standalone: false
 })
 export class InputComponent implements OnChanges {
-  /** Type HTML du input */
+  /** Mode d'affichage du composant */
+  @Input() mode: InputMode = 'input';
+
+  /** Type HTML du input (mode="input") */
   @Input() type: InputType = 'text';
 
   /** FormControl à binder (Reactive Forms) */
@@ -75,14 +89,211 @@ export class InputComponent implements OnChanges {
   @Input() pattern?: string;
   @Input() autocomplete?: string;
 
+  /** Select */
+  @Input() options: InputOption[] = [];
+
+  /** File */
+  @Input() accept?: string;
+  @Input() multiple = false;
+  @Input() maxFiles?: number;
+  @Input() maxFileSizeBytes?: number;
+
+  /** Mode file: UX */
+  @Input() fileDropLabel = 'Glissez-déposez un fichier ici ou cliquez pour parcourir';
+  @Input() fileHelperText = '';
+  @Input() syncFileToControl = false;
+
+  /** Ouvre un modal au clic (recommandé pour l’UX “maquette”) */
+  @Input() fileUseDialog = true;
+
+  /** Mode file: état UI interne */
+  isDragOver = false;
+
+  /** Tel (ngx-intl-tel-input)
+   * codes pays ISO2 en minuscule: ex ['mg','fr']
+   */
+  @Input() preferredCountries: string[] = ['mg', 'fr'];
+  @Input() separateDialCode = false;
+  @Input() searchCountryFlag = true;
+  @Input() enablePlaceholder = true;
+
+  /** Format NATIONAL : "032 xx xxx xx" */
+  readonly phoneNumberFormat = PhoneNumberFormat.National;
+
   /** Gestion d'erreur externe (ex: API) */
   @Input() error?: InputError;
 
   /** Émet la valeur brute (optionnel) */
   @Output() valueChange = new EventEmitter<any>();
 
+  /** Émet les fichiers sélectionnés (mode="file") */
+  @Output() fileChange = new EventEmitter<File | File[] | null>();
+
+  /** Émet la valeur complète du téléphone (mode="tel") */
+  @Output() telChange = new EventEmitter<any>();
+
+  /** Liste des fichiers sélectionnés (pour affichage) */
+  selectedFiles: File[] = [];
+
+  constructor(private readonly dialog: MatDialog) {}
+
   onInput(): void {
     this.valueChange.emit(this.control?.value);
+    if (this.mode === 'tel') {
+      this.telChange.emit(this.control?.value);
+    }
+  }
+
+  onFileSelected(files: FileList | null): void {
+    if (!files || files.length === 0) {
+      this.selectedFiles = [];
+      this.fileChange.emit(null);
+      if (this.syncFileToControl) this.control?.setValue(null);
+      return;
+    }
+
+    const selected = Array.from(files);
+    const filtered = this.filterFilesByAccept(this.multiple ? selected : selected[0]);
+
+    if (filtered === null) {
+      this.selectedFiles = [];
+      this.fileChange.emit(null);
+      if (this.syncFileToControl) this.control?.setValue(null);
+      return;
+    }
+
+    // Met à jour la liste pour l'affichage
+    this.selectedFiles = Array.isArray(filtered) ? filtered : [filtered];
+
+    this.fileChange.emit(filtered);
+    if (this.syncFileToControl) this.control?.setValue(filtered as any);
+  }
+
+  openUploadDialog(): void {
+    if (this.mode !== 'file' || !this.fileUseDialog) return;
+    if (this.disabled) return;
+
+    const ref = this.dialog.open(UploadDialogComponent, {
+      width: '720px',
+      maxWidth: '95vw',
+      autoFocus: true,
+      data: {
+        title: this.label || 'Ajouter des fichiers',
+        accept: this.accept,
+        multiple: this.multiple,
+        helperText: this.fileHelperText,
+        dropLabel: this.fileDropLabel,
+        initialFiles: this.selectedFiles,
+        limits: {
+          maxFiles: this.maxFiles,
+          maxFileSizeBytes: this.maxFileSizeBytes,
+        },
+      },
+    });
+
+    ref.afterClosed().subscribe((result: UploadDialogResult | null | undefined) => {
+      if (!result) return;
+      const files = result.files ?? [];
+
+      this.selectedFiles = files;
+
+      if (!files.length) {
+        this.fileChange.emit(null);
+        if (this.syncFileToControl) this.control?.setValue(null);
+        return;
+      }
+
+      const payload = this.multiple ? files : files[0];
+      this.fileChange.emit(payload);
+      if (this.syncFileToControl) this.control?.setValue(payload as any);
+    });
+  }
+
+  onDragOver(event: DragEvent): void {
+    if (this.mode !== 'file') return;
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragOver = true;
+  }
+
+  onDragLeave(event: DragEvent): void {
+    if (this.mode !== 'file') return;
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragOver = false;
+  }
+
+  onDrop(event: DragEvent): void {
+    if (this.mode !== 'file') return;
+    // Si on utilise un dialog, on laisse le drop ouvrir/ajouter via le modal pour une UX uniforme.
+    if (this.fileUseDialog) {
+      event.preventDefault();
+      event.stopPropagation();
+      this.isDragOver = false;
+      this.openUploadDialog();
+      return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragOver = false;
+
+    const dt = event.dataTransfer;
+    if (!dt?.files) return;
+    this.onFileSelected(dt.files);
+  }
+
+  private filterFilesByAccept(input: File | File[]): File | File[] | null {
+    if (!this.accept) return input;
+
+    const accepted = this.accept
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean);
+
+    const matches = (file: File): boolean => {
+      // ex: image/*
+      if (accepted.some((a) => a.endsWith('/*') && file.type?.startsWith(a.replace('/*', '/')))) {
+        return true;
+      }
+      // ex: .pdf
+      if (accepted.some((a) => a.startsWith('.') && file.name.toLowerCase().endsWith(a.toLowerCase()))) {
+        return true;
+      }
+      // ex: application/pdf
+      if (accepted.some((a) => !a.startsWith('.') && !a.endsWith('/*') && file.type === a)) {
+        return true;
+      }
+      return false;
+    };
+
+    if (Array.isArray(input)) {
+      const out = input.filter(matches);
+      return out.length ? out : null;
+    }
+
+    return matches(input) ? input : null;
+  }
+
+  get fileNameLabel(): string {
+    const v = this.control?.value as any;
+    if (typeof v === 'string') return v;
+    return '';
+  }
+
+  get selectedFilesLabel(): string {
+    const v = this.control?.value as any;
+
+    if (!v) return '';
+
+    // Si on a choisi de synchroniser le FormControl avec le(s) fichier(s)
+    if (v instanceof File) return v.name;
+    if (Array.isArray(v) && v.length && v[0] instanceof File) {
+      return v.map((f: File) => f.name).join(', ');
+    }
+
+    // Sinon, on n'a pas d'info fiable sur les fichiers (on laisse vide)
+    return '';
   }
 
   get showExternalError(): boolean {
@@ -102,7 +313,7 @@ export class InputComponent implements OnChanges {
    * Si un placeholder est fourni, on force le label à flotter dès le départ.
    */
   get floatLabel(): 'always' | 'auto' {
-    return this.placeholder ? 'always' : 'auto';
+    return (this.placeholder || this.mode === 'select') ? 'always' : 'auto';
   }
 
   /**
@@ -112,11 +323,20 @@ export class InputComponent implements OnChanges {
   hidePassword = true;
 
   ngOnChanges(changes: SimpleChanges): void {
+    // `control` peut arriver après le 1er rendu dans certains cas (SSR/hydration). On sécurise.
+    if (changes['control'] && this.control) {
+      if (this.disabled) {
+        this.control.disable({ emitEvent: false });
+      } else {
+        this.control.enable({ emitEvent: false });
+      }
+    }
+
     if (changes['disabled'] && this.control) {
       if (this.disabled) {
-        this.control.disable();
+        this.control.disable({ emitEvent: false });
       } else {
-        this.control.enable();
+        this.control.enable({ emitEvent: false });
       }
     }
   }
@@ -126,7 +346,7 @@ export class InputComponent implements OnChanges {
   }
 
   get isPasswordField(): boolean {
-    return this.type === 'password';
+    return this.mode === 'input' && this.type === 'password';
   }
 
   get effectiveType(): InputType {

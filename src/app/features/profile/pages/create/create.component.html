@@ -1,0 +1,90 @@
+<app-page headTitle="Créer mon profil">
+  <section class="profile-create">
+    <div class="profile-create__card">
+
+      <header class="profile-create__header">
+        <div class="profile-create__icon">
+          <mat-icon>person_add</mat-icon>
+        </div>
+        <h1 class="profile-create__title">Créer votre profil</h1>
+        <p class="profile-create__subtitle">
+          Complétez vos informations puis validez. Une fois terminé, vous serez redirigé vers l'accueil.
+        </p>
+      </header>
+
+      <form class="profile-create__form" [formGroup]="form" (ngSubmit)="onSubmit()">
+        <app-input
+          mode="file"
+          [control]="avatarNameControl"
+          name="avatar"
+          label="Avatar"
+          placeholder="Choisir une image…"
+          [required]="true"
+          accept="image/*"
+          (fileChange)="onAvatarSelected($event)"
+        />
+
+        <app-input
+          [control]="form.controls.firstName"
+          name="firstName"
+          label="Prénom"
+          placeholder="Votre prénom"
+          [required]="true"
+        />
+
+        <app-input
+          [control]="form.controls.lastName"
+          name="lastName"
+          label="Nom"
+          placeholder="Votre nom"
+          [required]="true"
+        />
+
+        <app-input
+          mode="tel"
+          [control]="form.controls.phone"
+          name="phone"
+          label="Téléphone"
+          placeholder="Entrez votre numéro"
+          [required]="true"
+          [preferredCountries]="['mg','fr']"
+          [separateDialCode]="true"
+        />
+
+        <app-input
+          mode="select"
+          [control]="form.controls.gender"
+          name="gender"
+          label="Genre"
+          [required]="true"
+          [options]="[
+            { value: 'Homme', label: 'Masculin' },
+            { value: 'Femme', label: 'Féminin' },
+            { value: 'Non défini', label: 'Autre' }
+          ]"
+        />
+
+        <app-input
+          type="date"
+          [control]="form.controls.birthday"
+          name="birthday"
+          label="Date de naissance"
+          [required]="true"
+        />
+
+        <div class="profile-create__actions">
+          <app-button
+            type="submit"
+            text="Créer le profil"
+            variant="raised"
+            color="accent"
+            [isenabled]="form.valid && !loading"
+            [loading]="loading"
+            [fullWidth]="true"
+          />
+        </div>
+      </form>
+
+    </div>
+  </section>
+</app-page>

@@ -7,9 +7,7 @@ $color-muted:     #9ca3af;
 $color-border:    #d1d5db;
 $color-bg:        #f8f7ff;
 $font:            'Segoe UI', system-ui, sans-serif;
-
-// Pill — cohérent avec les boutons
-$radius: 50px;
+$radius:          50px;
 
 // ── Base ──────────────────────────────────────────────────────────────────
 .app-input.mat-mdc-form-field {
@@ -17,36 +15,36 @@ $radius: 50px;
   font-family: $font;
 
   // Shape pill
-  --mdc-outlined-text-field-container-shape: #{$radius};
+  --mdc-outlined-text-field-container-shape:               #{$radius};
 
   // Bordures
-  --mdc-outlined-text-field-outline-color:              #{$color-border};
-  --mdc-outlined-text-field-hover-outline-color:        #{$color-primary};
-  --mdc-outlined-text-field-focus-outline-color:        #{$color-primary};
-  --mdc-outlined-text-field-outline-width:              1.5px;
-  --mdc-outlined-text-field-focus-outline-width:        2px;
+  --mdc-outlined-text-field-outline-color:                 #{$color-border};
+  --mdc-outlined-text-field-hover-outline-color:           #{$color-primary};
+  --mdc-outlined-text-field-focus-outline-color:           #{$color-primary};
+  --mdc-outlined-text-field-outline-width:                 1.5px;
+  --mdc-outlined-text-field-focus-outline-width:           2px;
 
-  // Texte saisi
-  --mdc-outlined-text-field-input-text-color:           #{$color-text};
-  --mdc-outlined-text-field-input-text-font:            #{$font};
-  --mdc-outlined-text-field-input-text-size:            14px;
+  // Texte
+  --mdc-outlined-text-field-input-text-color:              #{$color-text};
+  --mdc-outlined-text-field-input-text-font:               #{$font};
+  --mdc-outlined-text-field-input-text-size:               14px;
 
-  // Label flottant
-  --mdc-outlined-text-field-label-text-color:           #{$color-muted};
-  --mdc-outlined-text-field-focus-label-text-color:     #{$color-primary};
-  --mdc-outlined-text-field-hover-label-text-color:     #{$color-primary};
-  --mdc-outlined-text-field-label-text-font:            #{$font};
-  --mdc-outlined-text-field-label-text-size:            14px;
-  --mdc-outlined-text-field-label-text-weight:          500;
+  // Label
+  --mdc-outlined-text-field-label-text-color:              #{$color-muted};
+  --mdc-outlined-text-field-focus-label-text-color:        #{$color-primary};
+  --mdc-outlined-text-field-hover-label-text-color:        #{$color-primary};
+  --mdc-outlined-text-field-label-text-font:               #{$font};
+  --mdc-outlined-text-field-label-text-size:               14px;
+  --mdc-outlined-text-field-label-text-weight:             500;
 
-  // Fond transparent (géré en CSS)
-  --mdc-outlined-text-field-container-color: transparent;
+  // Fond
+  --mdc-outlined-text-field-container-color:               transparent;
 
   // Hint
-  --mat-form-field-hint-text-color: #{$color-muted};
-  --mat-form-field-hint-text-size:  12px;
+  --mat-form-field-hint-text-color:                        #{$color-muted};
+  --mat-form-field-hint-text-size:                         12px;
 
-  // ── Wrapper principal ──
+  // ── Wrapper ──
   .mat-mdc-text-field-wrapper {
     border-radius: $radius;
     background: $color-bg;
@@ -54,7 +52,7 @@ $radius: 50px;
     transition: background 0.2s ease, box-shadow 0.2s ease;
   }
 
-  // ── Flex interne ──
+  // ── Flex ──
   .mat-mdc-form-field-flex {
     background: transparent;
     align-items: center;
@@ -62,24 +60,23 @@ $radius: 50px;
     min-height: 52px;
   }
 
-  // ── Inset (zone label + input) ──
+  // ── Infix ──
   .mat-mdc-form-field-infix {
     padding-top: 14px;
     padding-bottom: 14px;
     min-height: unset;
   }
 
-  // ── Bordure outline : coins arrondis forcés ──
+  // ── Coins arrondis de la bordure outlined ──
   .mdc-notched-outline__leading {
     border-radius: $radius 0 0 $radius;
-    min-width: $radius; // assez large pour afficher le coin arrondi
+    min-width: $radius;
   }
 
   .mdc-notched-outline__trailing {
     border-radius: 0 $radius $radius 0;
   }
 
-  // ── Encoche du label flottant ──
   .mdc-notched-outline__notch {
     border-top: none;
   }
@@ -96,6 +93,20 @@ $radius: 50px;
       color: $color-muted;
       opacity: 1;
       font-size: 14px;
+    }
+  }
+
+  // ── Textarea ──
+  textarea.mat-mdc-input-element {
+    font-family: $font;
+    font-size: 14px;
+    color: $color-text;
+    caret-color: $color-primary;
+    padding: 0;
+
+    &::placeholder {
+      color: $color-muted;
+      opacity: 1;
     }
   }
 
@@ -118,23 +129,102 @@ $radius: 50px;
 
   .mdc-line-ripple { display: none; }
 
-  // Bouton oeil (password)
+  // ── Password toggle ──
   .app-input__toggle {
-    margin-right: -8px; // compense le padding du wrapper
+    margin-right: -8px;
+    mat-icon { color: $color-muted; }
   }
 
-  .app-input__toggle mat-icon {
-    color: $color-muted;
-  }
-
-  &.mat-focused .app-input__toggle mat-icon {
-    color: $color-primary;
-  }
+  &.mat-focused .app-input__toggle mat-icon { color: $color-primary; }
 
   &.mat-mdc-form-field-invalid .app-input__toggle mat-icon,
-  &.mat-form-field-invalid .app-input__toggle mat-icon,
-  &.mat-mdc-form-field-invalid .app-input__toggle mat-icon {
-    color: $color-error;
+  &.mat-form-field-invalid    .app-input__toggle mat-icon { color: $color-error; }
+
+  // ──────────────────────────────────────────────────────────────────────
+  // SELECT  — le wrapper outlined est présent, on réutilise les mêmes règles
+  // ──────────────────────────────────────────────────────────────────────
+  &.mat-mdc-form-field-type-mat-select {
+
+    // Même hauteur que les inputs
+    .mat-mdc-form-field-infix {
+      padding-top: 14px;
+      padding-bottom: 14px;
+      min-height: unset;
+      display: flex;
+      align-items: center;
+    }
+
+    // Trigger (ligne cliquable)
+    .mat-mdc-select-trigger {
+      font-family: $font;
+      font-size: 14px;
+      color: $color-text;
+      display: flex;
+      align-items: center;
+      width: 100%;
+    }
+
+    .mat-mdc-select-value {
+      font-family: $font;
+      font-size: 14px;
+      color: $color-text;
+    }
+
+    .mat-mdc-select-placeholder {
+      color: $color-muted;
+      font-family: $font;
+      font-size: 14px;
+      opacity: 1;
+    }
+
+    // Flèche
+    .mat-mdc-select-arrow-wrapper {
+      transform: none;
+      height: auto;
+    }
+
+    .mat-mdc-select-arrow svg {
+      fill: $color-muted;
+    }
+  }
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// PANEL DU SELECT  (rendu dans cdk-overlay, hors shadow DOM du composant)
+// On cible via la classe globale .mat-mdc-select-panel
+// ──────────────────────────────────────────────────────────────────────────
+.mat-mdc-select-panel {
+  // Coins arrondis propres (pas pill — ça serait trop radical pour une liste)
+  border-radius: 16px !important;
+  overflow: hidden;
+  background: #fff !important;
+  box-shadow: 0 8px 32px rgba(102, 126, 234, 0.15), 0 2px 8px rgba(0,0,0,0.06) !important;
+  border: 1px solid rgba(102, 126, 234, 0.12);
+  // Empêche le panel de se superposer aux champs en dessous
+  margin-top: 4px;
+
+  .mat-mdc-option {
+    font-family: $font;
+    font-size: 14px;
+    color: $color-text;
+    min-height: 44px;
+    padding: 0 20px;
+    transition: background 0.15s ease;
+
+    &:hover:not(.mdc-list-item--disabled) {
+      background: rgba(102, 126, 234, 0.07) !important;
+    }
+
+    &.mdc-list-item--selected:not(.mdc-list-item--disabled) {
+      background: rgba(102, 126, 234, 0.1) !important;
+      color: $color-primary;
+      font-weight: 600;
+
+      .mdc-list-item__primary-text { color: $color-primary; }
+    }
+
+    // Supprime le ripple Material par défaut
+    .mat-ripple { display: none; }
   }
 }
 
@@ -142,12 +232,12 @@ $radius: 50px;
 .app-input--error.mat-mdc-form-field,
 .app-input.mat-mdc-form-field.mat-form-field-invalid,
 .app-input.mat-mdc-form-field.mat-mdc-form-field-invalid {
-  --mdc-outlined-text-field-outline-color:           #e53e3e;
-  --mdc-outlined-text-field-hover-outline-color:     #e53e3e;
-  --mdc-outlined-text-field-focus-outline-color:     #e53e3e;
-  --mdc-outlined-text-field-label-text-color:        #e53e3e;
-  --mdc-outlined-text-field-focus-label-text-color:  #e53e3e;
-  --mdc-outlined-text-field-hover-label-text-color:  #e53e3e;
+  --mdc-outlined-text-field-outline-color:          #e53e3e;
+  --mdc-outlined-text-field-hover-outline-color:    #e53e3e;
+  --mdc-outlined-text-field-focus-outline-color:    #e53e3e;
+  --mdc-outlined-text-field-label-text-color:       #e53e3e;
+  --mdc-outlined-text-field-focus-label-text-color: #e53e3e;
+  --mdc-outlined-text-field-hover-label-text-color: #e53e3e;
 
   .mat-mdc-text-field-wrapper {
     background: rgba(229, 62, 62, 0.04);
@@ -184,16 +274,391 @@ $radius: 50px;
 
 // ── État : désactivé ──────────────────────────────────────────────────────
 .app-input.mat-mdc-form-field.mat-form-field-disabled {
-  --mdc-outlined-text-field-outline-color:       rgba(#d1d5db, 0.5);
-  --mdc-outlined-text-field-label-text-color:    rgba(#9ca3af, 0.5);
-  --mdc-outlined-text-field-input-text-color:    rgba(#1a1a2e, 0.4);
+  --mdc-outlined-text-field-outline-color:      rgba(209, 213, 219, 0.5);
+  --mdc-outlined-text-field-label-text-color:   rgba(156, 163, 175, 0.5);
+  --mdc-outlined-text-field-input-text-color:   rgba(26, 26, 46, 0.4);
 
   .mat-mdc-text-field-wrapper {
     background: rgba(0, 0, 0, 0.03);
     cursor: not-allowed;
   }
 
-  input.mat-mdc-input-element {
+  input.mat-mdc-input-element,
+  textarea.mat-mdc-input-element {
     cursor: not-allowed;
   }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// TEL — ngx-intl-tel-input (separateDialCode = false)
+//
+// Structure HTML réelle générée :
+//   div.app-input__tel-wrapper [.app-input__tel-wrapper--error]
+//     label.app-input__label
+//     ngx-intl-tel-input.app-input__tel
+//       div.iti.iti--allow-dropdown
+//         div.iti__flag-container
+//           div.iti__selected-flag          ← cliquable, position absolute
+//             span.iti__flag.iti__mg
+//             span.iti__selected-dial-code  ← +261
+//             div.iti__arrow
+//           ul.iti__country-list            ← dropdown
+//         input[type=tel]                   ← pleine largeur, pl compensé
+//     div.app-input__hint / div.app-input__error
+// ─────────────────────────────────────────────────────────────────────────────
+
+// ── Wrapper ──────────────────────────────────────────────────────────────────
+.app-input__tel-wrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  font-family: $font;
+
+  // Ajustements spécifiques TEL: le plugin ajoute parfois des marges/line-height
+  // qui donnent l'impression que l'input 'descend'.
+  .app-input__label {
+    margin-bottom: 4px; // un peu plus compact que 6px
+    line-height: 1.2;   // évite un calcul de hauteur trop agressif
+  }
+
+  // certains navigateurs donnent une line-height par défaut différente aux inputs tel
+  input[type='tel'],
+  input.iti__tel-input {
+    line-height: 1.2;
+  }
+}
+
+// ── Label (style cohérent avec mat-label floatLabel=always) ──────────────────
+.app-input__label {
+  display: block;
+  margin: 0 0 6px 18px;
+  font-family: $font;
+  font-size: 12px;
+  font-weight: 500;
+  color: $color-muted;
+  line-height: 1;
+  transition: color 0.2s;
+
+  .app-input__tel-wrapper:focus-within & { color: $color-primary; }
+  .app-input__tel-wrapper--error &       { color: $color-error;   }
+}
+
+// ── ngx-intl-tel-input host ───────────────────────────────────────────────────
+.app-input__tel {
+  display: block;
+  width: 100%;
+
+  // ── .iti : le pill ──────────────────────────────────────────────────────────
+  .iti {
+    width: 100%;
+    display: block;
+    position: relative;
+    border-radius: $radius;
+    border: 1.5px solid $color-border;
+    background: $color-bg;
+    height: 52px;
+    box-sizing: border-box;
+    transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+
+    // hover
+    &:hover {
+      border-color: $color-primary;
+      background: #fff;
+    }
+
+    // focus (via parent wrapper)
+    .app-input__tel-wrapper:focus-within & {
+      border-color: $color-primary;
+      border-width: 2px;
+      background: #fff;
+      box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.13);
+    }
+
+    // erreur
+    .app-input__tel-wrapper--error & {
+      border-color: $color-error !important;
+      background: rgba(229, 62, 62, 0.04);
+    }
+
+    .app-input__tel-wrapper--error:focus-within & {
+      box-shadow: 0 0 0 4px rgba(229, 62, 62, 0.1);
+    }
+  }
+
+  // ── Flag container ──────────────────────────────────────────────────────────
+  .iti__flag-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    display: flex;
+    align-items: stretch;
+    z-index: 2;
+  }
+
+  // ── Bouton drapeau (cliquable) ──────────────────────────────────────────────
+  .iti__selected-flag {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 14px 0 18px;
+    height: 100%;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    border-right: 1.5px solid $color-border;
+    border-radius: $radius 0 0 $radius;
+    transition: background 0.15s;
+    outline: none;
+    white-space: nowrap;
+
+    &:hover { background: rgba(102, 126, 234, 0.07); }
+
+    // compense la border 2px au focus pour éviter le saut
+    .app-input__tel-wrapper:focus-within & {
+      border-right-color: $color-border;
+    }
+  }
+
+  // ── Drapeau — NE PAS TOUCHER, laisser le sprite de la lib ──────────────────
+  // (ngx-intl-tel-input gère background-image, background-position, width, height)
+  .iti__flag {
+    border-radius: 2px;
+    box-shadow: 0 0 1px rgba(0,0,0,0.3);
+  }
+
+  // ── +261 ────────────────────────────────────────────────────────────────────
+  .iti__selected-dial-code {
+    font-family: $font;
+    font-size: 13px;
+    font-weight: 600;
+    color: $color-text;
+  }
+
+  // ── Flèche ──────────────────────────────────────────────────────────────────
+  .iti__arrow {
+    width: 0;
+    height: 0;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 5px solid $color-muted;
+    flex-shrink: 0;
+    transition: transform 0.2s;
+
+    &.iti__arrow--up {
+      border-top: none;
+      border-bottom: 5px solid $color-primary;
+    }
+  }
+
+  // ── Input natif ─────────────────────────────────────────────────────────────
+  input[type='tel'],
+  input.iti__tel-input {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+    background: transparent;
+    padding: 0 20px 0 115px;
+    font-family: $font;
+    font-size: 14px;
+    color: $color-text;
+    caret-color: $color-primary;
+    outline: none;
+    box-sizing: border-box;
+    border-radius: $radius;
+
+    &::placeholder {
+      color: $color-muted;
+      opacity: 1;
+      font-size: 14px;
+    }
+  }
+
+  // ── Dropdown pays ────────────────────────────────────────────────────────────
+  .iti__country-list {
+    // La lib positionne déjà le panel par défaut. On se contente de
+    // le rendre "responsive" et aligné avec le champ.
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+
+    // Le panel doit passer au-dessus des autres inputs mais rester dans l'écran.
+    z-index: 2000;
+
+    // Évite que le panel déborde visuellement (arrondis)
+    box-sizing: border-box;
+  }
+
+  // Le dropdown est dans le flag-container: on évite que son parent le coupe.
+  .iti__flag-container {
+    overflow: visible;
+  }
+} // fin .app-input__tel ─────────────────────────────────────────────────────────────────────
+.app-input__hint {
+  margin: 6px 0 0 18px;
+  font-family: $font;
+  font-size: 12px;
+  color: $color-muted;
+}
+
+// ── Erreur ───────────────────────────────────────────────────────────────────
+.app-input__error {
+  margin: 6px 0 0 18px;
+  font-family: $font;
+  font-size: 12px;
+  font-weight: 500;
+  color: $color-error;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+
+  &::before {
+    content: '!';
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background: $color-error;
+    color: #fff;
+    font-size: 9px;
+    font-weight: 800;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// FILE — drag & drop (dans mat-form-field)
+// ─────────────────────────────────────────────────────────────────────────────
+
+.app-input__dropzone {
+  width: 100%;
+  min-height: 52px;
+  border-radius: $radius;
+  border: 1.5px dashed $color-border;
+  background: $color-bg;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 18px;
+  box-sizing: border-box;
+  cursor: pointer;
+  user-select: none;
+  transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    border-color: $color-primary;
+    background: #fff;
+  }
+
+  &:focus {
+    outline: none;
+  }
+
+  // L'élément est focusable (tabindex=0)
+  &:focus-visible {
+    border-color: $color-primary;
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.13);
+    background: #fff;
+  }
+}
+
+.app-input__dropzone--dragover {
+  border-style: solid;
+  border-color: $color-primary;
+  background: #fff;
+  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.13);
+}
+
+.app-input__dropzone--error {
+  border-color: $color-error !important;
+  background: rgba(229, 62, 62, 0.04);
+}
+
+.app-input__dropzone-icon {
+  color: $color-muted;
+  flex-shrink: 0;
+}
+
+.app-input__dropzone-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.app-input__dropzone-title {
+  font-family: $font;
+  font-size: 14px;
+  font-weight: 600;
+  color: $color-text;
+  line-height: 1.2;
+}
+
+.app-input__dropzone-sub {
+  margin-top: 2px;
+  font-family: $font;
+  font-size: 12px;
+  color: $color-muted;
+}
+
+.app-input__dropzone-file {
+  margin-top: 4px;
+  font-family: $font;
+  font-size: 12px;
+  font-weight: 600;
+  color: $color-primary;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.app-input__dropzone-list {
+  list-style: none;
+  padding: 0;
+  margin: 6px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.app-input__dropzone-item {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 0;
+}
+
+.app-input__dropzone-filename {
+  font-family: $font;
+  font-size: 12px;
+  font-weight: 600;
+  color: $color-primary;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 320px;
+}
+
+.app-input__dropzone-filesize {
+  font-family: $font;
+  font-size: 12px;
+  color: $color-muted;
+  flex-shrink: 0;
+}
+
+// input de compatibilité pour l'hydratation (MatFormField attend un <input matInput>)
+.app-input__file-hydration-input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  height: 0;
+  padding: 0;
+  margin: 0;
 }

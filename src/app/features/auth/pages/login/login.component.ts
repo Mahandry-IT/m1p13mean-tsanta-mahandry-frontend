@@ -1,8 +1,9 @@
 import { Component } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { finalize, startWith, map, combineLatest, BehaviorSubject } from 'rxjs';
+import { startWith, map, combineLatest, BehaviorSubject } from 'rxjs';
 import { AuthService } from '../../../../core/services/auth.service';
+import { UserService } from '../../../../core/services/user.service';
 
 @Component({
   selector: 'app-login',
@@ -13,6 +14,7 @@ import { AuthService } from '../../../../core/services/auth.service';
 export class LoginComponent {
   constructor(
     private readonly auth: AuthService,
+    private readonly userService: UserService,
     private readonly router: Router,
     private readonly route: ActivatedRoute,
   ) {
@@ -59,16 +61,38 @@ export class LoginComponent {
 
     this.auth
       .login(payload)
-      .pipe(finalize(() => this.loadingSubject.next(false)))
       .subscribe({
         next: ({ token, raw }) => {
           if (token) {
             this.auth.setToken(token);
           }
-          // Redirection post-login
-          this.router.navigateByUrl(raw.data?.homePage as string ?? '/');
+
+          // homePage est renvoyé par le backend dans la réponse (pas dans le token)
+          this.auth.setHomePage(raw.data?.homePage as string | undefined);
+
+          const email = payload.email;
+
+          this.userService.checkProfile(email).subscribe({
+            next: (res) => {
+              const home = this.auth.getHomePage() ?? '/';
+              if (res.data?.hasProfile) {
+                this.router.navigateByUrl(home);
+              } else {
+                this.router.navigateByUrl('/profile/create');
+              }
+            },
+            error: () => {
+              // Si le check échoue, on redirige quand même vers la homepage (et l'interceptor affiche le toast)
+              const home = this.auth.getHomePage() ?? '/';
+              this.router.navigateByUrl(home);
+            },
+            complete: () => {
+              this.loadingSubject.next(false);
+            },
+          });
         },
         error: () => {
+          this.loadingSubject.next(false);
           // L'ErrorInterceptor affiche déjà un toast.
         },
       });
