@@ -14,6 +14,10 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatSelectModule } from '@angular/material/select';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatBadgeModule } from '@angular/material/badge';
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatTableModule } from '@angular/material/table';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatSortModule } from '@angular/material/sort';
 
 const MATERIAL_MODULES = [
   MatSnackBarModule,
@@ -30,6 +34,10 @@ const MATERIAL_MODULES = [
   MatSelectModule,
   MatDialogModule,
   MatBadgeModule,
+  MatPaginatorModule,
+  MatTableModule,
+  MatTooltipModule,
+  MatSortModule,
 ];
 
 @NgModule({

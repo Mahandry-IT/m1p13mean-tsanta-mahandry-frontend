@@ -1,12 +1,4 @@
-import { Component, OnInit } from '@angular/core';
-import { ApiService } from '../../../../core/services/api.service';
-import { ApiError } from '../../../../core/models/api-error.model';
-
-interface UserDto {
-  id: string;
-  name: string;
-  email: string;
-}
+import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-user-list',
@@ -14,32 +6,23 @@ interface UserDto {
   styleUrls: ['./user-list.component.scss'],
   standalone: false,
 })
-export class UserListComponent implements OnInit {
-  users: UserDto[] = [];
-  loading = false;
-  error?: ApiError;
+export class UserListComponent {
+  columns = [
+    { key: 'username', header: 'Nom' },
+    { key: 'email', header: 'Email' }
+  ];
 
-  constructor(private readonly api: ApiService) {}
-
-  ngOnInit(): void {
-    this.load();
+  onEdit(row: any): void {
+    // TODO: navigation vers form
+    console.log('edit', row);
   }
 
-  load(): void {
-    this.loading = true;
-    this.error = undefined;
+  onDelete(row: any): void {
+    // TODO: ouvrir confirm dialog
+    console.log('delete', row);
+  }
 
-    // Exemple d'appel API (à adapter à votre backend)
-    this.api.get<UserDto[]>('/users').subscribe({
-      next: (data) => {
-        this.users = data;
-        this.loading = false;
-      },
-      error: (err: ApiError) => {
-        // err vient de l'ErrorInterceptor
-        this.error = err;
-        this.loading = false;
-      },
-    });
+  onInfo(row: any): void {
+    console.log('info', row);
   }
 }

@@ -2,6 +2,9 @@ import { Injectable } from '@angular/core';
 import { Observable, map } from 'rxjs';
 import { ApiService } from './api.service';
 
+declare const localStorage: any;
+declare const window: any;
+
 export interface LoginRequest {
   email: string;
   password: string;
