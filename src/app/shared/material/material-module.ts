@@ -13,6 +13,7 @@ import { MatListModule } from '@angular/material/list';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatSelectModule } from '@angular/material/select';
 import { MatDialogModule } from '@angular/material/dialog';
+import { MatBadgeModule } from '@angular/material/badge';
 
 const MATERIAL_MODULES = [
   MatSnackBarModule,
@@ -28,6 +29,7 @@ const MATERIAL_MODULES = [
   MatDividerModule,
   MatSelectModule,
   MatDialogModule,
+  MatBadgeModule,
 ];
 
 @NgModule({

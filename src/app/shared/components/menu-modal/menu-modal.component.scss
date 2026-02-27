@@ -1,0 +1,280 @@
+// ── Design tokens (mirrors home-page) ──────────────────────────────────────
+$gradient-primary : linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+$color-primary    : #667eea;
+$color-secondary  : #764ba2;
+$color-text       : #1a1a2e;
+$color-text-muted : #6b7280;
+$color-border     : rgba(102, 126, 234, 0.15);
+$color-surface    : #ffffff;
+$radius-sm        : 8px;
+$radius-md        : 16px;
+$radius-lg        : 24px;
+$font-display     : 'Georgia', 'Times New Roman', serif;
+$font-body        : 'Segoe UI', system-ui, sans-serif;
+
+// ── Keyframes ──────────────────────────────────────────────────────────────
+@keyframes modal-in {
+  from { opacity: 0; transform: translateX(-20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+// ── Override Angular Material dialog container ─────────────────────────────
+.cdk-overlay-container {
+  // Position the backdrop to full-screen as usual
+}
+
+// Panel class — passe panelClass: 'menu-modal-panel' dans le service
+.menu-modal-panel {
+  // Floating — ne colle pas au bord
+  height    : calc(100vh - 32px) !important;
+  max-height: calc(100vh - 32px) !important;
+
+  .mat-mdc-dialog-container {
+    height          : 100% !important;
+    border-radius   : 32px !important;
+    overflow        : hidden !important;
+    box-shadow      : 0 16px 48px rgba(102, 126, 234, 0.18),
+    0 4px 16px rgba(0, 0, 0, 0.08) !important;
+    animation       : modal-in 0.25s cubic-bezier(0.22, 1, 0.36, 1) both;
+    border          : 1px solid $color-border;
+    background      : rgba(255, 255, 255, 0.97);
+    backdrop-filter : blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+  }
+
+  .mat-mdc-dialog-surface {
+    height        : 100% !important;
+    padding       : 0 !important;
+    border-radius : 32px !important;
+    background    : transparent !important;
+    box-shadow    : none !important;
+    display       : flex !important;
+    flex-direction: column !important;
+  }
+}
+
+// ── Dialog title ───────────────────────────────────────────────────────────
+.menu-modal-title {
+  font-family    : $font-display;
+  font-size      : 18px;
+  font-weight    : 700;
+  letter-spacing : -0.3px;
+  padding        : 28px 20px 20px;
+  margin         : 0;
+  color          : $color-text;
+  border-bottom  : 1px solid $color-border;
+  display        : flex;
+  align-items    : center;
+  gap            : 12px;
+  flex-shrink    : 0;
+
+  // Gradient accent bar on the left
+  &::before {
+    content      : '';
+    display      : block;
+    width        : 4px;
+    height       : 22px;
+    border-radius: 4px;
+    background   : $gradient-primary;
+    flex-shrink  : 0;
+  }
+
+  &__logo {
+    height: 28px;
+    width: auto;
+    display: block;
+    object-fit: contain;
+  }
+}
+
+// ── Dialog content ─────────────────────────────────────────────────────────
+.app-menu-modal {
+  padding    : 12px 12px 8px !important;
+  min-width  : unset !important;
+  max-height : unset !important;
+  flex       : 1 !important;
+  overflow-y : auto !important;
+  font-family: $font-body;
+
+  // Scrollbar fine
+  &::-webkit-scrollbar       { width: 4px; }
+  &::-webkit-scrollbar-track { background: transparent; }
+  &::-webkit-scrollbar-thumb { background: $color-border; border-radius: 4px; }
+
+  // ── Nav list reset ──────────────────────────────────────────────────────
+  mat-nav-list {
+    padding: 0 !important;
+  }
+
+  // ── Each menu item ──────────────────────────────────────────────────────
+  a[mat-list-item] {
+    font-family    : $font-display;
+    height        : auto !important;
+    border-radius : $radius-sm !important;
+    margin-bottom : 4px !important;
+    padding       : 0 8px !important;
+    transition    : background 0.15s ease !important;
+    text-decoration: none !important;
+
+    &:hover {
+      background: rgba(102, 126, 234, 0.07) !important;
+
+      .app-menu-modal__label { color: $color-primary !important; }
+      .app-menu-modal__icon  {
+        background: rgba(102, 126, 234, 0.15) !important;
+        mat-icon { color: $color-primary !important; }
+      }
+    }
+
+    &.active-item {
+      .app-menu-modal__item-row { background: $gradient-primary; border-radius: $radius-sm; padding: 0 12px; }
+      .app-menu-modal__label    { color: #fff !important; font-weight: 600 !important; }
+      .app-menu-modal__icon     {
+        background: rgba(255,255,255,0.25) !important;
+        mat-icon { color: #fff !important; }
+      }
+    }
+
+    &:active {
+      background: rgba(102, 126, 234, 0.13) !important;
+    }
+  }
+}
+
+// ── Label + icon row ────────────────────────────────────────────────────────
+.app-menu-modal__item-row {
+  display    : flex;
+  align-items: center;
+  gap        : 14px;
+  padding    : 11px 4px;
+  width      : 100%;
+}
+
+.app-menu-modal__icon {
+  width           : 34px;
+  height          : 34px;
+  border-radius   : $radius-sm;
+  background      : rgba(102, 126, 234, 0.08);
+  display         : flex;
+  align-items     : center;
+  justify-content : center;
+  flex-shrink     : 0;
+  transition      : background 0.15s ease, color 0.15s ease;
+
+  mat-icon {
+    font-size : 17px;
+    width     : 17px;
+    height    : 17px;
+    color     : $color-secondary;
+  }
+}
+
+.app-menu-modal__label {
+  font-family    : $font-display;
+  display        : flex;
+  align-items    : center;
+  gap            : 8px;
+  font-size      : 15px;
+  font-weight    : 500;
+  color          : $color-text;
+  letter-spacing : -0.1px;
+  transition     : color 0.15s ease;
+  flex           : 1;
+}
+
+// ── Empty state ─────────────────────────────────────────────────────────────
+.app-menu-modal__empty {
+  padding    : 32px 16px;
+  text-align : center;
+  font-size  : 14px;
+  color      : $color-text-muted;
+}
+
+// ── No actions (Fermer removed) ─────────────────────────────────────────────
+.menu-modal-actions {
+  display: none !important;
+}
+
+// ── Badge ───────────────────────────────────────────────────────────────────
+.mat-badge-content {
+  background : $gradient-primary !important;
+  font-size  : 10px !important;
+  font-weight: 700 !important;
+}
+
+// ── Expand chevron ──────────────────────────────────────────────────────────
+.app-menu-modal__expand {
+  margin-left : auto;
+  display     : inline-flex;
+  align-items : center;
+  flex-shrink : 0;
+  color       : $color-text-muted;
+  transition  : transform 0.25s ease, color 0.15s ease;
+
+  mat-icon {
+    font-size: 18px;
+    width    : 18px;
+    height   : 18px;
+  }
+
+  // Quand le parent est ouvert, le chevron pivote
+  .expanded & {
+    transform: rotate(180deg);
+    color    : $color-primary;
+  }
+}
+
+// Parent row ouvert — léger fond de fond pour indiquer l'état actif
+a[mat-list-item].parent-open {
+  background: rgba(102, 126, 234, 0.05) !important;
+
+  .app-menu-modal__label { color: $color-primary !important; font-weight: 600 !important; }
+  .app-menu-modal__icon  {
+    background: rgba(102, 126, 234, 0.14) !important;
+    mat-icon { color: $color-primary !important; }
+  }
+  .app-menu-modal__expand { color: $color-primary; }
+}
+
+// ── Children accordion ───────────────────────────────────────────────────────
+@keyframes children-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.app-menu-modal__children {
+  margin-left  : 16px;
+  padding-left : 14px;
+  border-left  : 2px solid rgba(102, 126, 234, 0.2);
+  margin-bottom: 4px;
+  animation    : children-in 0.2s ease both;
+
+  a[mat-list-item] {
+    margin-bottom: 2px !important;
+  }
+}
+
+.app-menu-modal__child-item {
+  padding-left: 0 !important;
+}
+
+// Icône enfant — plus petite et plus sobre
+.app-menu-modal__icon--child {
+  width     : 28px !important;
+  height    : 28px !important;
+  background: rgba(102, 126, 234, 0.04) !important;
+
+  mat-icon {
+    font-size: 14px !important;
+    width    : 14px !important;
+    height   : 14px !important;
+    color    : $color-text-muted !important;
+  }
+}
+
+// Label enfant — légèrement plus petit
+.app-menu-modal__children .app-menu-modal__label {
+  font-size  : 13.5px;
+  font-weight: 400;
+  color      : $color-text-muted;
+}
