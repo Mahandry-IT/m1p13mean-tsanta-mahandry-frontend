@@ -1,0 +1,14 @@
+<div class="app-shell">
+  <header class="app-shell__navbar" role="banner">
+    <app-navbar [user]="navbarUser"></app-navbar>
+  </header>
+
+  <main class="app-shell__content" role="main">
+    <ng-content></ng-content>
+  </main>
+
+  <footer class="app-shell__footer" role="contentinfo">
+    <app-footer></app-footer>
+  </footer>
+</div>
+

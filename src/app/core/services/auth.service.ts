@@ -23,6 +23,24 @@ export interface ResetPasswordRequest {
   email: string;
 }
 
+export interface ProfileResponse {
+  avatarUrl?: string;
+  firstName?: string;
+  lastName?: string;
+  birthday?: string;
+  phone?: string;
+  gender?: string;
+  [key: string]: unknown;
+}
+
+export interface UserResponse {
+  email: string;
+  username: string;
+  roleId: string;
+  profile?: ProfileResponse;
+  [key: string]: unknown;
+}
+
 export interface LoginResponseData {
   token?: string;
   accessToken?: string;
@@ -54,8 +72,13 @@ export interface LoginResponse {
 export class AuthService {
   private static readonly TOKEN_KEY = 'auth_token';
   private static readonly HOME_PAGE_KEY = 'auth_home_page';
+  private static readonly USER_KEY = 'auth_user';
 
   constructor(private readonly api: ApiService) {}
+
+  private get isBrowser(): boolean {
+    return typeof window !== 'undefined' && typeof localStorage !== 'undefined';
+  }
 
   login(payload: LoginRequest): Observable<{ token: string; raw: LoginResponse }> {
     return this.api.post<LoginResponse>('/auth/login', payload).pipe(
@@ -109,6 +132,8 @@ export class AuthService {
 
   /** Stocke la homepage renvoyée par le backend après login */
   setHomePage(homePage: string | null | undefined): void {
+    if (!this.isBrowser) return;
+
     if (typeof homePage === 'string' && homePage.trim()) {
       localStorage.setItem(AuthService.HOME_PAGE_KEY, homePage);
       return;
@@ -118,11 +143,14 @@ export class AuthService {
 
   /** Récupère la homepage stockée après login */
   getHomePage(): string | null {
+    if (!this.isBrowser) return null;
+
     const v = localStorage.getItem(AuthService.HOME_PAGE_KEY);
     return v && v.trim() ? v : null;
   }
 
   clearHomePage(): void {
+    if (!this.isBrowser) return;
     localStorage.removeItem(AuthService.HOME_PAGE_KEY);
   }
 
@@ -154,15 +182,54 @@ export class AuthService {
     }
   }
 
+  /** Stocke l'utilisateur renvoyé par le backend après login */
+  setUser(user: unknown | null | undefined): void {
+    if (!this.isBrowser) return;
+
+    if (user == null) {
+      localStorage.removeItem(AuthService.USER_KEY);
+      return;
+    }
+
+    try {
+      localStorage.setItem(AuthService.USER_KEY, JSON.stringify(user));
+    } catch {
+      // si JSON.stringify échoue, on ne stocke rien (évite de casser l'app)
+      localStorage.removeItem(AuthService.USER_KEY);
+    }
+  }
+
+  /** Récupère l'utilisateur stocké après login */
+  getUser<T = unknown>(): T | null {
+    if (!this.isBrowser) return null;
+
+    const raw = localStorage.getItem(AuthService.USER_KEY);
+    if (!raw) return null;
+
+    try {
+      return JSON.parse(raw) as T;
+    } catch {
+      return null;
+    }
+  }
+
+  clearUser(): void {
+    if (!this.isBrowser) return;
+    localStorage.removeItem(AuthService.USER_KEY);
+  }
+
   setToken(token: string): void {
+    if (!this.isBrowser) return;
     localStorage.setItem(AuthService.TOKEN_KEY, token);
   }
 
   getToken(): string | null {
+    if (!this.isBrowser) return null;
     return localStorage.getItem(AuthService.TOKEN_KEY);
   }
 
   clearToken(): void {
+    if (!this.isBrowser) return;
     localStorage.removeItem(AuthService.TOKEN_KEY);
   }
 }

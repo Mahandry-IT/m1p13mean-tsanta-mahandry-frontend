@@ -1,0 +1,55 @@
+<mat-toolbar class="navbar" color="primary">
+
+  <!-- Logo / Brand -->
+  <a class="navbar__logo">
+    <span class="navbar__logo-icon">
+      <mat-icon>menu</mat-icon>
+    </span>
+  </a>
+
+  <span class="navbar__spacer"></span>
+
+  <!-- User section — décalé vers la gauche -->
+  <div class="navbar__user">
+
+    <!-- Avatar trigger -->
+    <button
+      mat-icon-button
+      class="navbar__avatar-button"
+      [matMenuTriggerFor]="userMenu"
+      type="button"
+      aria-label="Menu utilisateur"
+    >
+      <ng-container *ngIf="hasAvatar; else initialsAvatar">
+        <img class="navbar__avatar" [src]="avatarSrc" [alt]="displayName" />
+      </ng-container>
+      <ng-template #initialsAvatar>
+        <span
+          class="navbar__avatar navbar__avatar--initials"
+          aria-hidden="true"
+        >{{ initials }}</span>
+      </ng-template>
+    </button>
+
+    <!-- Display name -->
+    <span class="navbar__username">{{ displayName }}</span>
+
+  </div>
+</mat-toolbar>
+
+<!-- ── Dropdown menu ──────────────────────────────────────────────────── -->
+<mat-menu #userMenu="matMenu" xPosition="after" yPosition="below" [overlapTrigger]="false">
+
+  <button mat-menu-item type="button" (click)="onEditProfile()">
+    <mat-icon>manage_accounts</mat-icon>
+    <span>Modifier le profil</span>
+  </button>
+
+  <mat-divider></mat-divider>
+
+  <button mat-menu-item type="button" (click)="onLogout()">
+    <mat-icon>logout</mat-icon>
+    <span>Se déconnecter</span>
+  </button>
+
+</mat-menu>

@@ -1,0 +1,311 @@
+// ── Design tokens (mirrors home-page) ──────────────────────────────────────
+$gradient-primary     : linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+$gradient-dark        : linear-gradient(135deg, #3d4eac 0%, #4a2a7a 100%);
+$color-primary        : #667eea;
+$color-secondary      : #764ba2;
+$color-accent         : #f093fb;
+$color-text           : #1a1a2e;
+$color-text-muted     : #6b7280;
+$color-border         : rgba(102, 126, 234, 0.15);
+$color-surface        : #ffffff;
+$radius-sm            : 8px;
+$radius-md            : 16px;
+$font-display         : 'Georgia', 'Times New Roman', serif;
+$font-body            : 'Segoe UI', system-ui, sans-serif;
+
+// ── Keyframes ──────────────────────────────────────────────────────────────
+@keyframes ring-spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes menu-in {
+  from { opacity: 0; transform: translateY(-8px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0)    scale(1); }
+}
+
+// ── Toolbar override ───────────────────────────────────────────────────────
+mat-toolbar.navbar {
+  // Angular Material sets background via [color]="primary"; we override it
+  background : rgba(255, 255, 255, 0.92) !important;
+  color      : $color-text !important;
+  // Pill floating shadow
+  box-shadow : 0 8px 32px rgba(102, 126, 234, 0.16), 0 2px 8px rgba(0,0,0,0.07) !important;
+}
+
+// ── Navbar ─────────────────────────────────────────────────────────────────
+.navbar {
+  // ── Floating pill shape ──────────────────────────────────────────────────
+  position         : fixed;
+  top              : 16px;
+  left             : 50%;
+  transform        : translateX(-50%);
+  width            : calc(100% - 64px);
+  max-width        : 960px;
+  z-index          : 100;
+  display          : flex;
+  align-items      : center;
+  padding          : 0 24px;
+  height           : 58px;
+  border-radius    : 999px;            // pill
+  border           : 1px solid $color-border;
+  backdrop-filter  : blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  font-family      : $font-body;
+
+  // ── Logo zone ────────────────────────────────────────────────────────────
+  &__logo {
+    display    : flex;
+    align-items: center;
+    gap        : 10px;
+    text-decoration: none;
+  }
+
+  &__logo-icon {
+    width           : 36px;
+    height          : 36px;
+    display         : flex;
+    align-items     : center;
+    justify-content : center;
+    flex-shrink     : 0;
+    transition      : transform 0.2s ease;
+
+    mat-icon {
+      font-size               : 22px;
+      width                   : 22px;
+      height                  : 22px;
+      background              : $gradient-primary;
+      -webkit-background-clip : text;
+      -webkit-text-fill-color : transparent;
+      background-clip         : text;
+    }
+
+    &:hover {
+      transform: translateY(-1px);
+    }
+  }
+
+  // ── Spacer ────────────────────────────────────────────────────────────────
+  &__spacer {
+    flex: 1 1 auto;
+  }
+
+  // ── Menu button (hamburger) ───────────────────────────────────────────────
+  &__menu-btn {
+    color      : $color-text-muted;
+    transition : color 0.2s, background 0.2s;
+
+    mat-icon { font-size: 22px; }
+
+    &:hover {
+      color      : $color-primary;
+      background : rgba(102, 126, 234, 0.08) !important;
+      border-radius: $radius-sm;
+    }
+  }
+
+  // ── User section — décalé vers la gauche ─────────────────────────────────
+  &__user {
+    display      : inline-flex;
+    align-items  : center;
+    gap          : 10px;
+    margin-right : 28px; // recul depuis le bord droit de la toolbar
+  }
+
+  // Avatar button wrapper
+  &__avatar-button {
+    position        : relative;
+    width           : 44px;
+    height          : 44px;
+    padding         : 0;
+    border-radius   : 50%;
+    line-height     : 0;
+    display         : inline-flex;
+    align-items     : center;
+    justify-content : center;
+    transition      : transform 0.2s ease;
+
+    // Gradient ring (pseudo-element)
+    &::before {
+      content      : '';
+      position     : absolute;
+      inset        : -2px;
+      border-radius: 50%;
+      background   : $gradient-primary;
+      z-index      : 0;
+      opacity      : 0;
+      transition   : opacity 0.25s ease;
+    }
+
+    &:hover {
+      transform: translateY(-1px);
+
+      &::before { opacity: 1; }
+    }
+
+    // Ensure avatar sits above the ring
+    .navbar__avatar {
+      position : relative;
+      z-index  : 1;
+    }
+  }
+
+  // Avatar image / initials circle
+  &__avatar {
+    width        : 34px;
+    height       : 34px;
+    border-radius: 50%;
+    object-fit   : cover;
+    background   : rgba(102, 126, 234, 0.12);
+    // Thin white separator between ring and avatar
+    outline      : 2px solid $color-surface;
+
+    &--initials {
+      display         : inline-flex;
+      align-items     : center;
+      justify-content : center;
+      font-size       : 12px;
+      font-weight     : 800;
+      letter-spacing  : 0.8px;
+      color           : #fff;
+      background      : $gradient-primary;
+      text-transform  : uppercase;
+      user-select     : none;
+      box-shadow      : 0 2px 8px rgba(102, 126, 234, 0.4);
+    }
+  }
+
+  // Display name
+  &__username {
+    font-size   : 14px;
+    font-weight : 600;
+    color       : $color-text;
+    max-width   : 180px;
+    overflow    : hidden;
+    text-overflow: ellipsis;
+    white-space : nowrap;
+    letter-spacing: -0.1px;
+  }
+}
+
+// ── Dropdown identity header ───────────────────────────────────────────────
+.menu-header {
+  display    : flex;
+  align-items: center;
+  gap        : 12px;
+  padding    : 14px 16px 12px;
+  cursor     : default;
+
+  &__avatar {
+    width        : 40px;
+    height       : 40px;
+    border-radius: 50%;
+    object-fit   : cover;
+    flex-shrink  : 0;
+    background   : $gradient-primary;
+
+    &--initials {
+      display         : inline-flex;
+      align-items     : center;
+      justify-content : center;
+      font-size       : 14px;
+      font-weight     : 800;
+      letter-spacing  : 0.8px;
+      color           : #fff;
+      background      : $gradient-primary;
+      text-transform  : uppercase;
+      user-select     : none;
+    }
+  }
+
+  &__info {
+    display       : flex;
+    flex-direction: column;
+    gap           : 2px;
+    overflow      : hidden;
+  }
+
+  &__name {
+    font-size    : 14px;
+    font-weight  : 700;
+    color        : $color-text;
+    white-space  : nowrap;
+    overflow     : hidden;
+    text-overflow: ellipsis;
+    letter-spacing: -0.1px;
+  }
+}
+
+// ── Dropdown menu ──────────────────────────────────────────────────────────
+// Angular Material mat-menu panel
+.mat-mdc-menu-panel {
+  border-radius: $radius-md !important;
+  border       : 1px solid $color-border !important;
+  box-shadow   : 0 8px 32px rgba(102, 126, 234, 0.14), 0 2px 8px rgba(0,0,0,0.06) !important;
+  overflow     : hidden !important;
+  animation    : menu-in 0.18s ease both !important;
+  min-width    : 220px !important;
+  margin-top   : 6px !important;    // petit gap entre la navbar et le panel
+  backdrop-filter: blur(12px);
+}
+
+.mat-mdc-menu-content {
+  padding: 6px !important;
+}
+
+.mat-mdc-menu-item {
+  border-radius: $radius-sm !important;
+  margin       : 2px 0 !important;
+  font-family  : $font-body !important;
+  font-size    : 14px !important;
+  color        : $color-text !important;
+  transition   : background 0.15s ease, color 0.15s ease !important;
+
+  mat-icon {
+    font-size  : 18px !important;
+    width      : 18px !important;
+    height     : 18px !important;
+    color      : $color-text-muted !important;
+    margin-right: 10px !important;
+    transition : color 0.15s ease !important;
+  }
+
+  &:hover {
+    background: rgba(102, 126, 234, 0.08) !important;
+    color     : $color-primary !important;
+
+    mat-icon { color: $color-primary !important; }
+  }
+
+  // Logout item — accent red on hover
+  &:last-child:hover {
+    background: rgba(240, 68, 56, 0.07) !important;
+    color     : #e03131 !important;
+
+    mat-icon { color: #e03131 !important; }
+  }
+}
+
+mat-divider {
+  margin     : 4px 8px !important;
+  border-color: $color-border !important;
+}
+
+// ── Responsive ─────────────────────────────────────────────────────────────
+@media (max-width: 600px) {
+  .navbar {
+    padding: 0 16px;
+    height : 60px;
+
+    &__username { display: none; }
+
+    &__avatar-button {
+      width : 38px;
+      height: 38px;
+    }
+
+    &__avatar {
+      width : 28px;
+      height: 28px;
+    }
+  }
+}
