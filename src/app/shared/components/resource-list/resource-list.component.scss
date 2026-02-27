@@ -48,90 +48,129 @@ $shadow-card-hover: 0 12px 40px rgba(102, 126, 234, 0.18), 0 2px 8px rgba(0,0,0,
   display    : flex;
   gap        : 12px;
   align-items: center;
+  height     : 44px;          // hauteur fixe = celle des deux éléments
 }
 
 .resource-list__search {
-  flex: 0 0 clamp(200px, 25%, 320px);
+  flex       : 0 0 clamp(200px, 25%, 320px);
+  height     : 44px !important;    // contraint le composant hôte lui-même
+  display    : block !important;
 
-  // Supprime l'espace subscript
-  .mat-mdc-form-field-subscript-wrapper { display: none !important; }
-
-  // Supprime le contour Material notched
-  .mdc-notched-outline,
-  .mdc-notched-outline__leading,
-  .mdc-notched-outline__notch,
-  .mdc-notched-outline__trailing { display: none !important; }
-
-  // Wrapper = pill
-  .mat-mdc-text-field-wrapper {
-    border-radius : 14px !important;
-    background    : $color-surface !important;
-    box-shadow    : 0 2px 12px rgba(102, 126, 234, 0.10), 0 1px 3px rgba(0,0,0,0.05) !important;
-    border        : 1.5px solid $color-border !important;
-    padding       : 0 !important;
-    height        : 44px !important;
-    transition    : border-color 0.2s ease, box-shadow 0.2s ease !important;
-
-    &:hover { border-color: rgba(102, 126, 234, 0.4) !important; }
+  // Le mat-form-field hôte — force la hauteur et coupe l'overflow
+  &.mat-mdc-form-field {
+    height  : 44px !important;
+    overflow: hidden !important;
   }
 
-  // Focus ring
-  &.mat-focused .mat-mdc-text-field-wrapper {
-    border-color: $color-primary !important;
-    box-shadow  : 0 0 0 3px rgba(102, 126, 234, 0.13),
-    0 2px 12px rgba(102, 126, 234, 0.10) !important;
+  // Supprime l'espace subscript (source du débordement bas)
+  .mat-mdc-form-field-subscript-wrapper,
+  ::ng-deep .mat-mdc-form-field-subscript-wrapper {
+    display : none !important;
+    height  : 0 !important;
+    overflow: hidden !important;
   }
 
-  // Flex row — centrage vertical de tous les éléments
-  .mat-mdc-form-field-flex {
-    height     : 44px !important;
-    display    : flex !important;
-    align-items: center !important;
-    padding    : 0 8px 0 14px !important;
-  }
+  ::ng-deep {
 
-  // Infix — retire le padding top/bottom qui décale le input
-  .mat-mdc-form-field-infix {
-    padding-top   : 0 !important;
-    padding-bottom: 0 !important;
-    min-height    : unset !important;
-    border-top    : none !important;
-    display       : flex !important;
-    align-items   : center !important;
-  }
+    // ── Conteneur hôte ──
+    .mat-mdc-form-field,
+    .mat-mdc-text-field-wrapper {
+      overflow: hidden !important;
+    }
 
-  // Prefix icon — centré
-  .mat-mdc-form-field-icon-prefix {
-    display    : flex !important;
-    align-items: center !important;
-    padding    : 0 8px 0 0 !important;
-    height     : 44px !important;
-  }
+    // Supprime le contour Material notched
+    .mdc-notched-outline,
+    .mdc-notched-outline__leading,
+    .mdc-notched-outline__notch,
+    .mdc-notched-outline__trailing { display: none !important; }
 
-  // Suffix button — centré
-  .mat-mdc-form-field-icon-suffix {
-    display    : flex !important;
-    align-items: center !important;
-    height     : 44px !important;
-    padding    : 0 !important;
-  }
+    // Ripple / line-ripple
+    .mdc-text-field__ripple,
+    .mdc-line-ripple { display: none !important; }
 
-  // Label — masqué, on utilise le placeholder
-  .mat-mdc-floating-label { display: none !important; }
+    // ── Wrapper = pill ──
+    .mat-mdc-text-field-wrapper {
+      border-radius : 50px !important;
+      background    : $color-surface !important;
+      box-shadow    : 0 2px 12px rgba(102, 126, 234, 0.10), 0 1px 3px rgba(0,0,0,0.05) !important;
+      border        : 1.5px solid $color-border !important;
+      padding       : 0 !important;
+      height        : 44px !important;
+      min-height    : 44px !important;
+      max-height    : 44px !important;
+      transition    : border-color 0.2s ease, box-shadow 0.2s ease !important;
 
-  // Input text — aligné sans padding vertical
-  input.mat-mdc-input-element {
-    font-size  : 14px !important;
-    font-weight: 400 !important;
-    color      : $color-text !important;
-    padding    : 0 !important;
-    margin     : 0 !important;
-    line-height: 44px !important;
-    caret-color: $color-primary !important;
+      &:hover { border-color: rgba(102, 126, 234, 0.4) !important; }
+      &::before, &::after { display: none !important; }
+    }
 
-    &::placeholder {
-      color  : $color-text-muted !important;
-      opacity: 0.7;
+    // Focus ring
+    &.mat-focused .mat-mdc-text-field-wrapper {
+      border-color: $color-primary !important;
+      box-shadow  : 0 0 0 3px rgba(102, 126, 234, 0.13),
+      0 2px 12px rgba(102, 126, 234, 0.10) !important;
+    }
+
+    // ── Flex interne — toute la rangée fait exactement 44px ──
+    .mat-mdc-form-field-flex {
+      height     : 44px !important;
+      display    : flex !important;
+      align-items: center !important;
+      padding    : 0 4px 0 14px !important;
+      box-sizing : border-box !important;
+    }
+
+    // ── Infix (zone du vrai <input>) ──
+    .mat-mdc-form-field-infix {
+      padding    : 0 !important;
+      min-height : unset !important;
+      height     : 44px !important;
+      border-top : none !important;
+      display    : flex !important;
+      align-items: center !important;
+      box-sizing : border-box !important;
+    }
+
+    // ── Icône loupe (prefix) ──
+    .mat-mdc-form-field-icon-prefix {
+      display    : flex !important;
+      align-items: center !important;
+      height     : 44px !important;
+      padding    : 0 6px 0 0 !important;
+      align-self : center !important;
+      margin-top : 6px !important;
+    }
+
+    // ── Bouton ✕ (suffix) ──
+    .mat-mdc-form-field-icon-suffix {
+      display    : flex !important;
+      align-items: center !important;
+      height     : 44px !important;
+      padding    : 0 !important;
+      align-self : center !important;
+      margin-top : 6px !important;
+    }
+
+    // ── Label flottant — masqué ──
+    .mat-mdc-floating-label { display: none !important; }
+
+    // ── <input> text ──
+    input.mat-mdc-input-element {
+      font-size   : 14px !important;
+      font-weight : 400 !important;
+      color       : $color-text !important;
+      padding     : 0 !important;
+      margin      : 0 !important;
+      height      : 44px !important;
+      line-height : 44px !important;
+      box-sizing  : border-box !important;
+      caret-color : $color-primary !important;
+      align-self  : center !important;
+
+      &::placeholder {
+        color  : $color-text-muted !important;
+        opacity: 0.7;
+      }
     }
   }
 }
