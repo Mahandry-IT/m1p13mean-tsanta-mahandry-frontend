@@ -1,37 +1,84 @@
 <!-- ── Title ──────────────────────────────────────────────────────────────── -->
-<p class="menu-modal-title">{{ data.title || 'Menu' }}</p>
+<div class="menu-modal-title" aria-label="Menu">
+  <img class="menu-modal-title__logo" src="/mean-logo.png" alt="Logo" />
+</div>
 
 <!-- ── Content ───────────────────────────────────────────────────────────── -->
 <mat-dialog-content class="app-menu-modal">
-    <ng-container *ngIf="sortedItems.length; else empty">
+    <ng-container *ngIf="tree.length; else empty">
         <mat-nav-list>
-            <a
-                    mat-list-item
-                    *ngFor="let item of sortedItems; trackBy: trackById"
-                    (click)="onMenuClick(item)"
-                    role="button"
-                    tabindex="0"
-            >
-                <div class="app-menu-modal__item-row">
+            <ng-container *ngFor="let node of tree; trackBy: trackByNodeId">
 
-                    <!-- Icon tile -->
-                    <span class="app-menu-modal__icon">
-            <mat-icon>{{ item.icon || 'chevron_right' }}</mat-icon>
-          </span>
+                <!-- ── Parent / leaf row ─────────────────────────────────────────── -->
+                <a
+                        mat-list-item
+                        [class.parent-open]="hasChildren(node) && isExpanded(node)"
+                        (click)="onNodeClick(node)"
+                        role="button"
+                        tabindex="0"
+                >
+                    <div class="app-menu-modal__item-row">
 
-                    <!-- Label + optional badge -->
-                    <span
-                            class="app-menu-modal__label"
-                            [matBadge]="item.badge ?? ''"
-                            matBadgePosition="after"
-                            matBadgeColor="accent"
-                            [matBadgeHidden]="!item.badge && item.badge !== 0"
+            <span class="app-menu-modal__icon">
+              <mat-icon>{{ node.icon || 'chevron_right' }}</mat-icon>
+            </span>
+
+                        <span
+                                class="app-menu-modal__label"
+                                [matBadge]="node.badge ?? ''"
+                                matBadgePosition="after"
+                                matBadgeColor="accent"
+                                [matBadgeHidden]="!node.badge && node.badge !== 0"
+                        >
+              {{ node.label }}
+            </span>
+
+                        <!-- Chevron — pivote quand ouvert -->
+                        <span
+                                class="app-menu-modal__expand"
+                                [class.expanded]="isExpanded(node)"
+                                *ngIf="hasChildren(node)"
+                        >
+              <mat-icon>keyboard_arrow_down</mat-icon>
+            </span>
+
+                    </div>
+                </a>
+
+                <!-- ── Children (accordion) ──────────────────────────────────────── -->
+                <div
+                        class="app-menu-modal__children"
+                        *ngIf="hasChildren(node) && isExpanded(node)"
+                >
+                    <a
+                            mat-list-item
+                            class="app-menu-modal__child-item"
+                            *ngFor="let child of node.children; trackBy: trackByNodeId"
+                            (click)="onMenuClick(child); $event.stopPropagation()"
+                            role="button"
+                            tabindex="0"
                     >
-            {{ item.label }}
-          </span>
+                        <div class="app-menu-modal__item-row">
 
+              <span class="app-menu-modal__icon app-menu-modal__icon--child">
+                <mat-icon>{{ child.icon || 'circle' }}</mat-icon>
+              </span>
+
+                            <span
+                                    class="app-menu-modal__label"
+                                    [matBadge]="child.badge ?? ''"
+                                    matBadgePosition="after"
+                                    matBadgeColor="accent"
+                                    [matBadgeHidden]="!child.badge && child.badge !== 0"
+                            >
+                {{ child.label }}
+              </span>
+
+                        </div>
+                    </a>
                 </div>
-            </a>
+
+            </ng-container>
         </mat-nav-list>
     </ng-container>
 

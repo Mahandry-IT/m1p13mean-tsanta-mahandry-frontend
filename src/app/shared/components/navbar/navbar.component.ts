@@ -43,6 +43,7 @@ export class NavbarComponent {
       label: String(m.label ?? ''),
       path: String(m.path ?? ''),
       icon: (m.icon ?? null) as string | null,
+      parentId: (m.parentId ?? null) as string | null,
       order: (m.order ?? null) as number | null,
       badge: (m.badgeCount ?? m.badgeText ?? m.badge ?? null) as string | number | null,
     }));

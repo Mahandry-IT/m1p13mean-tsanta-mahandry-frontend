@@ -78,6 +78,13 @@ $font-body        : 'Segoe UI', system-ui, sans-serif;
     background   : $gradient-primary;
     flex-shrink  : 0;
   }
+
+  &__logo {
+    height: 28px;
+    width: auto;
+    display: block;
+    object-fit: contain;
+  }
 }
 
 // ── Dialog content ─────────────────────────────────────────────────────────
@@ -101,6 +108,7 @@ $font-body        : 'Segoe UI', system-ui, sans-serif;
 
   // ── Each menu item ──────────────────────────────────────────────────────
   a[mat-list-item] {
+    font-family    : $font-display;
     height        : auto !important;
     border-radius : $radius-sm !important;
     margin-bottom : 4px !important;
@@ -162,6 +170,7 @@ $font-body        : 'Segoe UI', system-ui, sans-serif;
 }
 
 .app-menu-modal__label {
+  font-family    : $font-display;
   display        : flex;
   align-items    : center;
   gap            : 8px;
@@ -191,4 +200,81 @@ $font-body        : 'Segoe UI', system-ui, sans-serif;
   background : $gradient-primary !important;
   font-size  : 10px !important;
   font-weight: 700 !important;
+}
+
+// ── Expand chevron ──────────────────────────────────────────────────────────
+.app-menu-modal__expand {
+  margin-left : auto;
+  display     : inline-flex;
+  align-items : center;
+  flex-shrink : 0;
+  color       : $color-text-muted;
+  transition  : transform 0.25s ease, color 0.15s ease;
+
+  mat-icon {
+    font-size: 18px;
+    width    : 18px;
+    height   : 18px;
+  }
+
+  // Quand le parent est ouvert, le chevron pivote
+  .expanded & {
+    transform: rotate(180deg);
+    color    : $color-primary;
+  }
+}
+
+// Parent row ouvert — léger fond de fond pour indiquer l'état actif
+a[mat-list-item].parent-open {
+  background: rgba(102, 126, 234, 0.05) !important;
+
+  .app-menu-modal__label { color: $color-primary !important; font-weight: 600 !important; }
+  .app-menu-modal__icon  {
+    background: rgba(102, 126, 234, 0.14) !important;
+    mat-icon { color: $color-primary !important; }
+  }
+  .app-menu-modal__expand { color: $color-primary; }
+}
+
+// ── Children accordion ───────────────────────────────────────────────────────
+@keyframes children-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.app-menu-modal__children {
+  margin-left  : 16px;
+  padding-left : 14px;
+  border-left  : 2px solid rgba(102, 126, 234, 0.2);
+  margin-bottom: 4px;
+  animation    : children-in 0.2s ease both;
+
+  a[mat-list-item] {
+    margin-bottom: 2px !important;
+  }
+}
+
+.app-menu-modal__child-item {
+  padding-left: 0 !important;
+}
+
+// Icône enfant — plus petite et plus sobre
+.app-menu-modal__icon--child {
+  width     : 28px !important;
+  height    : 28px !important;
+  background: rgba(102, 126, 234, 0.04) !important;
+
+  mat-icon {
+    font-size: 14px !important;
+    width    : 14px !important;
+    height   : 14px !important;
+    color    : $color-text-muted !important;
+  }
+}
+
+// Label enfant — légèrement plus petit
+.app-menu-modal__children .app-menu-modal__label {
+  font-size  : 13.5px;
+  font-weight: 400;
+  color      : $color-text-muted;
 }
