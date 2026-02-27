@@ -1,7 +1,7 @@
 <mat-toolbar class="navbar" color="primary">
 
   <!-- Logo / Brand -->
-  <a class="navbar__logo">
+  <a class="navbar__logo" (click)="onMenuClick()" role="button" tabindex="0" (keydown.enter)="onMenuClick()">
     <span class="navbar__logo-icon">
       <mat-icon>menu</mat-icon>
     </span>

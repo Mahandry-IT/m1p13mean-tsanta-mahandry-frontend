@@ -1,0 +1,41 @@
+<!-- ── Title ──────────────────────────────────────────────────────────────── -->
+<p class="menu-modal-title">{{ data.title || 'Menu' }}</p>
+
+<!-- ── Content ───────────────────────────────────────────────────────────── -->
+<mat-dialog-content class="app-menu-modal">
+    <ng-container *ngIf="sortedItems.length; else empty">
+        <mat-nav-list>
+            <a
+                    mat-list-item
+                    *ngFor="let item of sortedItems; trackBy: trackById"
+                    (click)="onMenuClick(item)"
+                    role="button"
+                    tabindex="0"
+            >
+                <div class="app-menu-modal__item-row">
+
+                    <!-- Icon tile -->
+                    <span class="app-menu-modal__icon">
+            <mat-icon>{{ item.icon || 'chevron_right' }}</mat-icon>
+          </span>
+
+                    <!-- Label + optional badge -->
+                    <span
+                            class="app-menu-modal__label"
+                            [matBadge]="item.badge ?? ''"
+                            matBadgePosition="after"
+                            matBadgeColor="accent"
+                            [matBadgeHidden]="!item.badge && item.badge !== 0"
+                    >
+            {{ item.label }}
+          </span>
+
+                </div>
+            </a>
+        </mat-nav-list>
+    </ng-container>
+
+    <ng-template #empty>
+        <div class="app-menu-modal__empty">Aucun menu disponible.</div>
+    </ng-template>
+</mat-dialog-content>
