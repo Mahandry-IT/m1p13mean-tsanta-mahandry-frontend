@@ -1,0 +1,27 @@
+<div class="confirm-dialog" [class.confirm-dialog--danger]="data.danger">
+
+  <!-- Icône selon le mode -->
+  <div class="confirm-dialog__icon-wrap">
+    <div class="confirm-dialog__icon">
+      <mat-icon>{{ data.danger ? 'delete_outline' : 'help_outline' }}</mat-icon>
+    </div>
+  </div>
+
+  <!-- Titre -->
+  <h2 class="confirm-dialog__title">{{ data.title || 'Confirmation' }}</h2>
+
+  <!-- Message -->
+  <p class="confirm-dialog__message">{{ data.message || 'Êtes-vous sûr ?' }}</p>
+
+  <!-- Actions -->
+  <div class="confirm-dialog__actions">
+    <button class="confirm-dialog__btn confirm-dialog__btn--cancel" type="button" (click)="cancel()">
+      {{ data.cancelText || 'Annuler' }}
+    </button>
+    <button class="confirm-dialog__btn confirm-dialog__btn--confirm" type="button" (click)="confirm()">
+      <mat-icon>{{ data.danger ? 'delete_outline' : 'check' }}</mat-icon>
+      {{ data.confirmText || 'Confirmer' }}
+    </button>
+  </div>
+
+</div>

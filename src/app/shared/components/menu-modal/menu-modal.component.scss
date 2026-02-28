@@ -218,7 +218,7 @@ $font-body        : 'Segoe UI', system-ui, sans-serif;
   }
 
   // Quand le parent est ouvert, le chevron pivote
-  .expanded & {
+  &.expanded {
     transform: rotate(180deg);
     color    : $color-primary;
   }

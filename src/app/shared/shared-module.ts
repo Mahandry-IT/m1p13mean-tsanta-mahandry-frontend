@@ -10,6 +10,7 @@ import { NgxIntlTelInputModule } from 'ngx-intl-tel-input';
 import { NavbarComponent } from './components/navbar/navbar.component';
 import { FooterComponent } from './components/footer/footer.component';
 import { ResourceListComponent } from './components/resource-list/resource-list.component';
+import { ConfirmDialogComponent } from './components/confirm-dialog/confirm-dialog.component';
 
 @NgModule({
   declarations: [
@@ -19,6 +20,7 @@ import { ResourceListComponent } from './components/resource-list/resource-list.
     NavbarComponent,
     FooterComponent,
     ResourceListComponent,
+    ConfirmDialogComponent,
   ],
   imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule, MaterialModule, NgxIntlTelInputModule],
   exports: [
@@ -32,6 +34,7 @@ import { ResourceListComponent } from './components/resource-list/resource-list.
     NavbarComponent,
     FooterComponent,
     ResourceListComponent,
+    ConfirmDialogComponent,
   ],
 })
 export class SharedModule {}
