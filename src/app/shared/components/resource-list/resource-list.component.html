@@ -47,7 +47,7 @@
         <ng-container *ngFor="let col of displayedColumns" [matColumnDef]="col">
 
           <ng-container *ngIf="col !== 'actions'; else noSort">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header="{{ col }}">
+            <th mat-header-cell *matHeaderCellDef [mat-sort-header]="col">
               {{ headerLabel(col) }}
             </th>
           </ng-container>
@@ -79,7 +79,7 @@
         </ng-container>
 
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let _row; columns: displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns" [attr.data-row-id]="row?._id || row?.id || null"></tr>
       </table>
     </div><!-- /table-wrap -->
 

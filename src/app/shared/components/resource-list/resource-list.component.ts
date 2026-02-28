@@ -5,12 +5,24 @@ import { ResourceListService } from '../../../core/services/resource-list.servic
 import { ApiError } from '../../../core/models/api-error.model';
 import { PaginatedResponse, PaginationMeta } from '../../../core/models/pagination.model';
 import { Sort } from '@angular/material/sort';
+import { ApiService } from '../../../core/services/api.service';
 
 export interface ResourceListColumn {
   key: string;
   header: string;
   /** si absent, on affiche row[key] */
   cell?: (row: any) => string;
+}
+
+export interface ResourceResolveConfig {
+  /** champ dans la ligne qui contient l'id (ex: roleId) */
+  field: string;
+  /** endpoint à appeler pour récupérer la liste des entités (ex: '/roles') */
+  endpoint: string;
+  /** clé id dans la ressource retournée (défaut: '_id' puis 'id') */
+  idField?: string;
+  /** clé label à afficher (défaut: 'label' puis 'name' puis 'title') */
+  labelField?: string;
 }
 
 @Component({
@@ -39,6 +51,12 @@ export class ResourceListComponent<TItem extends Record<string, any>> implements
   /** colonnes ka table; si vide => auto à partir des clés du 1er item */
   @Input() columns: ResourceListColumn[] = [];
 
+  /**
+   * Permet de remplacer l'affichage d'un champ ID par un label lisible.
+   * Exemple: [{ field: 'roleId', endpoint: '/roles', labelField: 'label' }]
+   */
+  @Input() resolves: ResourceResolveConfig[] = [];
+
   @Input() pageSizeOptions: number[] = [10, 20, 50];
   @Input() pageSize = 20;
 
@@ -65,8 +83,12 @@ export class ResourceListComponent<TItem extends Record<string, any>> implements
 
   sort: Sort = { active: '', direction: '' };
 
+  /** field -> (id -> label) */
+  private resolveMaps = new Map<string, Map<string, string>>();
+
   constructor(
     private readonly resourceList: ResourceListService,
+    private readonly api: ApiService,
     private readonly cdr: ChangeDetectorRef,
   ) {
     this.searchCtrl.valueChanges
@@ -83,13 +105,60 @@ export class ResourceListComponent<TItem extends Record<string, any>> implements
       this.pagination = { ...this.pagination, page: 1, limit: this.pageSize };
       this.load();
     }
+
+    if (changes['resolves']) {
+      this.loadResolves();
+    }
   }
 
   ngOnInit(): void {
+    this.loadResolves();
+
     // Si la donnée n'a pas été chargée via ngOnChanges (cas edge), on charge une première fois.
     if (!this.items.length && this.endpoint) {
       this.pagination = { ...this.pagination, page: 1, limit: this.pageSize };
       this.load();
+    }
+  }
+
+  private loadResolves(): void {
+    const isBrowser = typeof (globalThis as any).window !== 'undefined';
+    if (!isBrowser) return;
+
+    const resolves = this.resolves ?? [];
+    if (!Array.isArray(resolves) || resolves.length === 0) return;
+
+    for (const r of resolves) {
+      if (!r?.field || !r?.endpoint) continue;
+
+      this.api.get<any>(r.endpoint).subscribe({
+        next: (res) => {
+          const data = res?.data ?? res;
+          const list = Array.isArray(data)
+            ? data
+            : (Array.isArray(data?.items) ? data.items
+              : (Array.isArray(data?.data) ? data.data
+                : []));
+
+          const idField = (r.idField ?? '_id').trim();
+          const fallbackIdField = 'id';
+          const labelField = (r.labelField ?? 'label').trim();
+
+          const mapForField = new Map<string, string>();
+          for (const item of list) {
+            const id = String(item?.[idField] ?? item?.[fallbackIdField] ?? '').trim();
+            if (!id) continue;
+            const label = String(item?.[labelField] ?? item?.name ?? item?.title ?? id).trim();
+            mapForField.set(id, label);
+          }
+
+          this.resolveMaps.set(r.field, mapForField);
+          this.cdr.markForCheck();
+        },
+        error: () => {
+          // on ignore: pas bloquant pour la liste
+        },
+      });
     }
   }
 
@@ -178,17 +247,36 @@ export class ResourceListComponent<TItem extends Record<string, any>> implements
     this.displayedColumns = [...base, ...actions];
   }
 
+  private tryResolveValue(colKey: string, raw: unknown): string | null {
+    const mapForField = this.resolveMaps.get(colKey);
+    if (!mapForField) return null;
+
+    const id = String(raw ?? '').trim();
+    if (!id) return '';
+
+    return mapForField.get(id) ?? id;
+  }
+
   cellValue(colKey: string, row: TItem): string {
     const col = this.columns.find((c) => c.key === colKey);
     if (col?.cell) return col.cell(row);
+
     const v = (row as any)[colKey];
+
+    const resolved = this.tryResolveValue(colKey, v);
+    if (resolved !== null) return resolved;
+
     if (v === null || v === undefined) return '';
     return String(v);
   }
 
   cardValue(col: ResourceListColumn, row: TItem): string {
     if (typeof col.cell === 'function') return col.cell(row);
+
     const v = (row as any)[col.key];
+    const resolved = this.tryResolveValue(col.key, v);
+    if (resolved !== null) return resolved;
+
     if (v === null || v === undefined) return '';
     return String(v);
   }

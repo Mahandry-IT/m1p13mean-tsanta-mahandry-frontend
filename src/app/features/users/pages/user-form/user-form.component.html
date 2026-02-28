@@ -55,8 +55,11 @@
             <mat-icon>shield_outlined</mat-icon>
             Rôle
           </label>
+
           <div class="uf-field__input-wrap" [class.uf-field__input-wrap--disabled]="isInfo">
-            <input class="uf-field__input" formControlName="roleId" placeholder="ex : admin" />
+            <mat-select class="uf-field__select" formControlName="roleId" [disabled]="isInfo" placeholder="Sélectionner un rôle">
+              <mat-option *ngFor="let r of roleOptions" [value]="r.id">{{ r.label }}</mat-option>
+            </mat-select>
           </div>
         </div>
 

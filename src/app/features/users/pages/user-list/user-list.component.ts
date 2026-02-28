@@ -5,7 +5,7 @@ import { ApiService } from '../../../../core/services/api.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { UserFormComponent } from '../user-form/user-form.component';
-import { ResourceListComponent } from '../../../../shared/components/resource-list/resource-list.component';
+import { ResourceListComponent, ResourceResolveConfig } from '../../../../shared/components/resource-list/resource-list.component';
 
 @Component({
   selector: 'app-user-list',
@@ -19,6 +19,11 @@ export class UserListComponent {
   columns = [
     { key: 'username', header: 'Nom' },
     { key: 'email', header: 'Email' },
+    { key: 'roleId', header: 'Rôle' },
+  ];
+
+  resolves: ResourceResolveConfig[] = [
+    { field: 'roleId', endpoint: '/roles/list', labelField: 'value' },
   ];
 
   constructor(
@@ -39,7 +44,7 @@ export class UserListComponent {
       next: (res) => {
         const user = res?.data ?? res?.user ?? res;
         this.dialog.open(UserFormComponent, {
-          data: { mode: 'info', user },
+          data: { mode: 'info', user, resolves: this.resolves },
         });
       },
       error: (err) => {
@@ -56,7 +61,7 @@ export class UserListComponent {
       next: (res) => {
         const user = res?.data ?? res?.user ?? res;
         const ref = this.dialog.open(UserFormComponent, {
-          data: { mode: 'edit', user },
+          data: { mode: 'edit', user, resolves: this.resolves },
         });
 
         ref.afterClosed().subscribe((payload) => {
