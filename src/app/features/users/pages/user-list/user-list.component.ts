@@ -1,12 +1,11 @@
-import { Component, OnInit } from '@angular/core';
-import { ApiService } from '../../../../core/services/api.service';
-import { ApiError } from '../../../../core/models/api-error.model';
+import { Component, ViewChild } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
 
-interface UserDto {
-  id: string;
-  name: string;
-  email: string;
-}
+import { ApiService } from '../../../../core/services/api.service';
+import { ToastService } from '../../../../core/services/toast.service';
+import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { UserFormComponent } from '../user-form/user-form.component';
+import { ResourceListComponent, ResourceResolveConfig } from '../../../../shared/components/resource-list/resource-list.component';
 
 @Component({
   selector: 'app-user-list',
@@ -14,32 +13,95 @@ interface UserDto {
   styleUrls: ['./user-list.component.scss'],
   standalone: false,
 })
-export class UserListComponent implements OnInit {
-  users: UserDto[] = [];
-  loading = false;
-  error?: ApiError;
+export class UserListComponent {
+  @ViewChild(ResourceListComponent) resourceList?: ResourceListComponent<any>;
 
-  constructor(private readonly api: ApiService) {}
+  columns = [
+    { key: 'username', header: 'Nom' },
+    { key: 'email', header: 'Email' },
+    { key: 'roleId', header: 'Rôle' },
+  ];
 
-  ngOnInit(): void {
-    this.load();
+  resolves: ResourceResolveConfig[] = [
+    { field: 'roleId', endpoint: '/roles/list', labelField: 'value' },
+  ];
+
+  constructor(
+    private readonly api: ApiService,
+    private readonly dialog: MatDialog,
+    private readonly toast: ToastService,
+  ) {}
+
+  private getId(row: any): string {
+    return String(row?._id ?? row?.id ?? '');
   }
 
-  load(): void {
-    this.loading = true;
-    this.error = undefined;
+  onInfo(row: any): void {
+    const id = this.getId(row);
+    if (!id) return;
 
-    // Exemple d'appel API (à adapter à votre backend)
-    this.api.get<UserDto[]>('/users').subscribe({
-      next: (data) => {
-        this.users = data;
-        this.loading = false;
+    this.api.get<any>(`/users/${encodeURIComponent(id)}`).subscribe({
+      next: (res) => {
+        const user = res?.data ?? res?.user ?? res;
+        this.dialog.open(UserFormComponent, {
+          data: { mode: 'info', user, resolves: this.resolves },
+        });
       },
-      error: (err: ApiError) => {
-        // err vient de l'ErrorInterceptor
-        this.error = err;
-        this.loading = false;
+      error: (err) => {
+        this.toast.error(err?.message ?? 'Erreur lors du chargement');
       },
+    });
+  }
+
+  onEdit(row: any): void {
+    const id = this.getId(row);
+    if (!id) return;
+
+    this.api.get<any>(`/users/${encodeURIComponent(id)}`).subscribe({
+      next: (res) => {
+        const user = res?.data ?? res?.user ?? res;
+        const ref = this.dialog.open(UserFormComponent, {
+          data: { mode: 'edit', user, resolves: this.resolves },
+        });
+
+        ref.afterClosed().subscribe((payload) => {
+          if (!payload) return;
+          this.api.put<any>(`/users/${encodeURIComponent(id)}`, payload).subscribe({
+            next: () => {
+              this.toast.success('Utilisateur modifié');
+              this.resourceList?.load();
+            },
+            error: (err) => this.toast.error(err?.message ?? 'Erreur lors de la modification'),
+          });
+        });
+      },
+      error: (err) => this.toast.error(err?.message ?? 'Erreur lors du chargement'),
+    });
+  }
+
+  onDelete(row: any): void {
+    const id = this.getId(row);
+    if (!id) return;
+
+    const ref = this.dialog.open(ConfirmDialogComponent, {
+      data: {
+        title: 'Suppression',
+        message: 'Supprimer cet utilisateur ? Cette action est irréversible.',
+        danger: true,
+        confirmText: 'Supprimer',
+        cancelText: 'Annuler',
+      },
+    });
+
+    ref.afterClosed().subscribe((ok) => {
+      if (!ok) return;
+      this.api.delete<any>(`/users/${encodeURIComponent(id)}`).subscribe({
+        next: () => {
+          this.toast.success('Utilisateur supprimé');
+          this.resourceList?.load();
+        },
+        error: (err) => this.toast.error(err?.message ?? 'Erreur lors de la suppression'),
+      });
     });
   }
 }

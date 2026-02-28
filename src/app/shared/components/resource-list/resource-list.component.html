@@ -1,0 +1,123 @@
+<section class="resource-list">
+
+  <!-- ── Toolbar ─────────────────────────────────────────────────────────── -->
+  <div class="resource-list__toolbar">
+    <mat-form-field appearance="outline" class="resource-list__search">
+      <mat-icon matPrefix style="color:#667eea;font-size:18px;margin-right:4px;margin-left:4px">search</mat-icon>
+      <input matInput [formControl]="searchCtrl" placeholder="Tapez pour rechercher…" />
+      <button
+        mat-icon-button matSuffix type="button"
+        (click)="searchCtrl.setValue('')"
+        [disabled]="!searchCtrl.value"
+      >
+        <mat-icon style="font-size:16px">close</mat-icon>
+      </button>
+    </mat-form-field>
+
+    <button mat-stroked-button class="resource-list__refresh" type="button" (click)="load()">
+      <mat-icon>refresh</mat-icon>
+      Rafraîchir
+    </button>
+  </div>
+
+  <!-- ── Loading ──────────────────────────────────────────────────────────── -->
+  <div class="resource-list__state" *ngIf="loading">Chargement en cours…</div>
+
+  <!-- ── Error ────────────────────────────────────────────────────────────── -->
+  <div class="resource-list__state resource-list__state--error" *ngIf="error">
+    <strong>Erreur :</strong>&nbsp;{{ error.message }}
+  </div>
+
+  <!-- ── Content ──────────────────────────────────────────────────────────── -->
+  <ng-container *ngIf="!loading && !error">
+
+    <div class="resource-list__empty" *ngIf="items.length === 0">
+      Aucun résultat trouvé.
+    </div>
+
+    <!-- Table view — wrapped for responsive horizontal scroll -->
+    <div class="resource-list__table-wrap" *ngIf="!isAList && items.length">
+      <table
+        mat-table
+        matSort
+        (matSortChange)="onSortChange($event)"
+        [dataSource]="items"
+        class="resource-list__table"
+      >
+        <ng-container *ngFor="let col of displayedColumns" [matColumnDef]="col">
+
+          <ng-container *ngIf="col !== 'actions'; else noSort">
+            <th mat-header-cell *matHeaderCellDef [mat-sort-header]="col">
+              {{ headerLabel(col) }}
+            </th>
+          </ng-container>
+          <ng-template #noSort>
+            <th mat-header-cell *matHeaderCellDef>{{ headerLabel(col) }}</th>
+          </ng-template>
+
+          <td mat-cell *matCellDef="let row">
+            <ng-container [ngSwitch]="col">
+              <ng-container *ngSwitchCase="'actions'">
+                <div class="resource-list__actions">
+                  <button *ngIf="isInfonable" mat-icon-button type="button" matTooltip="Infos" (click)="info.emit(row)">
+                    <mat-icon>info_outline</mat-icon>
+                  </button>
+                  <button *ngIf="isEditable" mat-icon-button type="button" matTooltip="Modifier" (click)="edit.emit(row)">
+                    <mat-icon>edit_outline</mat-icon>
+                  </button>
+                  <button *ngIf="isDeletable" mat-icon-button type="button" matTooltip="Supprimer" (click)="delete.emit(row)">
+                    <mat-icon>delete_outline</mat-icon>
+                  </button>
+                </div>
+              </ng-container>
+              <ng-container *ngSwitchDefault>
+                {{ cellValue(col, row) }}
+              </ng-container>
+            </ng-container>
+          </td>
+
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns" [attr.data-row-id]="row?._id || row?.id || null"></tr>
+      </table>
+    </div><!-- /table-wrap -->
+
+    <!-- Card list view -->
+    <div class="resource-list__cards" *ngIf="isAList && items.length">
+      <mat-card class="resource-list__card" *ngFor="let row of items; trackBy: trackByIndex">
+
+        <mat-card-content>
+          <div class="resource-list__card-row" *ngFor="let c of columns">
+            <div class="resource-list__card-key">{{ c.header }}</div>
+            <div class="resource-list__card-val">{{ cardValue(c, row) }}</div>
+          </div>
+        </mat-card-content>
+
+        <mat-card-actions align="end" *ngIf="isInfonable || isEditable || isDeletable">
+          <button *ngIf="isInfonable" mat-icon-button type="button" matTooltip="Infos" (click)="info.emit(row)">
+            <mat-icon>info_outline</mat-icon>
+          </button>
+          <button *ngIf="isEditable" mat-icon-button type="button" matTooltip="Modifier" (click)="edit.emit(row)">
+            <mat-icon>edit_outline</mat-icon>
+          </button>
+          <button *ngIf="isDeletable" mat-icon-button type="button" matTooltip="Supprimer" (click)="delete.emit(row)">
+            <mat-icon>delete_outline</mat-icon>
+          </button>
+        </mat-card-actions>
+
+      </mat-card>
+    </div>
+
+    <!-- Paginator -->
+    <mat-paginator
+      [length]="pagination.total"
+      [pageIndex]="pagination.page - 1"
+      [pageSize]="pagination.limit"
+      [pageSizeOptions]="pageSizeOptions"
+      (page)="onPage($event)"
+      aria-label="Pagination"
+    ></mat-paginator>
+
+  </ng-container>
+</section>

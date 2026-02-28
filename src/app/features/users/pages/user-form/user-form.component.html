@@ -1,0 +1,92 @@
+﻿<div class="user-form-dialog">
+
+  <!-- En-tête -->
+  <div class="user-form-dialog__header">
+    <div class="user-form-dialog__icon-wrap">
+      <div class="user-form-dialog__icon">
+        <mat-icon>{{ isInfo ? 'person_outline' : 'edit_outline' }}</mat-icon>
+      </div>
+    </div>
+    <h2 class="user-form-dialog__title">{{ isInfo ? 'Infos utilisateur' : 'Modifier utilisateur' }}</h2>
+    <p class="user-form-dialog__subtitle">
+      {{ isInfo ? 'Détails du compte utilisateur' : 'Modifiez les informations ci-dessous' }}
+    </p>
+  </div>
+
+  <!-- Formulaire -->
+  <form [formGroup]="form" (ngSubmit)="submit()">
+
+    <div class="user-form-dialog__body">
+      <div class="user-form-dialog__grid">
+
+        <!-- Nom -->
+        <div class="uf-field">
+          <label class="uf-field__label">
+            <mat-icon>badge</mat-icon>
+            Nom d'utilisateur
+          </label>
+          <div class="uf-field__input-wrap" [class.uf-field__input-wrap--disabled]="isInfo">
+            <input class="uf-field__input" formControlName="username" placeholder="ex : jean.dupont" />
+          </div>
+          <span class="uf-field__error"
+                *ngIf="form.get('username')?.invalid && form.get('username')?.touched">
+            Ce champ est requis.
+          </span>
+        </div>
+
+        <!-- Email -->
+        <div class="uf-field">
+          <label class="uf-field__label">
+            <mat-icon>alternate_email</mat-icon>
+            Adresse e-mail
+          </label>
+          <div class="uf-field__input-wrap" [class.uf-field__input-wrap--disabled]="isInfo">
+            <input class="uf-field__input" formControlName="email" type="email" placeholder="ex : jean@example.com" />
+          </div>
+          <span class="uf-field__error"
+                *ngIf="form.get('email')?.invalid && form.get('email')?.touched">
+            Adresse e-mail invalide.
+          </span>
+        </div>
+
+        <!-- Rôle -->
+        <div class="uf-field">
+          <label class="uf-field__label">
+            <mat-icon>shield_outlined</mat-icon>
+            Rôle
+          </label>
+
+          <div class="uf-field__input-wrap" [class.uf-field__input-wrap--disabled]="isInfo">
+            <mat-select class="uf-field__select" formControlName="roleId" [disabled]="isInfo" placeholder="Sélectionner un rôle">
+              <mat-option *ngFor="let r of roleOptions" [value]="r.id">{{ r.label }}</mat-option>
+            </mat-select>
+          </div>
+        </div>
+
+        <!-- Statut -->
+        <div class="uf-field">
+          <label class="uf-field__label">
+            <mat-icon>toggle_on</mat-icon>
+            Statut
+          </label>
+          <div class="uf-field__input-wrap" [class.uf-field__input-wrap--disabled]="isInfo">
+            <input class="uf-field__input" formControlName="status" placeholder="ex : actif" />
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="user-form-dialog__actions">
+      <button class="uf-btn uf-btn--cancel" type="button" (click)="close()">
+        Fermer
+      </button>
+      <button *ngIf="!isInfo" class="uf-btn uf-btn--submit" type="submit">
+        <mat-icon>save_outlined</mat-icon>
+        Enregistrer
+      </button>
+    </div>
+
+  </form>
+</div>

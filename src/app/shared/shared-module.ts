@@ -9,9 +9,19 @@ import { PageComponent } from './components/page/page.component';
 import { NgxIntlTelInputModule } from 'ngx-intl-tel-input';
 import { NavbarComponent } from './components/navbar/navbar.component';
 import { FooterComponent } from './components/footer/footer.component';
+import { ResourceListComponent } from './components/resource-list/resource-list.component';
+import { ConfirmDialogComponent } from './components/confirm-dialog/confirm-dialog.component';
 
 @NgModule({
-  declarations: [InputComponent, ButtonComponent, PageComponent, NavbarComponent, FooterComponent],
+  declarations: [
+    InputComponent,
+    ButtonComponent,
+    PageComponent,
+    NavbarComponent,
+    FooterComponent,
+    ResourceListComponent,
+    ConfirmDialogComponent,
+  ],
   imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule, MaterialModule, NgxIntlTelInputModule],
   exports: [
     MaterialModule,
@@ -22,7 +32,9 @@ import { FooterComponent } from './components/footer/footer.component';
     ButtonComponent,
     PageComponent,
     NavbarComponent,
-    FooterComponent
+    FooterComponent,
+    ResourceListComponent,
+    ConfirmDialogComponent,
   ],
 })
 export class SharedModule {}

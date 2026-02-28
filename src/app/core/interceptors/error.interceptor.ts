@@ -11,6 +11,8 @@ import { Router } from '@angular/router';
 import { ApiError } from '../models/api-error.model';
 import { ToastService } from '../services/toast.service';
 
+declare const window: any;
+
 @Injectable()
 export class ErrorInterceptor implements HttpInterceptor {
   constructor(
@@ -45,7 +47,7 @@ export class ErrorInterceptor implements HttpInterceptor {
         } else if (apiError.status === 404) {
           this.toast.warning(apiError.message);
 
-          if (window.history.length > 1) {
+          if (typeof window !== 'undefined' && window.history?.length > 1) {
             window.history.back();
           } else {
             this.router.navigateByUrl('/');

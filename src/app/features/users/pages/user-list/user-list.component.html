@@ -1,19 +1,17 @@
-<section>
-  <h2>Utilisateurs</h2>
-
-  <button type="button" (click)="load()" [disabled]="loading">Rafraîchir</button>
-
-  <p *ngIf="loading">Chargement...</p>
-
-  <div *ngIf="error" style="color: #b00020">
-    <p><strong>Erreur:</strong> {{ error.message }}</p>
-    <small>Status: {{ error.status }}</small>
-  </div>
-
-  <ul *ngIf="!loading && !error">
-    <li *ngFor="let u of users">
-      {{ u.name }} — {{ u.email }}
-    </li>
-  </ul>
-</section>
-
+<app-shell>
+  <app-page headTitle="Liste des utilisateurs">
+    <app-resource-list
+      [endpoint]="'/users'"
+      [itemsKey]="'users'"
+      [columns]="columns"
+      [resolves]="resolves"
+      [isEditable]="true"
+      [isDeletable]="true"
+      [isInfonable]="true"
+      [isAList]="false"
+      (edit)="onEdit($event)"
+      (delete)="onDelete($event)"
+      (info)="onInfo($event)"
+    ></app-resource-list>
+  </app-page>
+</app-shell>

@@ -1,4 +1,5 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import {
   HttpEvent,
   HttpHandler,
@@ -16,9 +17,9 @@ export class AuthInterceptor implements HttpInterceptor {
     const token = this.auth.getToken();
     if (!token) return next.handle(req);
 
-    // Ne pas mettre le token sur les endpoints publics
-    const publicAuthPaths = ['/auth/login', '/auth/register', '/auth/activate'];
-    if (publicAuthPaths.some((p) => req.url.includes(p))) {
+    const url = req.url;
+    const publicAuthPaths = ['/auth/login', '/auth/register', '/auth/activate', '/auth/reset-password', '/auth/change-password'];
+    if (publicAuthPaths.some((p) => url.includes(p))) {
       return next.handle(req);
     }
 
