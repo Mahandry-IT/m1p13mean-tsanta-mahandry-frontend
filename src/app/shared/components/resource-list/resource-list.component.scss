@@ -207,6 +207,37 @@ button.resource-list__refresh {
   }
 }
 
+// Add button — pill gradient (même forme que Rafraîchir, avec gradient)
+button.resource-list__add {
+  height       : 44px !important;
+  padding      : 0 20px !important;
+  border-radius: 50px !important;
+  font-weight  : 600 !important;
+  font-size    : 14px !important;
+  border       : none !important;
+  color        : #ffffff !important;
+  background   : $gradient-primary !important;
+  box-shadow   : 0 4px 16px rgba(102, 126, 234, 0.30) !important;
+  transition   : box-shadow 0.2s ease, transform 0.2s ease !important;
+  white-space  : nowrap;
+
+  mat-icon {
+    font-size   : 18px !important;
+    width       : 18px !important;
+    height      : 18px !important;
+    margin-right: 6px !important;
+    color       : rgba(255, 255, 255, 0.9) !important;
+  }
+
+  &:hover {
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.50) !important;
+    transform : translateY(-1px) !important;
+  }
+
+  &:active { transform: translateY(0) !important; }
+}
+
+
 // ── Loading ────────────────────────────────────────────────────────────────
 .resource-list__state {
   display        : flex;

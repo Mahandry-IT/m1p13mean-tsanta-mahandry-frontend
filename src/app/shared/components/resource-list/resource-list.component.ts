@@ -41,9 +41,13 @@ export class ResourceListComponent<TItem extends Record<string, any>> implements
   @Input() isEditable = false;
   @Input() isDeletable = false;
   @Input() isInfonable = false;
+  @Input() isAddable = false;
 
-  /** true => cartes; false => table */
+  /** affichage en table ou en list de card */
   @Input() isAList = false;
+
+  /** body envoyé au POST `${endpoint}/` quand on clique sur Ajouter */
+  @Input() addBody: Record<string, any> | null = null;
 
   /** filtres fixes envoyés au backend (ex: { status: 'active' }) */
   @Input() filters: Record<string, string | number | boolean | null | undefined> = {};
@@ -63,6 +67,9 @@ export class ResourceListComponent<TItem extends Record<string, any>> implements
   @Output() edit = new EventEmitter<TItem>();
   @Output() delete = new EventEmitter<TItem>();
   @Output() info = new EventEmitter<TItem>();
+
+  /** Permet au parent de surcharger le comportement add (ex: ouvrir un form) */
+  @Output() add = new EventEmitter<void>();
 
   searchCtrl = new FormControl<string>('', { nonNullable: true });
 
@@ -289,5 +296,35 @@ export class ResourceListComponent<TItem extends Record<string, any>> implements
 
   trackByIndex(i: number): number {
     return i;
+  }
+
+  onAdd(): void {
+    // Si le parent a branché (add), on lui laisse gérer (ouvrir dialog, etc.)
+    if (this.add.observed) {
+      this.add.emit();
+      return;
+    }
+
+    if (!this.endpoint) return;
+
+    const isBrowser = typeof (globalThis as any).window !== 'undefined';
+    if (!isBrowser) return;
+
+    this.loading = true;
+    this.error = undefined;
+
+    const url = this.endpoint.endsWith('/') ? this.endpoint : `${this.endpoint}/`;
+
+    this.api.post<any>(url, this.addBody ?? {}).subscribe({
+      next: () => {
+        this.loading = false;
+        this.load();
+      },
+      error: (err: ApiError) => {
+        this.error = err;
+        this.loading = false;
+        this.cdr.markForCheck();
+      },
+    });
   }
 }

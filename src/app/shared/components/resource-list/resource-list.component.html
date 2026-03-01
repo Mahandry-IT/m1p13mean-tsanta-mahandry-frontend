@@ -18,6 +18,11 @@
       <mat-icon>refresh</mat-icon>
       Rafraîchir
     </button>
+
+    <button *ngIf="isAddable" mat-flat-button class="resource-list__add" type="button" (click)="onAdd()">
+      <mat-icon>add</mat-icon>
+      Ajouter
+    </button>
   </div>
 
   <!-- ── Loading ──────────────────────────────────────────────────────────── -->

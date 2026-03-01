@@ -4,12 +4,12 @@
   <div class="user-form-dialog__header">
     <div class="user-form-dialog__icon-wrap">
       <div class="user-form-dialog__icon">
-        <mat-icon>{{ isInfo ? 'person_outline' : 'edit_outline' }}</mat-icon>
+        <mat-icon>{{ isInfo ? 'person_outline' : (isCreate ? 'person_add_alt' : 'edit_outline') }}</mat-icon>
       </div>
     </div>
-    <h2 class="user-form-dialog__title">{{ isInfo ? 'Infos utilisateur' : 'Modifier utilisateur' }}</h2>
+    <h2 class="user-form-dialog__title">{{ isInfo ? 'Infos utilisateur' : (isCreate ? 'Ajouter utilisateur' : 'Modifier utilisateur') }}</h2>
     <p class="user-form-dialog__subtitle">
-      {{ isInfo ? 'Détails du compte utilisateur' : 'Modifiez les informations ci-dessous' }}
+      {{ isInfo ? 'Détails du compte utilisateur' : (isCreate ? 'Remplissez les informations ci-dessous' : 'Modifiez les informations ci-dessous') }}
     </p>
   </div>
 

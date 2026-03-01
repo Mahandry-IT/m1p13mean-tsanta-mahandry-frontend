@@ -9,6 +9,7 @@
       [isDeletable]="true"
       [isInfonable]="true"
       [isAList]="false"
+      (add)="onAdd()"
       (edit)="onEdit($event)"
       (delete)="onDelete($event)"
       (info)="onInfo($event)"
