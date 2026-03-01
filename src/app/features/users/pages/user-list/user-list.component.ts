@@ -104,4 +104,21 @@ export class UserListComponent {
       });
     });
   }
+
+  onAdd(): void {
+    const ref = this.dialog.open(UserFormComponent, {
+      data: { mode: 'create', user: {}, resolves: this.resolves },
+    });
+
+    ref.afterClosed().subscribe((payload) => {
+      if (!payload) return;
+      this.api.post<any>(`/users/`, payload).subscribe({
+        next: () => {
+          this.toast.success('Utilisateur ajouté');
+          this.resourceList?.load();
+        },
+        error: (err) => this.toast.error(err?.message ?? 'Erreur lors de la création'),
+      });
+    });
+  }
 }

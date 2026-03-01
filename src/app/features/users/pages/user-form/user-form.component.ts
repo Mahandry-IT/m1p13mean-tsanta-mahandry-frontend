@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { ApiService } from '../../../../core/services/api.service';
 
-export type UserFormMode = 'info' | 'edit';
+export type UserFormMode = 'info' | 'edit' | 'create';
 
 export interface FieldResolveConfig {
   field: string;
@@ -34,6 +34,10 @@ export class UserFormComponent implements OnInit {
 
   get isInfo(): boolean {
     return this.data.mode === 'info';
+  }
+
+  get isCreate(): boolean {
+    return this.data.mode === 'create';
   }
 
   constructor(
