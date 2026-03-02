@@ -46,28 +46,33 @@ export class ProductFormComponent implements OnInit {
   /** Fichiers nouvellement sélectionnés (champ images) */
   newImages: File[] = [];
 
+  /** Données du dialog normalisées (jamais null) */
+  readonly dialogData: ProductFormDialogData;
+
+  /** cache pour éviter reload types répétés */
+  private loadedTypeCategories = new Set<string>();
+
   constructor(
     private readonly fb: FormBuilder,
     private readonly api: ApiService,
     private readonly dialog: MatDialog,
     private readonly dialogRef: MatDialogRef<ProductFormComponent>,
     private readonly cdr: ChangeDetectorRef,
-    @Optional() @Inject(MAT_DIALOG_DATA) public readonly data: ProductFormDialogData | null,
+    @Optional() @Inject(MAT_DIALOG_DATA) data: ProductFormDialogData | null,
   ) {
-    // fallback sécurité
-    this.data = this.data ?? ({ mode: 'info', product: {} } as ProductFormDialogData);
+    this.dialogData = data ?? ({ mode: 'info', product: {} } as ProductFormDialogData);
   }
 
   get isInfo(): boolean {
-    return (this.data?.mode ?? 'info') === 'info';
+    return (this.dialogData.mode ?? 'info') === 'info';
   }
 
   get isCreate(): boolean {
-    return (this.data?.mode ?? 'info') === 'create';
+    return (this.dialogData.mode ?? 'info') === 'create';
   }
 
   ngOnInit(): void {
-    const p = this.data?.product ?? {};
+    const p = this.dialogData.product ?? {};
 
     this.form = this.fb.group({
       name: [{ value: p.name ?? '', disabled: this.isInfo }, [Validators.required]],
@@ -75,8 +80,22 @@ export class ProductFormComponent implements OnInit {
       categories: this.fb.array([]),
     });
 
-    for (const c of p.categories ?? []) {
-      this.categoriesArray.push(this.buildCategoryGroup(c));
+    const incoming = Array.isArray(p.categories) ? p.categories : [];
+
+    // dédupliquer par categoryId et fusionner les typeIds
+    const byCategory = new Map<string, Set<string>>();
+    for (const c of incoming) {
+      const cid = String((c as any)?.categoryId ?? '').trim();
+      if (!cid) continue;
+
+      const set = byCategory.get(cid) ?? new Set<string>();
+      const tids = Array.isArray((c as any)?.typeIds) ? (c as any).typeIds : [];
+      for (const t of tids) set.add(String(t));
+      byCategory.set(cid, set);
+    }
+
+    for (const [categoryId, typeSet] of byCategory.entries()) {
+      this.categoriesArray.push(this.buildCategoryGroup({ categoryId, typeIds: Array.from(typeSet) }));
     }
 
     if (this.categoriesArray.length === 0 && !this.isInfo) {
@@ -91,7 +110,7 @@ export class ProductFormComponent implements OnInit {
   }
 
   private buildCategoryGroup(initial?: Partial<ProductCategoryDto>): FormGroup {
-    const categoryId = (initial?.categoryId ?? '').toString();
+    const categoryId = String(initial?.categoryId ?? '').trim();
     const typeIds = Array.isArray(initial?.typeIds) ? initial!.typeIds.map(String) : [];
 
     const g = this.fb.group({
@@ -104,13 +123,14 @@ export class ProductFormComponent implements OnInit {
       .valueChanges
       .subscribe((newCategoryId: string) => {
         if (this.isInfo) return;
+        const cid = String(newCategoryId ?? '').trim();
+
         g.get('typeIds')!.setValue([], { emitEvent: false });
-        if (newCategoryId) {
-          this.loadTypesForCategory(newCategoryId);
+        if (cid) {
+          this.loadTypesForCategory(cid);
         }
       });
 
-    // Précharger types si catégorie déjà remplie
     if (categoryId) {
       this.loadTypesForCategory(categoryId);
     }
@@ -158,7 +178,6 @@ export class ProductFormComponent implements OnInit {
   }
 
   private loadCategories(): void {
-    // API: GET /api/categories?page=1&limit=200 ... => { items: [...] }
     this.api.get<any>('/categories', { page: 1, limit: 200, sortBy: 'createdAt', sortDir: 'desc' }).subscribe({
       next: (res) => {
         const data = res?.data ?? res;
@@ -168,7 +187,7 @@ export class ProductFormComponent implements OnInit {
           .map((c: any) => ({ id: String(c?._id ?? c?.id ?? '').trim(), label: String(c?.name ?? c?.label ?? '').trim() }))
           .filter((o: any) => !!o.id);
 
-        // Important: ré-appliquer les valeurs après arrivée des options (surtout en mode info + disabled)
+        // Ré-appliquer les valeurs + charger les types (une seule fois par catégorie)
         for (const row of this.categoriesArray.controls) {
           const cid = String(row.get('categoryId')?.value ?? '').trim();
           row.get('categoryId')?.setValue(cid, { emitEvent: false });
@@ -188,10 +207,16 @@ export class ProductFormComponent implements OnInit {
   }
 
   private loadTypesForCategory(categoryId: string): void {
-    if (!categoryId) return;
+    const cid = String(categoryId ?? '').trim();
+    if (!cid) return;
 
-    // API: GET /api/types?categoryId=:id&page=1&limit=200 => { items: [...] }
-    this.api.get<any>('/types', { categoryId, page: 1, limit: 200, sortBy: 'createdAt', sortDir: 'desc' }).subscribe({
+    // éviter les hits multiples (init + loadCategories + autres)
+    if (this.loadedTypeCategories.has(cid) && this.typeOptionsByCategory.has(cid)) {
+      return;
+    }
+    this.loadedTypeCategories.add(cid);
+
+    this.api.get<any>('/types', { categoryId: cid, page: 1, limit: 200, sortBy: 'createdAt', sortDir: 'desc' }).subscribe({
       next: (res) => {
         const data = res?.data ?? res;
         const items = Array.isArray(data?.items) ? data.items : (Array.isArray(data?.types) ? data.types : []);
@@ -200,14 +225,13 @@ export class ProductFormComponent implements OnInit {
           .map((t: any) => ({ id: String(t?._id ?? t?.id ?? '').trim(), label: String(t?.name ?? t?.label ?? '').trim() }))
           .filter((o: any) => !!o.id);
 
-        this.typeOptionsByCategory.set(categoryId, opts);
+        this.typeOptionsByCategory.set(cid, opts);
 
-        // Mode info: options des types arrivent après init => forcer refresh des valeurs sélectionnées
+        // Mode info: options arrivent après init => forcer refresh multi-select
         if (this.isInfo) {
           for (const row of this.categoriesArray.controls) {
-            const cid = String(row.get('categoryId')?.value ?? '').trim();
-            if (cid !== categoryId) continue;
-
+            const rowCid = String(row.get('categoryId')?.value ?? '').trim();
+            if (rowCid !== cid) continue;
             const tids = row.get('typeIds')?.value;
             row.get('typeIds')?.setValue(Array.isArray(tids) ? tids : [], { emitEvent: false });
           }
@@ -216,7 +240,7 @@ export class ProductFormComponent implements OnInit {
         this.cdr.markForCheck();
       },
       error: () => {
-        this.typeOptionsByCategory.set(categoryId, []);
+        this.typeOptionsByCategory.set(cid, []);
         this.cdr.markForCheck();
       },
     });

@@ -59,23 +59,36 @@ export class ProductsPageComponent {
     return String(row?._id ?? row?.id ?? '');
   }
 
-  private buildProductFormData(payload: any): FormData {
-    const fd = new FormData();
+  private cleanUpdatePayload(payload: any): { json: any; formData: FormData } {
+    const json: any = {};
 
-    if (payload?.name !== undefined) fd.append('name', String(payload.name ?? ''));
-    if (payload?.description !== undefined) fd.append('description', String(payload.description ?? ''));
+    if (payload?.name !== undefined) json.name = String(payload.name ?? '');
+    if (payload?.description !== undefined) json.description = String(payload.description ?? '');
 
-    // relations: categories = JSON string
     if (payload?.categories !== undefined) {
-      fd.append('categories', JSON.stringify(payload.categories ?? []));
+      // IMPORTANT: le backend attend un tableau sur `categories`
+      json.categories = Array.isArray(payload.categories) ? payload.categories : [];
+    }
+
+    const fd = new FormData();
+    for (const [k, v] of Object.entries(json)) {
+      // FormData ne supporte pas les objets -> stringify pour `categories`
+      if (k === 'categories') {
+        fd.append('categories', JSON.stringify(v));
+      } else {
+        fd.append(k, String(v ?? ''));
+      }
     }
 
     const files: File[] = Array.isArray(payload?.newImages) ? payload.newImages : [];
-    for (const f of files) {
-      fd.append('images', f);
-    }
+    for (const f of files) fd.append('images', f);
 
-    return fd;
+    return { json, formData: fd };
+  }
+
+  private buildProductFormData(payload: any): FormData {
+    // compat: conserver pour create/ancien code
+    return this.cleanUpdatePayload(payload).formData;
   }
 
   onInfo(row: any): void {
@@ -86,6 +99,8 @@ export class ProductsPageComponent {
       next: (res) => {
         const product = res?.data ?? res?.product ?? res;
         this.dialog.open(ProductFormComponent, {
+          width: '900px',
+          maxWidth: '96vw',
           data: { mode: 'info', product },
         });
       },
@@ -101,14 +116,23 @@ export class ProductsPageComponent {
       next: (res) => {
         const product = res?.data ?? res?.product ?? res;
         const ref = this.dialog.open(ProductFormComponent, {
+          width: '900px',
+          maxWidth: '96vw',
           data: { mode: 'edit', product },
         });
 
         ref.afterClosed().subscribe((payload) => {
           if (!payload) return;
 
-          const fd = this.buildProductFormData(payload);
-          this.api.patch<any>(`/products/${encodeURIComponent(id)}`, fd).subscribe({
+          const { json, formData } = this.cleanUpdatePayload(payload);
+          const hasFiles = Array.isArray(payload?.newImages) && payload.newImages.length > 0;
+
+          // Si pas d'images à uploader -> PATCH JSON (categories en array) => correspond exactement au Joi
+          const req$ = hasFiles
+            ? this.api.patch<any>(`/products/${encodeURIComponent(id)}`, formData)
+            : this.api.patch<any>(`/products/${encodeURIComponent(id)}`, json);
+
+          req$.subscribe({
             next: () => {
               this.toast.success('Produit modifié');
               this.resourceCards?.refresh();
