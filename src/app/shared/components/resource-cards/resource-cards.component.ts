@@ -76,6 +76,9 @@ export class ResourceCardsComponent<TItem extends Record<string, any>> implement
 
   searchCtrl = new FormControl<string>('', { nonNullable: true });
 
+  /** Index de l'image active par item (clé = _id ou id) */
+  private activeImageIndexMap = new Map<string, number>();
+
   loading = false;
   error?: ApiError;
 
@@ -434,6 +437,52 @@ export class ResourceCardsComponent<TItem extends Record<string, any>> implement
     }
 
     return null;
+  }
+
+  /** Retourne toutes les URLs d'images d'un item */
+  imageUrlsOf(row: TItem): string[] {
+    if (!this.imageField) return [];
+    const val = (row as any)?.[this.imageField];
+    if (val === null || val === undefined) return [];
+
+    const toUrl = (v: any): string | null => {
+      if (typeof v === 'string') return v.trim() || null;
+      if (typeof v === 'object' && v !== null) {
+        const link = v?.link;
+        return typeof link === 'string' && link.trim() ? link.trim() : null;
+      }
+      return null;
+    };
+
+    if (Array.isArray(val)) {
+      return val.map(toUrl).filter((u): u is string => u !== null);
+    }
+    const single = toUrl(val);
+    return single ? [single] : [];
+  }
+
+  /** URL de l'image active (selon la miniature sélectionnée) */
+  activeImageOf(row: TItem): string | null {
+    const urls = this.imageUrlsOf(row);
+    if (urls.length === 0) return null;
+    const key = this.rowKey(row);
+    const idx = this.activeImageIndexMap.get(key) ?? 0;
+    return urls[idx] ?? urls[0];
+  }
+
+  /** Sélectionne une miniature */
+  selectImage(row: TItem, index: number): void {
+    this.activeImageIndexMap.set(this.rowKey(row), index);
+    this.cdr.markForCheck();
+  }
+
+  /** Index actif */
+  activeImageIndex(row: TItem): number {
+    return this.activeImageIndexMap.get(this.rowKey(row)) ?? 0;
+  }
+
+  private rowKey(row: TItem): string {
+    return String((row as any)?._id ?? (row as any)?.id ?? JSON.stringify(row));
   }
 
   getFilterCtrl(param: string): FormControl<any> {
