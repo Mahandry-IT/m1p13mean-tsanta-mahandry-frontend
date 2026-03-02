@@ -1,0 +1,83 @@
+<div class="promo-form-dialog">
+
+  <!-- En-tête -->
+  <div class="promo-form-dialog__header">
+    <div class="promo-form-dialog__icon">
+      <mat-icon>{{ isInfo ? 'local_offer' : (isCreate ? 'add_circle_outline' : 'edit_outline') }}</mat-icon>
+    </div>
+    <h2 class="promo-form-dialog__title">
+      {{ isInfo ? 'Infos promotion' : (isCreate ? 'Ajouter une promotion' : 'Modifier la promotion') }}
+    </h2>
+    <p class="promo-form-dialog__subtitle">
+      {{ isInfo ? 'Détails de la promotion en lecture seule' : 'Renseignez les champs ci-dessous' }}
+    </p>
+  </div>
+
+  <!-- Corps -->
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <div class="promo-form-dialog__body">
+      <div class="promo-form-dialog__grid">
+
+        <mat-form-field appearance="outline">
+          <mat-label>ID Boutique</mat-label>
+          <input matInput formControlName="storeId" placeholder="ID boutique" />
+          <mat-error *ngIf="form.get('storeId')?.touched && form.get('storeId')?.invalid">Requis</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>ID Produit</mat-label>
+          <input matInput formControlName="productId" placeholder="ID produit" />
+          <mat-error *ngIf="form.get('productId')?.touched && form.get('productId')?.invalid">Requis</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Remise (%)</mat-label>
+          <input matInput type="number" formControlName="discount" placeholder="ex : 20" />
+          <mat-error *ngIf="form.get('discount')?.touched && form.get('discount')?.invalid">Valeur entre 0 et 100</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Active</mat-label>
+          <mat-select formControlName="isActive">
+            <mat-option [value]="true">Oui</mat-option>
+            <mat-option [value]="false">Non</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Début</mat-label>
+          <input matInput type="datetime-local" formControlName="startDate" />
+          <mat-error *ngIf="form.get('startDate')?.touched && form.get('startDate')?.invalid">Requis</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Fin</mat-label>
+          <input matInput type="datetime-local" formControlName="endDate" />
+          <mat-error *ngIf="form.get('endDate')?.touched && form.get('endDate')?.invalid">Requis</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="promo-form-dialog__desc">
+          <mat-label>Description</mat-label>
+          <textarea matInput rows="3" formControlName="description" placeholder="Décrivez la promotion…"></textarea>
+        </mat-form-field>
+
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="promo-form-dialog__actions">
+      <button mat-stroked-button type="button" (click)="close()">Fermer</button>
+
+      <button *ngIf="isCreate && !isInfo" mat-stroked-button type="button" (click)="suggest()">
+        <mat-icon>auto_awesome</mat-icon>
+        Suggérer
+      </button>
+
+      <button *ngIf="!isInfo" mat-flat-button color="primary" type="submit">
+        <mat-icon>save_outlined</mat-icon>
+        {{ isCreate ? 'Créer' : 'Enregistrer' }}
+      </button>
+    </div>
+  </form>
+
+</div>
