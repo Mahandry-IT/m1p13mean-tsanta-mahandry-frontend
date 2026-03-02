@@ -10,9 +10,11 @@
       [isInfonable]="true"
       [isEditable]="true"
       [isDeletable]="true"
+      [isAddable]="true"
       (info)="onInfo($event)"
       (edit)="onEdit($event)"
       (delete)="onDelete($event)"
+      (add)="onAdd()"
       [filterControls]="productFilters"
     ></app-resource-cards>
   </app-page>

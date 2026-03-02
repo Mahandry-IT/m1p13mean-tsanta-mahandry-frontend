@@ -67,10 +67,12 @@ export class ResourceCardsComponent<TItem extends Record<string, any>> implement
   @Input() isEditable = false;
   @Input() isDeletable = false;
   @Input() isInfonable = false;
+  @Input() isAddable = false;
 
   @Output() edit = new EventEmitter<TItem>();
   @Output() delete = new EventEmitter<TItem>();
   @Output() info = new EventEmitter<TItem>();
+  @Output() add = new EventEmitter<void>();
 
   searchCtrl = new FormControl<string>('', { nonNullable: true });
 
@@ -454,6 +456,10 @@ export class ResourceCardsComponent<TItem extends Record<string, any>> implement
   }
 
   trackById = (_: number, row: TItem) => (row as any)?._id ?? (row as any)?.id ?? _;
+
+  onAdd(): void {
+    this.add.emit();
+  }
 }
 
 export interface ResourceCardsFilterOption {

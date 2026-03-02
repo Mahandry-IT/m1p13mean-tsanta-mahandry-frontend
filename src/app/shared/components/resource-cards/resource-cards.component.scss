@@ -186,6 +186,33 @@ button.resource-cards__refresh {
   }
 }
 
+// ── Add button ─────────────────────────────────────────────────────────────
+button.resource-cards__add {
+  height       : 44px !important;
+  padding      : 0 20px !important;
+  border-radius: 50px !important;
+  font-weight  : 700 !important;
+  font-size    : 14px !important;
+  white-space  : nowrap;
+  background   : $gradient-primary !important;
+  color        : #fff !important;
+  box-shadow   : $shadow-card;
+  transition   : transform 0.2s ease, box-shadow 0.2s ease;
+
+  mat-icon {
+    font-size   : 18px !important;
+    width       : 18px !important;
+    height      : 18px !important;
+    margin-right: 6px !important;
+    color       : #fff !important;
+  }
+
+  &:hover {
+    transform : translateY(-1px);
+    box-shadow: $shadow-card-hover;
+  }
+}
+
 // ── Filters bar ────────────────────────────────────────────────────────────
 .resource-cards__filters {
   display    : flex;
