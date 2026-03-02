@@ -51,6 +51,10 @@
       [isAddable]="true"
       [priceTemplate]="myPriceTpl"
       [priceResolver]="priceResolver"
+      (info)="onInfo($event)"
+      (edit)="onEdit($event)"
+      (delete)="onDelete($event)"
+      (add)="onAdd()"
     ></app-store-product-cards>
 
   </app-page>
