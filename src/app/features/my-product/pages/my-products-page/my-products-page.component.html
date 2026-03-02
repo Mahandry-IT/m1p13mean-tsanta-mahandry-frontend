@@ -1,0 +1,29 @@
+<app-shell>
+  <app-page headTitle="Mes produits">
+
+    <div class="my-products__filters">
+      <mat-form-field appearance="outline" class="my-products__store">
+        <mat-label>Boutique</mat-label>
+        <mat-select [(ngModel)]="selectedStoreId">
+          <mat-option *ngFor="let s of stores" [value]="s.id">{{ s.name }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <app-store-product-cards
+      [endpoint]="endpoint"
+      [listEndpoint]="listEndpoint"
+      itemsKey="products"
+      titleField="name"
+      imageField="images"
+      [storeId]="selectedStoreId"
+      [filters]="{ storeId: selectedStoreId, sortBy: 'createdAt', sortDir: 'desc' }"
+      [isInfonable]="true"
+      [isEditable]="true"
+      [isDeletable]="true"
+      [isAddable]="false"
+    ></app-store-product-cards>
+
+  </app-page>
+</app-shell>
+

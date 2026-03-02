@@ -1,0 +1,211 @@
+// Reprend le style de ResourceCards en le scoppant (éviter effets de bord)
+@use 'sass:color';
+
+$gradient-primary : linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+$color-primary    : #667eea;
+$color-secondary  : #764ba2;
+$color-text       : #1a1a2e;
+$color-text-muted : #6b7280;
+$color-border     : rgba(102, 126, 234, 0.14);
+$color-surface    : #ffffff;
+$color-surface-alt: #f8f7ff;
+$color-error      : #e03131;
+$radius-sm        : 8px;
+$radius-md        : 16px;
+$radius-lg        : 24px;
+$font-body        : 'Segoe UI', system-ui, sans-serif;
+$shadow-card      : 0 4px 24px rgba(102, 126, 234, 0.10), 0 1px 4px rgba(0,0,0,0.05);
+$shadow-card-hover: 0 12px 40px rgba(102, 126, 234, 0.18), 0 2px 8px rgba(0,0,0,0.07);
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.store-product-cards {
+  display       : flex;
+  flex-direction: column;
+  gap           : 20px;
+  font-family   : $font-body;
+  animation     : fade-in 0.3s ease both;
+  padding       : 24px 32px;
+  background    : $color-surface-alt;
+  border-radius : $radius-lg;
+}
+
+.store-product-cards__toolbar {
+  display    : flex;
+  gap        : 12px;
+  align-items: center;
+  height     : 44px;
+}
+
+.store-product-cards__search {
+  flex: 0 0 clamp(200px, 25%, 320px);
+}
+
+button.store-product-cards__refresh,
+button.store-product-cards__add {
+  height: 44px !important;
+  border-radius: 50px !important;
+}
+
+button.store-product-cards__add {
+  background: $gradient-primary !important;
+  color: #fff !important;
+}
+
+.store-product-cards__state {
+  display        : flex;
+  align-items    : center;
+  justify-content: center;
+  gap            : 12px;
+  padding        : 48px 0;
+  font-size      : 14px;
+  color          : $color-text-muted;
+
+  &::before {
+    content      : '';
+    display      : block;
+    width        : 20px;
+    height       : 20px;
+    border-radius: 50%;
+    border       : 2px solid $color-border;
+    border-top   : 2px solid $color-primary;
+    animation    : spin 0.7s linear infinite;
+    flex-shrink  : 0;
+  }
+}
+
+.store-product-cards__state--error {
+  background: rgba(224, 49, 49, 0.07);
+  border: 1px solid rgba(224, 49, 49, 0.2);
+  border-radius: $radius-md;
+  color: $color-error;
+  padding: 16px 20px;
+
+  &::before { display: none; }
+}
+
+.store-product-cards__empty {
+  display        : flex;
+  flex-direction : column;
+  align-items    : center;
+  justify-content: center;
+  gap            : 12px;
+  padding        : 64px 0;
+  color          : $color-text-muted;
+  font-size      : 14px;
+}
+
+.store-product-cards__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 20px;
+  animation: fade-in 0.25s ease both;
+}
+
+.store-product-cards__card {
+  border-radius: $radius-md !important;
+  border: 1px solid $color-border !important;
+  box-shadow: $shadow-card !important;
+  background: $color-surface !important;
+  transition: transform 0.25s ease, box-shadow 0.25s ease !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+
+  &:hover {
+    transform: translateY(-4px) !important;
+    box-shadow: $shadow-card-hover !important;
+  }
+
+  &::before {
+    content: '';
+    display: block;
+    height: 3px;
+    background: $gradient-primary;
+  }
+
+  mat-card-header {
+    padding: 12px 20px 6px !important;
+
+    .mat-mdc-card-title {
+      font-size: 15px !important;
+      font-weight: 700 !important;
+      color: $color-text !important;
+    }
+  }
+
+  mat-card-actions {
+    padding: 8px 12px 14px !important;
+    border-top: 1px solid $color-border;
+    margin-top: auto;
+  }
+}
+
+.store-product-cards__price {
+  font-weight: 800;
+  color: $color-secondary;
+}
+
+// Galerie
+.store-product-cards__gallery {
+  width: 100%;
+  padding: 14px 14px 10px;
+  background: $color-surface;
+}
+
+.store-product-cards__gallery-main {
+  width: 100%;
+  height: 180px;
+  border-radius: 14px;
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  border: 1px solid rgba(0,0,0,0.08);
+  background-color: #fff;
+}
+
+.store-product-cards__gallery-thumbs {
+  display: flex;
+  gap: 10px;
+  padding-top: 10px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.store-product-cards__thumb {
+  width: 56px;
+  height: 42px;
+  border-radius: 10px;
+  border: 1.5px solid rgba(0,0,0,0.10);
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-color: #fff;
+  flex: 0 0 auto;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+
+  &:hover {
+    transform: translateY(-1px);
+    border-color: rgba(102, 126, 234, 0.45);
+  }
+
+  &--active {
+    border-color: #f39c59;
+    box-shadow: 0 0 0 2px rgba(243, 156, 89, 0.25);
+  }
+}
+
+@media (max-width: 640px) {
+  .store-product-cards__toolbar { flex-wrap: wrap; height: auto; }
+  .store-product-cards__grid { grid-template-columns: 1fr; }
+}
+

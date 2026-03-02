@@ -12,6 +12,7 @@ import { FooterComponent } from './components/footer/footer.component';
 import { ResourceListComponent } from './components/resource-list/resource-list.component';
 import { ConfirmDialogComponent } from './components/confirm-dialog/confirm-dialog.component';
 import { ResourceCardsComponent } from './components/resource-cards/resource-cards.component';
+import { StoreProductCardsComponent } from './components/store-product-cards/store-product-cards.component';
 
 @NgModule({
   declarations: [
@@ -23,6 +24,7 @@ import { ResourceCardsComponent } from './components/resource-cards/resource-car
     ResourceListComponent,
     ConfirmDialogComponent,
     ResourceCardsComponent,
+    StoreProductCardsComponent,
   ],
   imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule, MaterialModule, NgxIntlTelInputModule],
   exports: [
@@ -38,6 +40,7 @@ import { ResourceCardsComponent } from './components/resource-cards/resource-car
     ResourceListComponent,
     ConfirmDialogComponent,
     ResourceCardsComponent,
+    StoreProductCardsComponent,
   ],
 })
 export class SharedModule {}
