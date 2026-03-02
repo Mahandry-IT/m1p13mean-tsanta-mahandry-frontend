@@ -88,6 +88,15 @@ export class ResourceCardsComponent<TItem extends Record<string, any>> implement
 
   sort: Sort = { active: '', direction: '' };
 
+  /**
+   * Filtres UI (en plus de la recherche q).
+   * Chaque filtre est envoyé comme query param (filtre.param = value).
+   */
+  @Input() filterControls: ResourceCardsFilterControl[] = [];
+
+  /** param -> ctrl */
+  filterForm = new Map<string, FormControl<any>>();
+
   constructor(
     private readonly resourceList: ResourceListService,
     private readonly cdr: ChangeDetectorRef,
@@ -101,6 +110,10 @@ export class ResourceCardsComponent<TItem extends Record<string, any>> implement
   }
 
   ngOnChanges(changes: SimpleChanges): void {
+    if (changes['filterControls']) {
+      this.setupFilterControls();
+    }
+
     if (changes['endpoint'] || changes['filters'] || changes['itemsKey']) {
       this.pagination = { ...this.pagination, page: 1, limit: this.pageSize };
       this.load();
@@ -108,10 +121,48 @@ export class ResourceCardsComponent<TItem extends Record<string, any>> implement
   }
 
   ngOnInit(): void {
+    this.setupFilterControls();
+
     if (this.endpoint) {
       this.pagination = { ...this.pagination, page: 1, limit: this.pageSize };
       this.load();
     }
+  }
+
+  private setupFilterControls(): void {
+    // Ne pas recréer si déjà initialisé avec les mêmes params
+    this.filterForm.clear();
+
+    const ctrls = Array.isArray(this.filterControls) ? this.filterControls : [];
+    for (const f of ctrls) {
+      if (!f?.param) continue;
+      const fc = new FormControl<any>(f.defaultValue ?? null);
+      this.filterForm.set(f.param, fc);
+
+      fc.valueChanges.pipe(debounceTime(150), distinctUntilChanged()).subscribe(() => {
+        this.pagination = { ...this.pagination, page: 1 };
+        this.load();
+      });
+    }
+  }
+
+  private uiFilterParams(): Record<string, string | number | boolean | null | undefined> {
+    const out: Record<string, string | number | boolean | null | undefined> = {};
+    for (const [param, ctrl] of this.filterForm.entries()) {
+      const v = ctrl.value;
+      if (v === null || v === undefined || v === '') continue;
+      out[param] = v;
+    }
+    return out;
+  }
+
+  clearFilters(): void {
+    for (const ctrl of this.filterForm.values()) {
+      ctrl.setValue(null, { emitEvent: false });
+    }
+    this.pagination = { ...this.pagination, page: 1 };
+    this.load();
+    this.cdr.markForCheck();
   }
 
   load(): void {
@@ -129,13 +180,15 @@ export class ResourceCardsComponent<TItem extends Record<string, any>> implement
       sortParams[this.sortDirParam] = this.sort.direction;
     }
 
+    const uiFilters = this.uiFilterParams();
+
     this.resourceList
       .fetchPage<TItem>({
         endpoint: this.endpoint,
         page: this.pagination.page,
         limit: this.pagination.limit,
         q: this.searchCtrl.value,
-        filters: { ...(this.filters ?? {}), ...sortParams },
+        filters: { ...(this.filters ?? {}), ...uiFilters, ...sortParams },
         itemsKey: this.itemsKey,
       })
       .subscribe({
@@ -202,6 +255,36 @@ export class ResourceCardsComponent<TItem extends Record<string, any>> implement
     return null;
   }
 
+  getFilterCtrl(param: string): FormControl<any> {
+    const existing = this.filterForm.get(param);
+    if (existing) return existing;
+
+    const fc = new FormControl<any>(null);
+    this.filterForm.set(param, fc);
+    return fc;
+  }
+
   trackById = (_: number, row: TItem) => (row as any)?._id ?? (row as any)?.id ?? _;
 }
 
+export interface ResourceCardsFilterOption {
+  label: string;
+  value: string | number | boolean;
+}
+
+export type ResourceCardsFilterType = 'select' | 'number' | 'text';
+
+export interface ResourceCardsFilterControl {
+  /** Label affiché dans le form-field */
+  label: string;
+  /** Nom du query param côté backend (ex: categoryId, typeId, minPrice, maxPrice) */
+  param: string;
+  /** Type de contrôle */
+  type: ResourceCardsFilterType;
+  /** Options (obligatoire pour select) */
+  options?: ResourceCardsFilterOption[];
+  /** Placeholder optionnel */
+  placeholder?: string;
+  /** Valeur par défaut */
+  defaultValue?: string | number | boolean | null;
+}

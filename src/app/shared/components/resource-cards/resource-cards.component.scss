@@ -62,3 +62,26 @@
   gap: 6px;
 }
 
+.resource-cards__filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  align-items: end;
+  margin-bottom: 12px;
+}
+
+.resource-cards__filter {
+  width: 100%;
+}
+
+.resource-cards__sort-item {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(102, 126, 234, 0.25);
+  color: #344054;
+  font-size: 12px;
+  cursor: pointer;
+  user-select: none;
+}

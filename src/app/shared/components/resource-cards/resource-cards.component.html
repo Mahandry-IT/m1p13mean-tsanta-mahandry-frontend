@@ -19,6 +19,45 @@
     </button>
   </div>
 
+  <!-- Filters -->
+  <div class="resource-cards__filters" *ngIf="filterControls.length">
+    <mat-form-field
+      *ngFor="let f of filterControls"
+      appearance="outline"
+      class="resource-cards__filter"
+    >
+      <mat-label>{{ f.label }}</mat-label>
+
+      <mat-select *ngIf="f.type === 'select'" [formControl]="getFilterCtrl(f.param)">
+        <mat-option [value]="null">Tous</mat-option>
+        <mat-option *ngFor="let opt of (f.options ?? [])" [value]="opt.value">
+          {{ opt.label }}
+        </mat-option>
+      </mat-select>
+
+      <input
+        *ngIf="f.type === 'number'"
+        matInput
+        type="number"
+        [placeholder]="f.placeholder || ''"
+        [formControl]="getFilterCtrl(f.param)"
+      />
+
+      <input
+        *ngIf="f.type === 'text'"
+        matInput
+        type="text"
+        [placeholder]="f.placeholder || ''"
+        [formControl]="getFilterCtrl(f.param)"
+      />
+    </mat-form-field>
+
+    <button mat-stroked-button type="button" (click)="clearFilters()">
+      <mat-icon>backspace</mat-icon>
+      Réinitialiser
+    </button>
+  </div>
+
   <!-- Loading -->
   <div class="resource-cards__state" *ngIf="loading">Chargement en cours…</div>
 
@@ -36,9 +75,8 @@
     <div class="resource-cards__sort" *ngIf="enableServerSort">
       <div class="resource-cards__sort-label">Tri:</div>
       <div matSort (matSortChange)="onSortChange($event)" class="resource-cards__sort-row">
-        <!-- On expose des headers "virtuel" juste pour bénéficier de MatSortHeader -->
-        <button mat-button [mat-sort-header]="titleField">{{ titleField }}</button>
-        <button *ngIf="descriptionField" mat-button [mat-sort-header]="descriptionField">{{ descriptionField }}</button>
+        <div class="resource-cards__sort-item" [mat-sort-header]="titleField">{{ titleField }}</div>
+        <div *ngIf="descriptionField" class="resource-cards__sort-item" [mat-sort-header]="descriptionField">{{ descriptionField }}</div>
       </div>
     </div>
 
