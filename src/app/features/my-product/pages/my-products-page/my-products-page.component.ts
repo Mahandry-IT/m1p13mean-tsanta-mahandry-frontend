@@ -281,7 +281,12 @@ export class MyProductsPageComponent implements OnInit {
     ref.afterClosed().subscribe((ok) => {
       if (!ok) return;
 
-      this.api.delete<any>(`/products/${encodeURIComponent(id)}`).subscribe({
+      if (!this.selectedStoreId) {
+        this.toast.error('Sélectionnez une boutique avant de supprimer le produit.');
+        return;
+      }
+
+      this.api.delete<any>(`/products/my-stores/${encodeURIComponent(id)}/${encodeURIComponent(this.selectedStoreId)}`).subscribe({
         next: () => {
           this.toast.success('Produit supprimé');
           this.storeProductCards?.load();
