@@ -29,7 +29,6 @@ export class ProductsPageComponent {
       label: 'Type',
       param: 'typeId',
       type: 'select',
-      disabledWhenMissingDeps: true,
       remoteOptions: {
         endpoint: '/types',
         itemsKey: 'items',
