@@ -11,6 +11,7 @@ import { NavbarComponent } from './components/navbar/navbar.component';
 import { FooterComponent } from './components/footer/footer.component';
 import { ResourceListComponent } from './components/resource-list/resource-list.component';
 import { ConfirmDialogComponent } from './components/confirm-dialog/confirm-dialog.component';
+import { ResourceCardsComponent } from './components/resource-cards/resource-cards.component';
 
 @NgModule({
   declarations: [
@@ -21,6 +22,7 @@ import { ConfirmDialogComponent } from './components/confirm-dialog/confirm-dial
     FooterComponent,
     ResourceListComponent,
     ConfirmDialogComponent,
+    ResourceCardsComponent,
   ],
   imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule, MaterialModule, NgxIntlTelInputModule],
   exports: [
@@ -35,6 +37,7 @@ import { ConfirmDialogComponent } from './components/confirm-dialog/confirm-dial
     FooterComponent,
     ResourceListComponent,
     ConfirmDialogComponent,
+    ResourceCardsComponent,
   ],
 })
 export class SharedModule {}
