@@ -137,36 +137,40 @@ $shadow-card      : 0 4px 24px rgba(102, 126, 234, 0.10), 0 1px 4px rgba(0,0,0,0
 
 // ── Prix (template custom) ────────────────────────────────────────────────
 .my-products__price {
-  /* mat-card-subtitle s'affiche déjà en block, mais on force pour éviter tout collage au titre */
-  display: flex;
+  display    : flex;
   align-items: baseline;
-  gap: 10px;
-  flex-wrap: wrap;
-  margin-top: 6px;
-  width: 100%;
+  gap        : 8px;
+  flex-wrap  : wrap;
+  padding    : 0 !important;
+  margin     : 0 !important;
 }
+
 
 .my-products__price-final {
-  font-weight: 900;
-  color: $color-secondary;
+  font-size  : 16px;
+  font-weight: 800;
+  color      : #1a1a2e;   // prix final en noir/foncé comme la maquette
 }
 
+
 .my-products__price-base {
+  font-size      : 13px;
+  font-weight    : 400;
+  color          : #9ca3af;
   text-decoration: line-through;
-  opacity: 0.55;
-  font-weight: 700;
+}
+
+.my-products__promo-row {
+  padding: 2px 20px 10px;   // aligne avec le padding de la card header
 }
 
 .my-products__promo-badge {
-  display: inline-flex;
-  align-items: center;
-  height: 22px;
-  padding: 0 8px;
-  border-radius: 999px;
-  background: rgba(224, 49, 49, 0.10);
-  border: 1px solid rgba(224, 49, 49, 0.25);
-  color: $color-error;
-  font-size: 12px;
-  font-weight: 800;
-  line-height: 22px;
+  display      : inline-block;
+  padding      : 3px 10px;
+  background   : #fff3e0;          // orange clair comme la maquette
+  color        : #e65100;          // orange foncé
+  font-size    : 11px;
+  font-weight  : 700;
+  border-radius: 4px;
+  letter-spacing: 0.3px;
 }

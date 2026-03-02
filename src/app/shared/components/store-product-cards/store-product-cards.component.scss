@@ -347,6 +347,15 @@ button.store-product-cards__add {
   }
 }
 
+.store-product-cards__card > ng-container {
+  display: block;
+  padding: 0 16px 8px;
+}
+
+.store-product-cards__card-price {
+  padding: 0 16px 8px;
+}
+
 // ── Price ──────────────────────────────────────────────────────────────────
 .store-product-cards__price {
   font-size  : 15px !important;

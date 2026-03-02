@@ -28,9 +28,13 @@
         <ng-template #promoTpl>
           <span class="my-products__price-final">{{ format(finalPrice) }}</span>
           <span class="my-products__price-base">{{ format(basePrice) }}</span>
-          <span class="my-products__promo-badge" *ngIf="promoPercent as p">-{{ p }}%</span>
         </ng-template>
       </mat-card-subtitle>
+
+      <!-- Badge promo juste sous le prix -->
+      <div class="my-products__promo-row" *ngIf="hasPromo && promoPercent">
+        <span class="my-products__promo-badge">-{{ promoPercent }}%</span>
+      </div>
     </ng-template>
 
     <app-store-product-cards

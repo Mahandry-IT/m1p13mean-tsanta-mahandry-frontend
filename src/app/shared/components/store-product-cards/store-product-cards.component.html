@@ -116,17 +116,21 @@
         <mat-card-header>
           <mat-card-title>{{ titleOf(row) }}</mat-card-title>
 
-          <ng-container *ngIf="priceTemplate; else defaultPriceTpl">
+          <!-- Subtitle par défaut uniquement (sans priceTemplate) -->
+          <mat-card-subtitle class="store-product-cards__price" *ngIf="!priceTemplate">
+            {{ formatPrice(priceOf(row)) }}
+          </mat-card-subtitle>
+        </mat-card-header>
+
+        <!-- Template prix custom HORS du header -->
+        <ng-container *ngIf="priceTemplate">
+          <div class="store-product-cards__card-price" *ngIf="priceTemplate">
             <ng-container
               [ngTemplateOutlet]="priceTemplate"
               [ngTemplateOutletContext]="priceContextOf(row)"
             ></ng-container>
-          </ng-container>
-
-          <ng-template #defaultPriceTpl>
-            <mat-card-subtitle class="store-product-cards__price">{{ formatPrice(priceOf(row)) }}</mat-card-subtitle>
-          </ng-template>
-        </mat-card-header>
+          </div>
+        </ng-container>
 
         <mat-card-actions align="end" *ngIf="isInfonable || isEditable || isDeletable">
           <button *ngIf="isInfonable" mat-icon-button type="button" matTooltip="Infos" (click)="info.emit(row)">
