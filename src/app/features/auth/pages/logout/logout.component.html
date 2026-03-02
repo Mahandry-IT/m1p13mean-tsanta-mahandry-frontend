@@ -1,0 +1,20 @@
+<app-page headTitle="Déconnexion">
+  <section class="activate">
+    <div class="activate__card">
+      <div class="activate__icon">
+        <mat-icon>logout</mat-icon>
+      </div>
+
+      <h1 class="activate__title">Déconnexion
+…</h1>
+      <p class="activate__subtitle">Merci de patienter, nous fermons votre session.</p>
+
+      <div class="activate__loader" *ngIf="(loading$ | async) ?? true">
+        <mat-progress-spinner mode="indeterminate" diameter="32"></mat-progress-spinner>
+      </div>
+
+      <p class="activate__hint">Vous allez être redirigé automatiquement vers la page de connexion.</p>
+    </div>
+  </section>
+</app-page>
+

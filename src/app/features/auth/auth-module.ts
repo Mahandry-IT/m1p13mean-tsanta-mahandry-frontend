@@ -11,6 +11,7 @@ import { ActivateComponent } from './pages/activate/activate.component';
 import { NewPasswordComponent } from './pages/new-password/new-password.component';
 import { ForgotPasswordComponent } from './pages/forgot-password/forgot-password.component';
 import { ResetPasswordComponent } from './pages/reset-password/reset-password.component';
+import { LogoutComponent } from './pages/logout/logout.component';
 
 @NgModule({
   declarations: [
@@ -18,6 +19,7 @@ import { ResetPasswordComponent } from './pages/reset-password/reset-password.co
     RegisterComponent,
     RegisterManagerComponent,
     ActivateComponent,
+    LogoutComponent,
     NewPasswordComponent,
     ForgotPasswordComponent,
     ResetPasswordComponent,

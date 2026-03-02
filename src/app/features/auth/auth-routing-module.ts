@@ -7,12 +7,14 @@ import { ActivateComponent } from './pages/activate/activate.component';
 import { NewPasswordComponent } from './pages/new-password/new-password.component';
 import { ForgotPasswordComponent } from './pages/forgot-password/forgot-password.component';
 import { ResetPasswordComponent } from './pages/reset-password/reset-password.component';
+import { LogoutComponent } from './pages/logout/logout.component';
 
 const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
   { path: 'register-manager', component: RegisterManagerComponent },
   { path: 'activate', component: ActivateComponent },
+  { path: 'logout', component: LogoutComponent },
   { path: 'new-password', component: NewPasswordComponent },
   { path: 'forgot-password', component: ForgotPasswordComponent },
   { path: 'reset-password', component: ResetPasswordComponent },

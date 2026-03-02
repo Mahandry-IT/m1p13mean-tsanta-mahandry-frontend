@@ -226,4 +226,16 @@ export class AuthService {
     if (!this.isBrowser) return;
     (globalThis as any).localStorage.removeItem(AuthService.TOKEN_KEY);
   }
+
+  /** Backend: POST /api/auth/logout */
+  logout(): Observable<unknown> {
+    return this.api.post<unknown>('/auth/logout', null);
+  }
+
+  /** Nettoie la session côté front */
+  clearSession(): void {
+    this.clearToken();
+    this.clearUser();
+    this.clearHomePage();
+  }
 }
