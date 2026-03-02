@@ -17,7 +17,7 @@ export class BuyProductsPageComponent implements OnInit {
 
   endpoint = '/products';
   // pour l'achat: on conserve le même flux que my-products (produits des boutiques)
-  listEndpoint = '/products/my-stores';
+  listEndpoint = '/products/buy-product';
 
   stores: Array<{ id: string; name: string }> = [];
   selectedStoreId: string | null = null;
@@ -66,7 +66,7 @@ export class BuyProductsPageComponent implements OnInit {
   }
 
   private loadStores(): void {
-    this.api.get<any>('/stores/my').subscribe({
+    this.api.get<any>('/stores/list').subscribe({
       next: (res: any) => {
         const data = res?.data ?? res;
         const arr = Array.isArray(data) ? data : (Array.isArray(data?.items) ? data.items : []);
