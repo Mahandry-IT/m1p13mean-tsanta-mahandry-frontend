@@ -310,7 +310,6 @@ export class ResourceListComponent<TItem extends Record<string, any>> implements
   trackByIndex(i: number): number {
     return i;
   }
-<<<<<<< Updated upstream
 
   onAdd(): void {
     // Si le parent a branché (add), on lui laisse gérer (ouvrir dialog, etc.)
@@ -342,6 +341,3 @@ export class ResourceListComponent<TItem extends Record<string, any>> implements
     });
   }
 }
-=======
-}
->>>>>>> Stashed changes

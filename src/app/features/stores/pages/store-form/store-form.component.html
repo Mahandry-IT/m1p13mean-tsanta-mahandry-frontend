@@ -1,0 +1,113 @@
+<div class="store-form-dialog">
+
+  <!-- En-tête -->
+  <div class="store-form-dialog__header">
+    <div class="store-form-dialog__icon-wrap">
+      <div class="store-form-dialog__icon">
+        <mat-icon>
+          {{ isInfo ? 'store' : (isCreate ? 'add_business' : 'edit_outline') }}
+        </mat-icon>      
+      </div>
+    </div>
+    <h2 class="store-form-dialog__title">
+      {{ isInfo ? 'Détails de la boutique' : (isCreate ? 'Créer une boutique' : 'Modifier la boutique') }}
+    </h2>
+    <p class="store-form-dialog__subtitle">
+      {{ isInfo ? 'Informations de la boutique' : (isCreate ? 'Remplissez les informations ci-dessous' : 'Modifiez les informations ci-dessous') }}
+    </p>
+  </div>
+
+  <!-- Formulaire -->
+  <form [formGroup]="form" (ngSubmit)="submit()">
+
+    <div class="store-form-dialog__body">
+      <div class="store-form-dialog__grid">
+
+        <!-- Nom -->
+        <div class="sf-field">
+          <label class="sf-field__label">
+            <mat-icon>storefront</mat-icon>
+            Nom de la boutique
+          </label>
+          <div class="sf-field__input-wrap" [class.sf-field__input-wrap--disabled]="isInfo">
+            <input class="sf-field__input" formControlName="name" placeholder="ex : Magasin Centre-Ville" />
+          </div>
+          <span class="sf-field__error"
+                *ngIf="form.get('name')?.invalid && form.get('name')?.touched">
+            Le nom est requis (max 100 caractères).
+          </span>
+        </div>
+
+        <!-- Adresse -->
+        <div class="sf-field">
+          <label class="sf-field__label">
+            <mat-icon>place</mat-icon>
+            Adresse
+          </label>
+          <div class="sf-field__input-wrap" [class.sf-field__input-wrap--disabled]="isInfo">
+            <input class="sf-field__input" formControlName="address" placeholder="ex : 123 Rue Principale" />
+          </div>
+          <span class="sf-field__error"
+                *ngIf="form.get('address')?.invalid && form.get('address')?.touched">
+            L'adresse est requise (max 255 caractères).
+          </span>
+        </div>
+
+        <!-- Téléphone -->
+        <div class="sf-field">
+          <label class="sf-field__label">
+            <mat-icon>phone</mat-icon>
+            Téléphone
+          </label>
+          <div class="sf-field__input-wrap" [class.sf-field__input-wrap--disabled]="isInfo">
+            <input class="sf-field__input" formControlName="phone" placeholder="ex : +33123456789" />
+          </div>
+          <span class="sf-field__error"
+                *ngIf="form.get('phone')?.invalid && form.get('phone')?.touched">
+            Le téléphone est requis.
+          </span>
+        </div>
+
+        <!-- Email -->
+        <div class="sf-field">
+          <label class="sf-field__label">
+            <mat-icon>alternate_email</mat-icon>
+            Email
+          </label>
+          <div class="sf-field__input-wrap" [class.sf-field__input-wrap--disabled]="isInfo">
+            <input class="sf-field__input" formControlName="email" type="email" placeholder="ex : contact@store.com" />
+          </div>
+          <span class="sf-field__error"
+                *ngIf="form.get('email')?.invalid && form.get('email')?.touched">
+            Un email valide est requis.
+          </span>
+        </div>
+
+        <!-- Statut (lecture seule) - Seulement si pas en création -->
+        <div class="sf-field" *ngIf="!isCreate">
+          <label class="sf-field__label">
+            <mat-icon>flag</mat-icon>
+            Statut
+          </label>
+          <div class="sf-field__input-wrap sf-field__input-wrap--disabled">
+            <input class="sf-field__input" formControlName="status" />
+          </div>
+        </div>
+
+        
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="store-form-dialog__actions">
+      <button class="sf-btn sf-btn--cancel" type="button" (click)="close()">
+        Fermer
+      </button>
+      <button *ngIf="!isInfo" class="sf-btn sf-btn--submit" type="submit">
+        <mat-icon>{{ isCreate ? 'add' : 'save_outlined' }}</mat-icon>
+        {{ isCreate ? 'Créer' : 'Enregistrer' }}
+      </button>
+    </div>
+
+  </form>
+</div>
