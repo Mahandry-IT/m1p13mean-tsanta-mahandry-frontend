@@ -17,26 +17,28 @@ export class ProductsPageComponent {
       label: 'Catégorie',
       param: 'categoryId',
       type: 'select',
-      options: [],
+      remoteOptions: {
+        endpoint: '/categories',
+        itemsKey: 'items',
+        valueField: '_id',
+        labelField: 'name',
+        params: { page: 1, limit: 200, sortBy: 'createdAt', sortDir: 'desc' },
+      },
     },
     {
       label: 'Type',
       param: 'typeId',
       type: 'select',
-      options: [],
-    },
-    {
-      label: 'Prix min',
-      param: 'minPrice',
-      type: 'number',
-      placeholder: '0',
-    },
-    {
-      label: 'Prix max',
-      param: 'maxPrice',
-      type: 'number',
-      placeholder: '100000',
-    },
+      disabledWhenMissingDeps: true,
+      remoteOptions: {
+        endpoint: '/types',
+        itemsKey: 'items',
+        valueField: '_id',
+        labelField: 'name',
+        dependsOn: ['categoryId'],
+        params: { page: 1, limit: 200, sortBy: 'createdAt', sortDir: 'desc' },
+      },
+    }
   ];
 
   onInfo(row: any) {

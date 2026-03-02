@@ -15,6 +15,7 @@ import { debounceTime, distinctUntilChanged, startWith } from 'rxjs/operators';
 import { ApiError } from '../../../core/models/api-error.model';
 import { PaginationMeta } from '../../../core/models/pagination.model';
 import { ResourceListService } from '../../../core/services/resource-list.service';
+import { ApiService } from '../../../core/services/api.service';
 
 /**
  * Composant générique d'affichage en cards.
@@ -97,8 +98,14 @@ export class ResourceCardsComponent<TItem extends Record<string, any>> implement
   /** param -> ctrl */
   filterForm = new Map<string, FormControl<any>>();
 
+  /** options calculées (param -> options) */
+  private selectOptions = new Map<string, ResourceCardsFilterOption[]>();
+  /** statut chargement options (param -> boolean) */
+  private selectOptionsLoading = new Map<string, boolean>();
+
   constructor(
     private readonly resourceList: ResourceListService,
+    private readonly api: ApiService,
     private readonly cdr: ChangeDetectorRef,
   ) {
     this.searchCtrl.valueChanges
@@ -112,6 +119,7 @@ export class ResourceCardsComponent<TItem extends Record<string, any>> implement
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['filterControls']) {
       this.setupFilterControls();
+      this.loadRemoteOptions();
     }
 
     if (changes['endpoint'] || changes['filters'] || changes['itemsKey']) {
@@ -122,6 +130,7 @@ export class ResourceCardsComponent<TItem extends Record<string, any>> implement
 
   ngOnInit(): void {
     this.setupFilterControls();
+    this.loadRemoteOptions();
 
     if (this.endpoint) {
       this.pagination = { ...this.pagination, page: 1, limit: this.pageSize };
@@ -136,25 +145,176 @@ export class ResourceCardsComponent<TItem extends Record<string, any>> implement
     const ctrls = Array.isArray(this.filterControls) ? this.filterControls : [];
     for (const f of ctrls) {
       if (!f?.param) continue;
-      const fc = new FormControl<any>(f.defaultValue ?? null);
+
+      const shouldStartDisabled = this.shouldDisableFilterAtStart(f);
+      const fc = new FormControl<any>({ value: f.defaultValue ?? null, disabled: shouldStartDisabled });
       this.filterForm.set(f.param, fc);
 
       fc.valueChanges.pipe(debounceTime(150), distinctUntilChanged()).subscribe(() => {
+        this.onDependencyChanged(f.param);
+
         this.pagination = { ...this.pagination, page: 1 };
         this.load();
       });
     }
+
+    // appliquer disable/enable après création pour tous (au cas où l'ordre des filtres change)
+    this.refreshDependentDisabledStates();
   }
 
-  private uiFilterParams(): Record<string, string | number | boolean | null | undefined> {
-    const out: Record<string, string | number | boolean | null | undefined> = {};
-    for (const [param, ctrl] of this.filterForm.entries()) {
-      const v = ctrl.value;
-      if (v === null || v === undefined || v === '') continue;
-      out[param] = v;
-    }
-    return out;
+  private shouldDisableFilterAtStart(f: ResourceCardsFilterControl): boolean {
+    if (f.type !== 'select') return false;
+    if (!f.disabledWhenMissingDeps) return false;
+    const deps = f.remoteOptions?.dependsOn;
+    if (!deps?.length) return false;
+    return this.isMissingDeps(deps);
   }
+
+  private refreshDependentDisabledStates(): void {
+    const ctrls = Array.isArray(this.filterControls) ? this.filterControls : [];
+    for (const f of ctrls) {
+      if (f.type !== 'select') continue;
+      if (!f.disabledWhenMissingDeps) continue;
+      const deps = f.remoteOptions?.dependsOn;
+      if (!deps?.length) continue;
+
+      const ctrl = this.getFilterCtrl(f.param);
+      const shouldDisable = this.isMissingDeps(deps);
+
+      if (shouldDisable && ctrl.enabled) {
+        ctrl.disable({ emitEvent: false });
+        ctrl.setValue(null, { emitEvent: false });
+      }
+      if (!shouldDisable && ctrl.disabled) {
+        ctrl.enable({ emitEvent: false });
+      }
+    }
+  }
+
+  private onDependencyChanged(changedParam: string): void {
+    const ctrls = Array.isArray(this.filterControls) ? this.filterControls : [];
+    for (const f of ctrls) {
+      const ro = f.remoteOptions;
+      if (f.type !== 'select' || !ro?.dependsOn?.length) continue;
+      if (!ro.dependsOn.includes(changedParam)) continue;
+
+      // si la dépendance manque, reset la valeur
+      if (f.disabledWhenMissingDeps && this.isMissingDeps(ro.dependsOn)) {
+        this.getFilterCtrl(f.param).setValue(null, { emitEvent: false });
+      }
+
+      // reload options pour ce select
+      this.loadRemoteOptionsFor(f);
+    }
+
+    // mettre à jour disabled/enabled des champs dépendants
+    this.refreshDependentDisabledStates();
+
+    this.cdr.markForCheck();
+  }
+
+  private isMissingDeps(dependsOn: string[]): boolean {
+    for (const dep of dependsOn) {
+      const v = this.getFilterCtrl(dep).value;
+      if (v === null || v === undefined || v === '') return true;
+    }
+    return false;
+  }
+
+  private loadRemoteOptions(): void {
+    const ctrls = Array.isArray(this.filterControls) ? this.filterControls : [];
+    for (const f of ctrls) {
+      if (f.type !== 'select') continue;
+      if (!f.remoteOptions?.endpoint) continue;
+      this.loadRemoteOptionsFor(f);
+    }
+  }
+
+  private loadRemoteOptionsFor(f: ResourceCardsFilterControl): void {
+    const ro = f.remoteOptions;
+    if (!ro?.endpoint) return;
+
+    // dépendances manquantes => options vides (et facultativement disabled)
+    if (ro.dependsOn?.length && this.isMissingDeps(ro.dependsOn)) {
+      this.selectOptions.set(f.param, []);
+      this.selectOptionsLoading.set(f.param, false);
+      this.cdr.markForCheck();
+      return;
+    }
+
+    this.selectOptionsLoading.set(f.param, true);
+    this.cdr.markForCheck();
+
+    const params: Record<string, string | number | boolean | null | undefined> = {
+      ...(ro.params ?? {}),
+    };
+
+    // injecter dépendances en query params
+    if (ro.dependsOn?.length) {
+      for (const dep of ro.dependsOn) {
+        params[dep] = this.getFilterCtrl(dep).value;
+      }
+    }
+
+    // pagination large par défaut si non spécifiée
+    if (params['page'] === undefined) params['page'] = 1;
+    if (params['limit'] === undefined) params['limit'] = 200;
+
+    this.api.get<any>(ro.endpoint, params).subscribe({
+      next: (res) => {
+        const data = res?.data ?? res;
+
+        // trouver le tableau
+        let items: any[] = [];
+        if (ro.itemsKey && Array.isArray(data?.[ro.itemsKey])) {
+          items = data[ro.itemsKey];
+        } else if (Array.isArray(data?.items)) {
+          items = data.items;
+        } else {
+          // fallback: première propriété array
+          for (const [k, v] of Object.entries(data ?? {})) {
+            if (Array.isArray(v)) {
+              items = v as any[];
+              break;
+            }
+          }
+        }
+
+        const valueField = (ro.valueField ?? '_id').trim();
+        const labelField = (ro.labelField ?? 'name').trim();
+
+        const opts: ResourceCardsFilterOption[] = (items ?? [])
+          .map((it) => {
+            const value = it?.[valueField] ?? it?.id;
+            const label = it?.[labelField] ?? it?.label ?? it?.title ?? value;
+            if (value === undefined || value === null) return null;
+            return {
+              value: value as any,
+              label: String(label ?? '').trim() || String(value),
+            };
+          })
+          .filter(Boolean) as ResourceCardsFilterOption[];
+
+        this.selectOptions.set(f.param, opts);
+        this.selectOptionsLoading.set(f.param, false);
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.selectOptions.set(f.param, []);
+        this.selectOptionsLoading.set(f.param, false);
+        this.cdr.markForCheck();
+      },
+    });
+  }
+
+  getSelectOptions(param: string, fallback?: ResourceCardsFilterOption[]): ResourceCardsFilterOption[] {
+    return this.selectOptions.get(param) ?? (fallback ?? []);
+  }
+
+  isSelectOptionsLoading(param: string): boolean {
+    return this.selectOptionsLoading.get(param) ?? false;
+  }
+
 
   clearFilters(): void {
     for (const ctrl of this.filterForm.values()) {
@@ -162,6 +322,7 @@ export class ResourceCardsComponent<TItem extends Record<string, any>> implement
     }
     this.pagination = { ...this.pagination, page: 1 };
     this.load();
+    this.loadRemoteOptions();
     this.cdr.markForCheck();
   }
 
@@ -264,6 +425,16 @@ export class ResourceCardsComponent<TItem extends Record<string, any>> implement
     return fc;
   }
 
+  private uiFilterParams(): Record<string, string | number | boolean | null | undefined> {
+    const out: Record<string, string | number | boolean | null | undefined> = {};
+    for (const [param, ctrl] of this.filterForm.entries()) {
+      const v = ctrl.value;
+      if (v === null || v === undefined || v === '') continue;
+      out[param] = v;
+    }
+    return out;
+  }
+
   trackById = (_: number, row: TItem) => (row as any)?._id ?? (row as any)?.id ?? _;
 }
 
@@ -274,6 +445,20 @@ export interface ResourceCardsFilterOption {
 
 export type ResourceCardsFilterType = 'select' | 'number' | 'text';
 
+export interface ResourceCardsRemoteOptionsConfig {
+  endpoint: string;
+  /** clé du tableau dans data si nécessaire (défaut: 'items', sinon auto) */
+  itemsKey?: string | null;
+  /** mapping option.value (défaut: '_id' puis 'id') */
+  valueField?: string;
+  /** mapping option.label (défaut: 'name' puis 'label' puis 'title') */
+  labelField?: string;
+  /** params fixes (ex: { limit: 100 }) */
+  params?: Record<string, string | number | boolean | null | undefined>;
+  /** dépendances: liste de query params à injecter depuis les autres filtres (ex: ['categoryId']) */
+  dependsOn?: string[];
+}
+
 export interface ResourceCardsFilterControl {
   /** Label affiché dans le form-field */
   label: string;
@@ -283,6 +468,10 @@ export interface ResourceCardsFilterControl {
   type: ResourceCardsFilterType;
   /** Options (obligatoire pour select) */
   options?: ResourceCardsFilterOption[];
+  /** Si fourni et type=select, les options sont chargées depuis l'API */
+  remoteOptions?: ResourceCardsRemoteOptionsConfig;
+  /** Désactive le champ tant que les dépendances ne sont pas remplies */
+  disabledWhenMissingDeps?: boolean;
   /** Placeholder optionnel */
   placeholder?: string;
   /** Valeur par défaut */

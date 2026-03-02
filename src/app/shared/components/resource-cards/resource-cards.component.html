@@ -28,9 +28,16 @@
     >
       <mat-label>{{ f.label }}</mat-label>
 
-      <mat-select *ngIf="f.type === 'select'" [formControl]="getFilterCtrl(f.param)">
+      <mat-select
+        *ngIf="f.type === 'select'"
+        [formControl]="getFilterCtrl(f.param)"
+      >
         <mat-option [value]="null">Tous</mat-option>
-        <mat-option *ngFor="let opt of (f.options ?? [])" [value]="opt.value">
+        <mat-option *ngIf="isSelectOptionsLoading(f.param)" [disabled]="true">Chargement…</mat-option>
+        <mat-option
+          *ngFor="let opt of getSelectOptions(f.param, f.options)"
+          [value]="opt.value"
+        >
           {{ opt.label }}
         </mat-option>
       </mat-select>
