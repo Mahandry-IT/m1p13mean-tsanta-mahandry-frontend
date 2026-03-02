@@ -70,9 +70,8 @@ export class MyProductsPageComponent implements OnInit {
           }))
           .filter((s: any) => !!s.id);
 
-        // auto-select 1ère boutique
-        if (!this.selectedStoreId && this.stores.length) {
-          this.selectedStoreId = this.stores[0].id;
+        if (this.selectedStoreId && !this.stores.some((s) => s.id === this.selectedStoreId)) {
+          this.selectedStoreId = null;
         }
       },
       error: (err: any) => this.toast.error(err?.message ?? 'Erreur lors du chargement des boutiques'),
@@ -81,7 +80,7 @@ export class MyProductsPageComponent implements OnInit {
 
   get listFilters(): Record<string, any> {
     return {
-      storeId: this.selectedStoreId ?? undefined,
+      ...(this.selectedStoreId ? { storeId: this.selectedStoreId } : {}),
       page: 1,
       limit: 20,
       sortBy: 'createdAt',

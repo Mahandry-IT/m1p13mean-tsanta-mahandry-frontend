@@ -1,0 +1,113 @@
+// ── Design tokens (locaux) ─────────────────────────────────────────────────
+$gradient-primary : linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+$color-primary    : #667eea;
+$color-secondary  : #764ba2;
+$color-text       : #1a1a2e;
+$color-text-muted : #6b7280;
+$color-border     : rgba(102, 126, 234, 0.14);
+$color-surface    : #ffffff;
+$color-surface-alt: #f8f7ff;
+$radius-md        : 16px;
+$shadow-card      : 0 4px 24px rgba(102, 126, 234, 0.10), 0 1px 4px rgba(0,0,0,0.05);
+
+// ── Barre de filtre boutique ───────────────────────────────────────────────
+.my-products__filters {
+  display      : flex;
+  align-items  : center;
+  gap          : 12px;
+  margin-bottom: 8px;
+}
+
+// ── Select boutique — pill style ───────────────────────────────────────────
+.my-products__store {
+  flex      : 0 0 auto;
+  min-width : 200px;
+  max-width : 280px;
+  height    : 44px !important;
+  display   : block !important;
+
+  &.mat-mdc-form-field {
+    height  : 44px !important;
+    overflow: hidden !important;
+  }
+
+  .mat-mdc-form-field-subscript-wrapper,
+  ::ng-deep .mat-mdc-form-field-subscript-wrapper {
+    display : none !important;
+    height  : 0 !important;
+    overflow: hidden !important;
+  }
+
+  ::ng-deep {
+    .mdc-notched-outline,
+    .mdc-notched-outline__leading,
+    .mdc-notched-outline__notch,
+    .mdc-notched-outline__trailing { display: none !important; }
+
+    .mdc-line-ripple,
+    .mdc-text-field__ripple { display: none !important; }
+
+    .mat-mdc-text-field-wrapper {
+      border-radius : 50px !important;
+      background    : $color-surface !important;
+      border        : 1.5px solid $color-border !important;
+      box-shadow    : 0 2px 12px rgba(102, 126, 234, 0.10), 0 1px 3px rgba(0,0,0,0.05) !important;
+      padding       : 0 !important;
+      height        : 44px !important;
+      min-height    : 44px !important;
+      max-height    : 44px !important;
+      overflow      : hidden !important;
+      transition    : border-color 0.2s ease, box-shadow 0.2s ease !important;
+
+      &:hover { border-color: rgba(102, 126, 234, 0.4) !important; }
+      &::before, &::after { display: none !important; }
+    }
+
+    &.mat-focused .mat-mdc-text-field-wrapper {
+      border-color: $color-primary !important;
+      box-shadow  : 0 0 0 3px rgba(102, 126, 234, 0.13),
+      0 2px 12px rgba(102, 126, 234, 0.10) !important;
+    }
+
+    .mat-mdc-form-field-flex {
+      height     : 44px !important;
+      display    : flex !important;
+      align-items: center !important;
+      padding    : 0 14px !important;
+      box-sizing : border-box !important;
+    }
+
+    .mat-mdc-form-field-infix {
+      padding    : 0 !important;
+      min-height : unset !important;
+      height     : 44px !important;
+      border-top : none !important;
+      display    : flex !important;
+      align-items: center !important;
+      box-sizing : border-box !important;
+    }
+
+    // Label fixe au centre, masqué dès qu'une valeur est sélectionnée
+    .mat-mdc-floating-label {
+      font-size  : 13px !important;
+      font-weight: 500 !important;
+      color      : $color-text-muted !important;
+      top        : 50% !important;
+      transform  : translateY(-50%) !important;
+      position   : absolute !important;
+    }
+
+    &.mat-focused .mat-mdc-floating-label,
+    &.ng-dirty    .mat-mdc-floating-label,
+    .mat-mdc-floating-label.mdc-floating-label--float-above { display: none !important; }
+
+    .mat-mdc-select           { font-size: 13px !important; font-weight: 600 !important; color: $color-text !important; }
+    .mat-mdc-select-trigger   { height: 44px !important; display: flex !important; align-items: center !important; }
+    .mat-mdc-select-value     { font-size: 13px !important; font-weight: 600 !important; color: $color-text !important; }
+    .mat-mdc-select-placeholder { color: $color-text-muted !important; opacity: 0.8 !important; }
+    .mat-mdc-select-arrow-wrapper { height: 44px !important; display: flex !important; align-items: center !important; }
+    .mat-mdc-select-arrow     { color: $color-secondary !important; }
+
+    .mat-mdc-form-field-subscript-wrapper { display: none !important; }
+  }
+}

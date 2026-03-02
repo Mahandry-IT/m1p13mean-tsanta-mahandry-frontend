@@ -5,6 +5,7 @@
       <mat-form-field appearance="outline" class="my-products__store">
         <mat-label>Boutique</mat-label>
         <mat-select [(ngModel)]="selectedStoreId">
+          <mat-option [value]="null">Tous</mat-option>
           <mat-option *ngFor="let s of stores" [value]="s.id">{{ s.name }}</mat-option>
         </mat-select>
       </mat-form-field>
@@ -21,7 +22,7 @@
       [isInfonable]="true"
       [isEditable]="true"
       [isDeletable]="true"
-      [isAddable]="false"
+      [isAddable]="true"
     ></app-store-product-cards>
 
   </app-page>
