@@ -11,6 +11,7 @@ const routes: Routes = [
   { path: 'categories', loadChildren: () => import('./features/categories/categories-module').then(m => m.CategoriesModule) },
   { path: 'types', loadChildren: () => import('./features/types/types-module').then(m => m.TypesModule) },
   { path: 'my-product', loadChildren: () => import('./features/my-product/my-product-module').then(m => m.MyProductModule) },
+  { path: 'buy-product', loadChildren: () => import('./features/buy-product/buy-product-module').then(m => m.BuyProductModule) },
   { path: 'promotions', loadChildren: () => import('./features/promotions/promotions-module').then(m => m.PromotionsModule) },
 ];
 
