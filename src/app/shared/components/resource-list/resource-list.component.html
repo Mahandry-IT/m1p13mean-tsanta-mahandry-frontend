@@ -73,6 +73,19 @@
                   <button *ngIf="isDeletable" mat-icon-button type="button" matTooltip="Supprimer" (click)="delete.emit(row)">
                     <mat-icon>delete_outline</mat-icon>
                   </button>
+                  
+                  <!-- 👇 AJOUTER les actions personnalisées -->
+                  <button 
+                    *ngFor="let action of customActions"
+                    mat-icon-button 
+                    type="button" 
+                    [matTooltip]="action.label"
+                    [disabled]="action.disabled ? action.disabled(row) : false"
+                    (click)="action.callback(row)"
+                  >
+                    <mat-icon *ngIf="action.icon">{{ action.icon }}</mat-icon>
+                    <span *ngIf="!action.icon">{{ action.label }}</span>
+                  </button>
                 </div>
               </ng-container>
               <ng-container *ngSwitchDefault>
@@ -99,7 +112,8 @@
           </div>
         </mat-card-content>
 
-        <mat-card-actions align="end" *ngIf="isInfonable || isEditable || isDeletable">
+        <!-- 👇 MODIFIER le *ngIf -->
+        <mat-card-actions align="end" *ngIf="isInfonable || isEditable || isDeletable || customActions.length > 0">
           <button *ngIf="isInfonable" mat-icon-button type="button" matTooltip="Infos" (click)="info.emit(row)">
             <mat-icon>info_outline</mat-icon>
           </button>
@@ -108,6 +122,19 @@
           </button>
           <button *ngIf="isDeletable" mat-icon-button type="button" matTooltip="Supprimer" (click)="delete.emit(row)">
             <mat-icon>delete_outline</mat-icon>
+          </button>
+          
+          <!-- 👇 AJOUTER les actions personnalisées pour cartes -->
+          <button 
+            *ngFor="let action of customActions"
+            mat-icon-button 
+            type="button" 
+            [matTooltip]="action.label"
+            [disabled]="action.disabled ? action.disabled(row) : false"
+            (click)="action.callback(row)"
+          >
+            <mat-icon *ngIf="action.icon">{{ action.icon }}</mat-icon>
+            <span *ngIf="!action.icon">{{ action.label }}</span>
           </button>
         </mat-card-actions>
 

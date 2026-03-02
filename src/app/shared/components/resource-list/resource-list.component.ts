@@ -25,6 +25,15 @@ export interface ResourceResolveConfig {
   labelField?: string;
 }
 
+// 👇 AJOUTER cette interface
+export interface CustomAction {
+  label: string;
+  icon?: string;
+  callback: (row: any) => void;
+  color?: 'primary' | 'accent' | 'warn';
+  disabled?: (row: any) => boolean;
+}
+
 @Component({
   selector: 'app-resource-list',
   templateUrl: './resource-list.component.html',
@@ -60,6 +69,9 @@ export class ResourceListComponent<TItem extends Record<string, any>> implements
    * Exemple: [{ field: 'roleId', endpoint: '/roles', labelField: 'label' }]
    */
   @Input() resolves: ResourceResolveConfig[] = [];
+
+  // 👇 AJOUTER cet Input
+  @Input() customActions: CustomAction[] = [];
 
   @Input() pageSizeOptions: number[] = [10, 20, 50];
   @Input() pageSize = 20;
@@ -245,12 +257,13 @@ export class ResourceListComponent<TItem extends Record<string, any>> implements
     });
   }
 
+  // 👇 MODIFIER cette méthode
   private syncColumns(): void {
     const base = this.columns?.length
       ? this.columns.map((c) => c.key)
       : (this.items[0] ? Object.keys(this.items[0]) : []);
 
-    const actions: string[] = (this.isInfonable || this.isEditable || this.isDeletable) ? ['actions'] : [];
+    const actions: string[] = (this.isInfonable || this.isEditable || this.isDeletable || this.customActions.length > 0) ? ['actions'] : [];
     this.displayedColumns = [...base, ...actions];
   }
 
@@ -297,6 +310,7 @@ export class ResourceListComponent<TItem extends Record<string, any>> implements
   trackByIndex(i: number): number {
     return i;
   }
+<<<<<<< Updated upstream
 
   onAdd(): void {
     // Si le parent a branché (add), on lui laisse gérer (ouvrir dialog, etc.)
@@ -328,3 +342,6 @@ export class ResourceListComponent<TItem extends Record<string, any>> implements
     });
   }
 }
+=======
+}
+>>>>>>> Stashed changes

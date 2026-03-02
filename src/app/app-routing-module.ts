@@ -7,6 +7,9 @@ const routes: Routes = [
   { path: 'dashboard', loadChildren: () => import('./features/dashboard/dashboard-module').then(m => m.DashboardModule) },
   { path: 'profile', loadChildren: () => import('./features/profile/profile-module').then(m => m.ProfileModule) },
   { path: 'users', loadChildren: () => import('./features/users/users-module').then(m => m.UsersModule) },
+  { path: 'admin/stores', loadChildren: () => import('./features/stores/stores-module').then(m => m.StoresModule) },
+  { path: 'manager/stores', loadChildren: () => import('./features/stores/stores-module').then(m => m.StoresModule) },
+  
 ];
 
 @NgModule({
