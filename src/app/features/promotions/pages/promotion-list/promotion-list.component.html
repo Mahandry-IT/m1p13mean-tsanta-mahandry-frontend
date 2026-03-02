@@ -5,7 +5,6 @@
       <mat-form-field appearance="outline" class="promo-list__store">
         <mat-label>Boutique</mat-label>
         <mat-select [(ngModel)]="selectedStoreId" (selectionChange)="onStoreChange()">
-          <mat-option [value]="null">—</mat-option>
           <mat-option *ngFor="let s of stores" [value]="s.id">{{ s.name }}</mat-option>
         </mat-select>
       </mat-form-field>

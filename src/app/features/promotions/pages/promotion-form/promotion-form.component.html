@@ -24,10 +24,13 @@
         <div class="pf-field">
           <label class="pf-field__label">
             <mat-icon>store</mat-icon>
-            ID Boutique
+            Boutique
           </label>
-          <div class="pf-field__wrap" [class.pf-field__wrap--disabled]="isInfo">
-            <input class="pf-field__input" formControlName="storeId" placeholder="ID boutique" />
+          <div class="pf-field__wrap pf-field__wrap--select" [class.pf-field__wrap--disabled]="isInfo">
+            <mat-select class="pf-field__select" formControlName="storeId" [disabled]="isInfo">
+              <mat-option [value]="''">—</mat-option>
+              <mat-option *ngFor="let s of storeOptions" [value]="s.id">{{ s.label }}</mat-option>
+            </mat-select>
           </div>
           <span class="pf-field__error" *ngIf="form.get('storeId')?.touched && form.get('storeId')?.invalid">Requis</span>
         </div>
@@ -36,10 +39,14 @@
         <div class="pf-field">
           <label class="pf-field__label">
             <mat-icon>inventory_2</mat-icon>
-            ID Produit
+            Produit
           </label>
-          <div class="pf-field__wrap" [class.pf-field__wrap--disabled]="isInfo">
-            <input class="pf-field__input" formControlName="productId" placeholder="ID produit" />
+          <div class="pf-field__wrap pf-field__wrap--select" [class.pf-field__wrap--disabled]="isInfo || loadingProducts">
+            <mat-select class="pf-field__select" formControlName="productId" [disabled]="isInfo || loadingProducts">
+              <mat-option [value]="''">—</mat-option>
+              <mat-option *ngIf="loadingProducts" [disabled]="true">Chargement…</mat-option>
+              <mat-option *ngFor="let p of productOptions" [value]="p.id">{{ p.label }}</mat-option>
+            </mat-select>
           </div>
           <span class="pf-field__error" *ngIf="form.get('productId')?.touched && form.get('productId')?.invalid">Requis</span>
         </div>
