@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Inject, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnInit, Optional } from '@angular/core';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
 
@@ -46,24 +46,28 @@ export class ProductFormComponent implements OnInit {
   /** Fichiers nouvellement sélectionnés (champ images) */
   newImages: File[] = [];
 
-  get isInfo(): boolean {
-    return this.data.mode === 'info';
-  }
-
-  get isCreate(): boolean {
-    return this.data.mode === 'create';
-  }
-
   constructor(
     private readonly fb: FormBuilder,
     private readonly api: ApiService,
     private readonly dialog: MatDialog,
     private readonly dialogRef: MatDialogRef<ProductFormComponent>,
-    @Inject(MAT_DIALOG_DATA) public readonly data: ProductFormDialogData,
-  ) {}
+    private readonly cdr: ChangeDetectorRef,
+    @Optional() @Inject(MAT_DIALOG_DATA) public readonly data: ProductFormDialogData | null,
+  ) {
+    // fallback sécurité
+    this.data = this.data ?? ({ mode: 'info', product: {} } as ProductFormDialogData);
+  }
+
+  get isInfo(): boolean {
+    return (this.data?.mode ?? 'info') === 'info';
+  }
+
+  get isCreate(): boolean {
+    return (this.data?.mode ?? 'info') === 'create';
+  }
 
   ngOnInit(): void {
-    const p = this.data.product ?? {};
+    const p = this.data?.product ?? {};
 
     this.form = this.fb.group({
       name: [{ value: p.name ?? '', disabled: this.isInfo }, [Validators.required]],
@@ -164,11 +168,18 @@ export class ProductFormComponent implements OnInit {
           .map((c: any) => ({ id: String(c?._id ?? c?.id ?? '').trim(), label: String(c?.name ?? c?.label ?? '').trim() }))
           .filter((o: any) => !!o.id);
 
-        // Précharger types pour les lignes déjà remplies
+        // Important: ré-appliquer les valeurs après arrivée des options (surtout en mode info + disabled)
         for (const row of this.categoriesArray.controls) {
           const cid = String(row.get('categoryId')?.value ?? '').trim();
+          row.get('categoryId')?.setValue(cid, { emitEvent: false });
+
+          const tids = row.get('typeIds')?.value;
+          row.get('typeIds')?.setValue(Array.isArray(tids) ? tids : [], { emitEvent: false });
+
           if (cid) this.loadTypesForCategory(cid);
         }
+
+        this.cdr.markForCheck();
       },
       error: () => {
         // ignore
@@ -190,9 +201,23 @@ export class ProductFormComponent implements OnInit {
           .filter((o: any) => !!o.id);
 
         this.typeOptionsByCategory.set(categoryId, opts);
+
+        // Mode info: options des types arrivent après init => forcer refresh des valeurs sélectionnées
+        if (this.isInfo) {
+          for (const row of this.categoriesArray.controls) {
+            const cid = String(row.get('categoryId')?.value ?? '').trim();
+            if (cid !== categoryId) continue;
+
+            const tids = row.get('typeIds')?.value;
+            row.get('typeIds')?.setValue(Array.isArray(tids) ? tids : [], { emitEvent: false });
+          }
+        }
+
+        this.cdr.markForCheck();
       },
       error: () => {
         this.typeOptionsByCategory.set(categoryId, []);
+        this.cdr.markForCheck();
       },
     });
   }

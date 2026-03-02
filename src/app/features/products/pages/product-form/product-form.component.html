@@ -1,5 +1,5 @@
 <h2 mat-dialog-title>
-  <ng-container [ngSwitch]="data.mode">
+  <ng-container [ngSwitch]="data?.mode">
     <span *ngSwitchCase="'create'">Nouveau produit</span>
     <span *ngSwitchCase="'edit'">Modifier le produit</span>
     <span *ngSwitchDefault>Détails du produit</span>
@@ -36,10 +36,10 @@
 
       <div class="product-form__hint" *ngIf="!newImages.length">Aucun nouveau fichier sélectionné.</div>
 
-      <div class="product-form__existing" *ngIf="(data.product.images?.length ?? 0) > 0">
+      <div class="product-form__existing" *ngIf="((data?.product?.images?.length ?? 0) > 0)">
         <div class="product-form__hint">Images existantes (lecture seule)</div>
         <div class="product-form__existing-grid">
-          <img *ngFor="let img of data.product.images" [src]="img.link" alt="image" />
+          <img *ngFor="let img of (data?.product?.images ?? [])" [src]="img.link" alt="image" />
         </div>
       </div>
     </div>
