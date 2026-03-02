@@ -366,44 +366,53 @@ button.store-product-cards__add {
 // ── Gallery ────────────────────────────────────────────────────────────────
 .store-product-cards__gallery {
   width     : 100%;
-  padding   : 0;        // ← était '14px 14px 10px', le padding poussait l'image
+  padding   : 0;
   background: $color-surface;
+  position  : relative;
 }
 
+// Image principale (background-image) : sans ça le conteneur n'a pas de hauteur => invisible
 .store-product-cards__gallery-main {
   width              : 100%;
   height             : 180px;
   border-radius      : $radius-md;
-  background-size    : contain;          // ← était 'contain', passez à 'cover'
-  background-position: center center;  // ← expliciter les deux axes
+  background-size    : contain;
+  background-position: center center;
   background-repeat  : no-repeat;
   border             : 1px solid $color-border;
   background-color   : $color-surface;
-  transition         : background-image 0.2s ease;
 }
 
-.store-product-cards__card-img {
-  width              : 100%;
-  height             : 180px;
-  background-size    : cover;
-  background-position: center;
-  background-repeat  : no-repeat;
-  flex-shrink        : 0;
+.store-product-cards__fav {
+  position     : absolute;
+  top          : 10px;
+  right        : 10px;
+  width        : 38px;
+  height       : 38px;
+  border-radius: 999px;
+  border       : 1px solid rgba(224, 49, 49, 0.22);
+  background   : rgba(255, 255, 255, 0.92);
+  box-shadow   : 0 6px 18px rgba(0,0,0,0.10);
+  display      : inline-flex;
+  align-items  : center;
+  justify-content: center;
+  cursor       : pointer;
+  transition   : transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+  z-index      : 2;
 
-  &--placeholder {
-    background: linear-gradient(135deg, #f0f0ff 0%, #e8e0ff 100%);
-    display    : flex;
-    align-items: center;
-    justify-content: center;
-    margin     : 14px;
-    width      : calc(100% - 28px);
-    border-radius: $radius-md;
+  mat-icon {
+    font-size: 20px !important;
+    width    : 20px !important;
+    height   : 20px !important;
+    color    : $color-error;
+  }
 
-    &::after {
-      content  : '🖼️';
-      font-size: 36px;
-      opacity  : 0.4;
-    }
+  &:hover { transform: translateY(-1px); }
+  &:active { transform: translateY(0); }
+
+  &--active {
+    background : rgba(224, 49, 49, 0.10);
+    border-color: rgba(224, 49, 49, 0.35);
   }
 }
 

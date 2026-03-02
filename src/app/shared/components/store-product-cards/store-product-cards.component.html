@@ -96,6 +96,17 @@
                 [style.background-image]="'url(' + (getSelectedImageUrl(row) || imgs[0]) + ')'"
               ></div>
 
+              <button
+                *ngIf="isFavorisable"
+                type="button"
+                class="store-product-cards__fav"
+                [class.store-product-cards__fav--active]="isFavoriteOf(row)"
+                (click)="toggleFavorite(row, $event)"
+                aria-label="Favori"
+              >
+                <mat-icon>{{ isFavoriteOf(row) ? 'favorite' : 'favorite_border' }}</mat-icon>
+              </button>
+
               <div class="store-product-cards__gallery-thumbs" *ngIf="imgs.length > 1">
                 <button
                   type="button"

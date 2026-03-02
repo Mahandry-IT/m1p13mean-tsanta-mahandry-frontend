@@ -75,10 +75,17 @@ export class StoreProductCardsComponent<TItem extends Record<string, any>> imple
   @Input() isInfonable = false;
   @Input() isAddable = false;
 
+  /** Affiche un coeur sur l'image + permet de toggler un favori */
+  @Input() isFavorisable = false;
+
+  /** Champ booléen du row indiquant si c'est en favori (par défaut: 'isFavorite') */
+  @Input() favField = 'isFavorite';
+
   @Output() edit = new EventEmitter<TItem>();
   @Output() delete = new EventEmitter<TItem>();
   @Output() info = new EventEmitter<TItem>();
   @Output() add = new EventEmitter<void>();
+  @Output() favoriteChange = new EventEmitter<{ row: TItem; isFavorite: boolean }>();
 
   searchCtrl = new FormControl<string>('', { nonNullable: true });
 
@@ -651,6 +658,28 @@ export class StoreProductCardsComponent<TItem extends Record<string, any>> imple
 
   onAdd(): void {
     this.add.emit();
+  }
+
+  isFavoriteOf(row: TItem): boolean {
+    const v = (row as any)?.[this.favField];
+    return !!v;
+  }
+
+  toggleFavorite(row: TItem, ev?: Event): void {
+    ev?.stopPropagation?.();
+    ev?.preventDefault?.();
+
+    const next = !this.isFavoriteOf(row);
+
+    // update optimiste local pour refléter l'UI
+    try {
+      (row as any)[this.favField] = next;
+    } catch {
+      // ignore
+    }
+
+    this.favoriteChange.emit({ row, isFavorite: next });
+    this.cdr.markForCheck();
   }
 
   trackById = (_: number, row: TItem) => (row as any)?._id ?? (row as any)?.id ?? _;
