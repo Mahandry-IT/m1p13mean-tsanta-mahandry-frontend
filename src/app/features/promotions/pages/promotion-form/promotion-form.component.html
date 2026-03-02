@@ -2,8 +2,10 @@
 
   <!-- En-tête -->
   <div class="promo-form-dialog__header">
-    <div class="promo-form-dialog__icon">
-      <mat-icon>{{ isInfo ? 'local_offer' : (isCreate ? 'add_circle_outline' : 'edit_outline') }}</mat-icon>
+    <div class="promo-form-dialog__icon-wrap">
+      <div class="promo-form-dialog__icon">
+        <mat-icon>{{ isInfo ? 'local_offer' : (isCreate ? 'add_circle_outline' : 'edit_outline') }}</mat-icon>
+      </div>
     </div>
     <h2 class="promo-form-dialog__title">
       {{ isInfo ? 'Infos promotion' : (isCreate ? 'Ajouter une promotion' : 'Modifier la promotion') }}
@@ -18,62 +20,104 @@
     <div class="promo-form-dialog__body">
       <div class="promo-form-dialog__grid">
 
-        <mat-form-field appearance="outline">
-          <mat-label>ID Boutique</mat-label>
-          <input matInput formControlName="storeId" placeholder="ID boutique" />
-          <mat-error *ngIf="form.get('storeId')?.touched && form.get('storeId')?.invalid">Requis</mat-error>
-        </mat-form-field>
+        <!-- ID Boutique -->
+        <div class="pf-field">
+          <label class="pf-field__label">
+            <mat-icon>store</mat-icon>
+            ID Boutique
+          </label>
+          <div class="pf-field__wrap" [class.pf-field__wrap--disabled]="isInfo">
+            <input class="pf-field__input" formControlName="storeId" placeholder="ID boutique" />
+          </div>
+          <span class="pf-field__error" *ngIf="form.get('storeId')?.touched && form.get('storeId')?.invalid">Requis</span>
+        </div>
 
-        <mat-form-field appearance="outline">
-          <mat-label>ID Produit</mat-label>
-          <input matInput formControlName="productId" placeholder="ID produit" />
-          <mat-error *ngIf="form.get('productId')?.touched && form.get('productId')?.invalid">Requis</mat-error>
-        </mat-form-field>
+        <!-- ID Produit -->
+        <div class="pf-field">
+          <label class="pf-field__label">
+            <mat-icon>inventory_2</mat-icon>
+            ID Produit
+          </label>
+          <div class="pf-field__wrap" [class.pf-field__wrap--disabled]="isInfo">
+            <input class="pf-field__input" formControlName="productId" placeholder="ID produit" />
+          </div>
+          <span class="pf-field__error" *ngIf="form.get('productId')?.touched && form.get('productId')?.invalid">Requis</span>
+        </div>
 
-        <mat-form-field appearance="outline">
-          <mat-label>Remise (%)</mat-label>
-          <input matInput type="number" formControlName="discount" placeholder="ex : 20" />
-          <mat-error *ngIf="form.get('discount')?.touched && form.get('discount')?.invalid">Valeur entre 0 et 100</mat-error>
-        </mat-form-field>
+        <!-- Remise -->
+        <div class="pf-field">
+          <label class="pf-field__label">
+            <mat-icon>percent</mat-icon>
+            Remise (%)
+          </label>
+          <div class="pf-field__wrap" [class.pf-field__wrap--disabled]="isInfo">
+            <input class="pf-field__input" type="number" formControlName="discount" placeholder="ex : 20" />
+          </div>
+          <span class="pf-field__error" *ngIf="form.get('discount')?.touched && form.get('discount')?.invalid">Valeur entre 0 et 100</span>
+        </div>
 
-        <mat-form-field appearance="outline">
-          <mat-label>Active</mat-label>
-          <mat-select formControlName="isActive">
-            <mat-option [value]="true">Oui</mat-option>
-            <mat-option [value]="false">Non</mat-option>
-          </mat-select>
-        </mat-form-field>
+        <!-- Active -->
+        <div class="pf-field">
+          <label class="pf-field__label">
+            <mat-icon>toggle_on</mat-icon>
+            Active
+          </label>
+          <div class="pf-field__wrap pf-field__wrap--select" [class.pf-field__wrap--disabled]="isInfo">
+            <mat-select class="pf-field__select" formControlName="isActive" [disabled]="isInfo">
+              <mat-option [value]="true">Oui</mat-option>
+              <mat-option [value]="false">Non</mat-option>
+            </mat-select>
+          </div>
+        </div>
 
-        <mat-form-field appearance="outline">
-          <mat-label>Début</mat-label>
-          <input matInput type="datetime-local" formControlName="startDate" />
-          <mat-error *ngIf="form.get('startDate')?.touched && form.get('startDate')?.invalid">Requis</mat-error>
-        </mat-form-field>
+        <!-- Début -->
+        <div class="pf-field">
+          <label class="pf-field__label">
+            <mat-icon>event</mat-icon>
+            Début
+          </label>
+          <div class="pf-field__wrap" [class.pf-field__wrap--disabled]="isInfo">
+            <input class="pf-field__input" type="datetime-local" formControlName="startDate" />
+          </div>
+          <span class="pf-field__error" *ngIf="form.get('startDate')?.touched && form.get('startDate')?.invalid">Requis</span>
+        </div>
 
-        <mat-form-field appearance="outline">
-          <mat-label>Fin</mat-label>
-          <input matInput type="datetime-local" formControlName="endDate" />
-          <mat-error *ngIf="form.get('endDate')?.touched && form.get('endDate')?.invalid">Requis</mat-error>
-        </mat-form-field>
+        <!-- Fin -->
+        <div class="pf-field">
+          <label class="pf-field__label">
+            <mat-icon>event_busy</mat-icon>
+            Fin
+          </label>
+          <div class="pf-field__wrap" [class.pf-field__wrap--disabled]="isInfo">
+            <input class="pf-field__input" type="datetime-local" formControlName="endDate" />
+          </div>
+          <span class="pf-field__error" *ngIf="form.get('endDate')?.touched && form.get('endDate')?.invalid">Requis</span>
+        </div>
 
-        <mat-form-field appearance="outline" class="promo-form-dialog__desc">
-          <mat-label>Description</mat-label>
-          <textarea matInput rows="3" formControlName="description" placeholder="Décrivez la promotion…"></textarea>
-        </mat-form-field>
+        <!-- Description (pleine largeur) -->
+        <div class="pf-field pf-field--full">
+          <label class="pf-field__label">
+            <mat-icon>subject</mat-icon>
+            Description
+          </label>
+          <div class="pf-field__wrap pf-field__wrap--textarea" [class.pf-field__wrap--disabled]="isInfo">
+            <textarea class="pf-field__input pf-field__textarea" formControlName="description" rows="3" placeholder="Décrivez la promotion…"></textarea>
+          </div>
+        </div>
 
       </div>
     </div>
 
     <!-- Actions -->
     <div class="promo-form-dialog__actions">
-      <button mat-stroked-button type="button" (click)="close()">Fermer</button>
+      <button class="pf-btn pf-btn--cancel" type="button" (click)="close()">Fermer</button>
 
-      <button *ngIf="isCreate && !isInfo" mat-stroked-button type="button" (click)="suggest()">
+      <button *ngIf="isCreate && !isInfo" class="pf-btn pf-btn--suggest" type="button" (click)="suggest()">
         <mat-icon>auto_awesome</mat-icon>
         Suggérer
       </button>
 
-      <button *ngIf="!isInfo" mat-flat-button color="primary" type="submit">
+      <button *ngIf="!isInfo" class="pf-btn pf-btn--submit" type="submit">
         <mat-icon>save_outlined</mat-icon>
         {{ isCreate ? 'Créer' : 'Enregistrer' }}
       </button>
