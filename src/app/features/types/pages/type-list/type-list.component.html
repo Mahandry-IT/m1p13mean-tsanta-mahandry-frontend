@@ -1,0 +1,19 @@
+<app-shell>
+  <app-page headTitle="Types">
+    <app-resource-list
+      [endpoint]="endpoint"
+      itemsKey="items"
+      [columns]="columns"
+      [resolves]="resolves"
+      [isInfonable]="true"
+      [isEditable]="true"
+      [isDeletable]="true"
+      [isAddable]="true"
+      (info)="onInfo($event)"
+      (edit)="onEdit($event)"
+      (delete)="onDelete($event)"
+      (add)="onAdd()"
+    ></app-resource-list>
+  </app-page>
+</app-shell>
+

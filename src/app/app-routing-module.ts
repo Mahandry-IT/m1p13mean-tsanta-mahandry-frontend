@@ -8,6 +8,8 @@ const routes: Routes = [
   { path: 'profile', loadChildren: () => import('./features/profile/profile-module').then(m => m.ProfileModule) },
   { path: 'users', loadChildren: () => import('./features/users/users-module').then(m => m.UsersModule) },
   { path: 'products', loadChildren: () => import('./features/products/products-module').then(m => m.ProductsModule) },
+  { path: 'categories', loadChildren: () => import('./features/categories/categories-module').then(m => m.CategoriesModule) },
+  { path: 'types', loadChildren: () => import('./features/types/types-module').then(m => m.TypesModule) },
 ];
 
 @NgModule({

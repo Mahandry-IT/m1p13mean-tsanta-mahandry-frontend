@@ -1,0 +1,37 @@
+<div class="dialog">
+  <div class="dialog__header">
+    <div class="dialog__icon">
+      <mat-icon>{{ isInfo ? 'category' : (isCreate ? 'add_circle_outline' : 'edit_outline') }}</mat-icon>
+    </div>
+    <div class="dialog__titles">
+      <h2>{{ isInfo ? 'Infos catégorie' : (isCreate ? 'Ajouter catégorie' : 'Modifier catégorie') }}</h2>
+      <p>{{ isInfo ? 'Détails de la catégorie' : 'Renseignez les informations ci-dessous' }}</p>
+    </div>
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="submit()" class="dialog__body">
+    <div class="field">
+      <label>Nom</label>
+      <div class="field__wrap" [class.field__wrap--disabled]="isInfo">
+        <input formControlName="name" placeholder="ex: Mobilier" />
+      </div>
+      <div class="field__error" *ngIf="form.get('name')?.touched && form.get('name')?.invalid">Nom requis</div>
+    </div>
+
+    <div class="field">
+      <label>Slug</label>
+      <div class="field__wrap" [class.field__wrap--disabled]="isInfo">
+        <input formControlName="slug" placeholder="ex: mobilier" />
+      </div>
+    </div>
+
+    <div class="dialog__actions">
+      <button type="button" class="btn btn--cancel" (click)="close()">Fermer</button>
+      <button *ngIf="!isInfo" type="submit" class="btn btn--submit">
+        <mat-icon>save_outlined</mat-icon>
+        Enregistrer
+      </button>
+    </div>
+  </form>
+</div>
+

@@ -1,0 +1,17 @@
+.dialog { width: min(760px, 92vw); }
+.dialog__header { display:flex; gap:12px; align-items:center; margin-bottom:14px; }
+.dialog__icon { width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center; background: rgba(102,126,234,0.12); color:#667eea; }
+.dialog__titles h2 { margin:0; font-weight:800; }
+.dialog__titles p { margin:2px 0 0; opacity:0.75; }
+.field { display:grid; gap:6px; margin-bottom:12px; }
+.field label { font-weight:700; font-size:13px; opacity:0.9; }
+.field__wrap { border:1px solid rgba(0,0,0,0.12); border-radius:12px; padding:10px 12px; background:#fff; }
+.field__wrap--disabled { opacity:0.7; }
+.field__wrap input { width:100%; border:none; outline:none; font-size:14px; }
+.field__wrap mat-select { width:100%; }
+.field__error { font-size:12px; color:#e03131; }
+.dialog__actions { display:flex; justify-content:flex-end; gap:10px; margin-top:14px; }
+.btn { border:none; border-radius:999px; padding:10px 16px; font-weight:800; cursor:pointer; }
+.btn--cancel { background:#eee; }
+.btn--submit { background: linear-gradient(135deg,#667eea 0%,#764ba2 100%); color:#fff; display:inline-flex; align-items:center; gap:6px; }
+
