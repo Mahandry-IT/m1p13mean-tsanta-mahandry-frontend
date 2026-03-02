@@ -487,10 +487,19 @@ export class MyProductsPageComponent implements OnInit {
     const now = Date.now();
 
     const isActivePromo = (p: any) => {
+      // si explicitement false => inactive
       if (p?.isActive === false) return false;
-      const start = new Date(p?.startDate ?? 0).getTime();
-      const end = new Date(p?.endDate ?? 0).getTime();
-      if (!Number.isFinite(start) || !Number.isFinite(end)) return false;
+
+      // Si isActive est true et que les dates sont invalides/absentes, on considère active.
+      const startRaw = p?.startDate;
+      const endRaw = p?.endDate;
+      const start = startRaw ? new Date(startRaw).getTime() : NaN;
+      const end = endRaw ? new Date(endRaw).getTime() : NaN;
+
+      const hasValidWindow = Number.isFinite(start) && Number.isFinite(end);
+      if (!hasValidWindow) return p?.isActive !== false;
+
+      const now = Date.now();
       return start <= now && now <= end;
     };
 

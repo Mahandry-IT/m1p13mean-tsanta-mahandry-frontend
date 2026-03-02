@@ -6,6 +6,7 @@ import { ToastService } from '../../../../core/services/toast.service';
 import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { ResourceListComponent, ResourceResolveConfig } from '../../../../shared/components/resource-list/resource-list.component';
 import { TypeFormComponent } from '../type-form/type-form.component';
+import { formatDateTime } from '../../../../util/format.util';
 
 @Component({
   selector: 'app-type-list',
@@ -22,11 +23,15 @@ export class TypeListComponent {
     { key: 'name', header: 'Nom' },
     { key: 'slug', header: 'Slug' },
     { key: 'categoryId', header: 'Catégorie' },
-    { key: 'createdAt', header: 'Créé le' },
+    {
+      key: 'createdAt',
+      header: 'Créé le',
+      cell: (row: any) => formatDateTime(row?.createdAt),
+    },
   ];
 
   resolves: ResourceResolveConfig[] = [
-    { field: 'categoryId', endpoint: '/categories', labelField: 'name' },
+    { field: 'categoryId', endpoint: '/categories/list', labelField: 'name' },
   ];
 
   constructor(
@@ -126,4 +131,3 @@ export class TypeListComponent {
     });
   }
 }
-

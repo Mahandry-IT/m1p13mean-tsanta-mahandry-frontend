@@ -6,6 +6,7 @@ import { ToastService } from '../../../../core/services/toast.service';
 import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { ResourceListComponent } from '../../../../shared/components/resource-list/resource-list.component';
 import { CategoryFormComponent } from '../category-form/category-form.component';
+import {formatDateTime} from '../../../../util/format.util';
 
 @Component({
   selector: 'app-category-list',
@@ -21,7 +22,11 @@ export class CategoryListComponent {
   columns = [
     { key: 'name', header: 'Nom' },
     { key: 'slug', header: 'Slug' },
-    { key: 'createdAt', header: 'Créé le' },
+    {
+      key: 'createdAt',
+      header: 'Créé le',
+      cell: (row: any) => formatDateTime(row?.createdAt),
+    }
   ];
 
   constructor(

@@ -68,12 +68,29 @@ export class PromotionFormComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    const p = this.data.promotion ?? {};
+    const input = this.data.promotion ?? {};
+    const promo = (input as any)?.promotion ?? {};
+
+    // certaines APIs renvoient { storeId, productId, promotion: {...} }
+    // on aplatit pour alimenter le form
+    const p: any = {
+      ...input,
+      ...promo,
+      storeId: (input as any)?.storeId ?? promo?.storeId,
+      productId: (input as any)?.productId ?? promo?.productId,
+    };
+
+    const toNum = (v: any): number | null => {
+      if (v === null || v === undefined || v === '') return null;
+      if (typeof v === 'object' && v && '$numberDecimal' in v) return toNum((v as any).$numberDecimal);
+      const n = Number(String(v).replace(',', '.'));
+      return Number.isFinite(n) ? n : null;
+    };
 
     this.form = this.fb.group({
       productId: [{ value: p.productId ?? '', disabled: this.isInfo }, [Validators.required]],
       storeId: [{ value: p.storeId ?? '', disabled: this.isInfo }, [Validators.required]],
-      discount: [{ value: p.discount ?? '', disabled: this.isInfo }, [Validators.required, Validators.min(0), Validators.max(100)]],
+      discount: [{ value: toNum(p.discount) ?? '', disabled: this.isInfo }, [Validators.required, Validators.min(0), Validators.max(100)]],
       description: [{ value: p.description ?? '', disabled: this.isInfo }],
       startDate: [{ value: p.startDate ? String(p.startDate).slice(0, 16) : '', disabled: this.isInfo }, [Validators.required]],
       endDate: [{ value: p.endDate ? String(p.endDate).slice(0, 16) : '', disabled: this.isInfo }, [Validators.required]],

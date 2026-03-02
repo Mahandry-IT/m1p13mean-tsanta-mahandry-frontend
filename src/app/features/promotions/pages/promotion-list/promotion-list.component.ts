@@ -9,6 +9,7 @@ import {
   ResourceResolveConfig
 } from '../../../../shared/components/resource-list/resource-list.component';
 import { PromotionFormComponent } from '../promotion-form/promotion-form.component';
+import {formatThousands} from '../../../../util/format.util';
 
 @Component({
   selector: 'app-promotion-list',
@@ -33,10 +34,7 @@ export class PromotionListComponent implements OnInit {
     {
       key: 'discount',
       header: 'Remise (%)',
-      cell: (row: any) => {
-        const n = this.toNum(row?.discount);
-        return n === null ? '' : String(n);
-      },
+      cell: (row: any) => formatThousands(row?.discount),
     },
     { key: 'description', header: 'Description' },
     { key: 'isActive', header: 'Active' },
@@ -112,8 +110,22 @@ export class PromotionListComponent implements OnInit {
     const id = this.getId(row);
     if (!id) return;
 
-    // backend attend aussi storeId/productId en query
-    this.api.get<any>(`/promotions/${encodeURIComponent(id)}`, this.listFilters).subscribe({
+    if (!this.selectedStoreId) {
+      this.toast.error('Sélectionnez une boutique avant de consulter une promotion');
+      return;
+    }
+
+    const productId = String(row?.productId ?? '').trim();
+    if (!productId) {
+      this.toast.error('productId manquant sur la ligne');
+      return;
+    }
+
+    // backend attend storeId + productId
+    this.api.get<any>(`/promotions/${encodeURIComponent(id)}`, {
+      storeId: this.selectedStoreId,
+      productId,
+    }).subscribe({
       next: (res) => {
         const promotion = res?.data ?? res?.promotion ?? res;
         this.dialog.open(PromotionFormComponent, {
@@ -128,7 +140,21 @@ export class PromotionListComponent implements OnInit {
     const id = this.getId(row);
     if (!id) return;
 
-    this.api.get<any>(`/promotions/${encodeURIComponent(id)}`, this.listFilters).subscribe({
+    if (!this.selectedStoreId) {
+      this.toast.error('Sélectionnez une boutique avant de modifier une promotion');
+      return;
+    }
+
+    const productId = String(row?.productId ?? '').trim();
+    if (!productId) {
+      this.toast.error('productId manquant sur la ligne');
+      return;
+    }
+
+    this.api.get<any>(`/promotions/${encodeURIComponent(id)}`, {
+      storeId: this.selectedStoreId,
+      productId,
+    }).subscribe({
       next: (res) => {
         const promotion = res?.data ?? res?.promotion ?? res;
         const ref = this.dialog.open(PromotionFormComponent, {
@@ -138,7 +164,13 @@ export class PromotionListComponent implements OnInit {
         ref.afterClosed().subscribe((payload) => {
           if (!payload) return;
 
-          this.api.patch<any>(`/promotions/${encodeURIComponent(id)}`, payload).subscribe({
+          const body = {
+            ...payload,
+            storeId: payload?.storeId ?? this.selectedStoreId,
+            productId: payload?.productId ?? productId,
+          };
+
+          this.api.patch<any>(`/promotions/${encodeURIComponent(id)}`, body).subscribe({
             next: () => {
               this.toast.success('Promotion modifiée');
               this.resourceList?.load();
@@ -155,6 +187,17 @@ export class PromotionListComponent implements OnInit {
     const id = this.getId(row);
     if (!id) return;
 
+    if (!this.selectedStoreId) {
+      this.toast.error('Sélectionnez une boutique avant de supprimer une promotion');
+      return;
+    }
+
+    const productId = String(row?.productId ?? '').trim();
+    if (!productId) {
+      this.toast.error('productId manquant sur la ligne');
+      return;
+    }
+
     const ref = this.dialog.open(ConfirmDialogComponent, {
       data: {
         title: 'Suppression',
@@ -168,7 +211,10 @@ export class PromotionListComponent implements OnInit {
     ref.afterClosed().subscribe((ok) => {
       if (!ok) return;
 
-      this.api.delete<any>(`/promotions/${encodeURIComponent(id)}`).subscribe({
+      this.api.delete<any>(`/promotions/${encodeURIComponent(id)}`, {
+        storeId: this.selectedStoreId,
+        productId,
+      }).subscribe({
         next: () => {
           this.toast.success('Promotion supprimée');
           this.resourceList?.load();
