@@ -15,7 +15,25 @@ $shadow-card      : 0 4px 24px rgba(102, 126, 234, 0.10), 0 1px 4px rgba(0,0,0,0
   display      : flex;
   align-items  : center;
   gap          : 12px;
-  margin-bottom: 8px;
+  margin-bottom: 0; // on colle au composant cards (qui a déjà son padding)
+  height       : 44px; // même hauteur que la search/toolbar
+
+  // Le mat-form-field ajoute souvent un padding/margin interne; on le neutralise pour l'alignement.
+  .mat-mdc-form-field {
+    margin: 0 !important;
+  }
+}
+
+// Place la barre "Boutique" au même niveau visuel que la recherche du composant cards
+// (le composant cards a un padding-top de 24px; on applique le même spacing ici)
+:host {
+  display: block;
+
+  // Ajuste légèrement la position verticale pour matcher la toolbar interne.
+  // Si besoin, tu peux affiner à +/−2px.
+  .my-products__filters {
+    padding: 24px 32px 0 32px;
+  }
 }
 
 // ── Select boutique — pill style ───────────────────────────────────────────
@@ -110,4 +128,8 @@ $shadow-card      : 0 4px 24px rgba(102, 126, 234, 0.10), 0 1px 4px rgba(0,0,0,0
 
     .mat-mdc-form-field-subscript-wrapper { display: none !important; }
   }
+
+  // Important: certains thèmes MDC ajoutent un margin-top implicite.
+  // On force l'alignement sur la même baseline que la search.
+  margin: 0 !important;
 }
