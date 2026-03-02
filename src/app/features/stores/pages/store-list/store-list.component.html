@@ -1,0 +1,17 @@
+<app-shell>
+  <app-page headTitle="Liste des boutiques">
+    
+    <app-resource-list
+      [endpoint]="endpoint"
+      [itemsKey]="'stores'"
+      [columns]="columns"
+      [resolves]="resolves"
+      [customActions]="customActions"
+      [isEditable]="false"
+      [isDeletable]="false"
+      [isInfonable]="true"
+      (info)="onInfo($event)"
+      [isAList]="false"
+    ></app-resource-list>
+  </app-page>
+</app-shell>

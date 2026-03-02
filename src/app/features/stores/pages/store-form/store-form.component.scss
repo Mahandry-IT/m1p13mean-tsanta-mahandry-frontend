@@ -1,0 +1,292 @@
+// ── Design tokens ──────────────────────────────────────────────────────────
+$gradient-primary : linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+$color-primary    : #667eea;
+$color-secondary  : #764ba2;
+$color-error      : #e03131;
+$color-text       : #1a1a2e;
+$color-text-muted : #6b7280;
+$color-border     : rgba(102, 126, 234, 0.14);
+$color-surface    : #ffffff;
+$color-surface-alt: #f8f7ff;
+$font-body        : 'Segoe UI', system-ui, sans-serif;
+$shadow-card      : 0 4px 24px rgba(102, 126, 234, 0.10), 0 1px 4px rgba(0,0,0,0.05);
+
+// ── Animations ─────────────────────────────────────────────────────────────
+@keyframes dialog-in {
+  from { opacity: 0; transform: translateY(14px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes icon-pop {
+  0%   { transform: scale(0.5); opacity: 0; }
+  70%  { transform: scale(1.12); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes field-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+// ── Conteneur ──────────────────────────────────────────────────────────────
+.store-form-dialog {
+  font-family: $font-body;
+  min-width  : 440px;
+  max-width  : 520px;
+  animation  : dialog-in 0.28s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+// ── En-tête ────────────────────────────────────────────────────────────────
+.store-form-dialog__header {
+  display        : flex;
+  flex-direction : column;
+  align-items    : center;
+  padding        : 36px 32px 20px;
+  text-align     : center;
+  background     : $color-surface-alt;
+  border-bottom  : 1.5px solid $color-border;
+  position       : relative;
+
+  // Bande gradient en haut
+  &::before {
+    content      : '';
+    position     : absolute;
+    top          : 0; left: 0; right: 0;
+    height       : 3px;
+    background   : $gradient-primary;
+    border-radius: 0;
+  }
+}
+
+.store-form-dialog__icon-wrap {
+  animation: icon-pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s both;
+  margin-bottom: 12px;
+}
+
+.store-form-dialog__icon {
+  width          : 60px;
+  height         : 60px;
+  border-radius  : 50%;
+  background     : linear-gradient(135deg, rgba(102,126,234,0.12), rgba(118,75,162,0.12));
+  border         : 2px solid rgba(102, 126, 234, 0.2);
+  display        : flex;
+  align-items    : center;
+  justify-content: center;
+
+  mat-icon {
+    font-size: 26px !important;
+    width    : 26px !important;
+    height   : 26px !important;
+    background: $gradient-primary;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+}
+
+.store-form-dialog__title {
+  font-size  : 18px;
+  font-weight: 700;
+  color      : $color-text;
+  margin     : 0 0 4px;
+  line-height: 1.3;
+}
+
+.store-form-dialog__subtitle {
+  font-size  : 13px;
+  color      : $color-text-muted;
+  margin     : 0;
+  line-height: 1.5;
+}
+
+// ── Corps formulaire ───────────────────────────────────────────────────────
+.store-form-dialog__body {
+  padding: 24px 32px 8px;
+}
+
+.store-form-dialog__grid {
+  display              : grid;
+  grid-template-columns: 1fr 1fr;
+  gap                  : 16px;
+
+  // Chaque champ s'anime en cascade
+  .sf-field:nth-child(1) { animation: field-in 0.25s ease 0.10s both; }
+  .sf-field:nth-child(2) { animation: field-in 0.25s ease 0.15s both; }
+  .sf-field:nth-child(3) { animation: field-in 0.25s ease 0.20s both; }
+  .sf-field:nth-child(4) { animation: field-in 0.25s ease 0.25s both; }
+}
+
+// ── Champ ──────────────────────────────────────────────────────────────────
+.sf-field {
+  display       : flex;
+  flex-direction: column;
+  gap           : 6px;
+}
+
+.sf-field__label {
+  display    : flex;
+  align-items: center;
+  gap        : 5px;
+  font-size  : 11px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color      : $color-text-muted;
+
+  mat-icon {
+    font-size: 14px !important;
+    width    : 14px !important;
+    height   : 14px !important;
+    color    : $color-primary;
+    opacity  : 0.7;
+  }
+}
+
+.sf-field__input-wrap {
+  background   : $color-surface;
+  border       : 1.5px solid $color-border;
+  border-radius: 12px;
+  padding      : 0 14px;
+  height       : 44px;
+  display      : flex;
+  align-items  : center;
+  transition   : border-color 0.2s ease, box-shadow 0.2s ease;
+  box-shadow   : 0 1px 4px rgba(102, 126, 234, 0.06);
+
+  &:focus-within {
+    border-color: $color-primary;
+    box-shadow  : 0 0 0 3px rgba(102, 126, 234, 0.12),
+    0 1px 4px rgba(102, 126, 234, 0.08);
+  }
+
+  &:hover:not(.sf-field__input-wrap--disabled) {
+    border-color: rgba(102, 126, 234, 0.35);
+  }
+
+  // Mode lecture seule
+  &--disabled {
+    background: $color-surface-alt;
+    cursor    : default;
+
+    .sf-field__input {
+      cursor: default;
+      color : $color-text-muted;
+    }
+  }
+}
+
+.sf-field__input {
+  width      : 100%;
+  border     : none;
+  outline    : none;
+  background : transparent;
+  font-family: $font-body;
+  font-size  : 14px;
+  font-weight: 500;
+  color      : $color-text;
+  caret-color: $color-primary;
+
+  &::placeholder {
+    color  : rgba(107, 114, 128, 0.5);
+    font-weight: 400;
+  }
+
+  &:disabled {
+    color : $color-text-muted;
+    cursor: default;
+  }
+}
+
+.sf-field__error {
+  font-size : 11px;
+  color     : $color-error;
+  font-weight: 500;
+  padding-left: 4px;
+  animation : field-in 0.2s ease both;
+}
+
+// ── Actions ────────────────────────────────────────────────────────────────
+.store-form-dialog__actions {
+  display        : flex;
+  justify-content: flex-end;
+  gap            : 10px;
+  padding        : 16px 32px 28px;
+  border-top     : 1.5px solid $color-border;
+  margin-top     : 16px;
+}
+
+// ── Boutons ────────────────────────────────────────────────────────────────
+.sf-btn {
+  display        : inline-flex;
+  align-items    : center;
+  justify-content: center;
+  gap            : 6px;
+  height         : 44px;
+  padding        : 0 24px;
+  border-radius  : 50px;
+  font-family    : $font-body;
+  font-size      : 14px;
+  font-weight    : 600;
+  cursor         : pointer;
+  border         : none;
+  transition     : all 0.2s ease;
+  outline        : none;
+
+  mat-icon {
+    font-size: 17px !important;
+    width    : 17px !important;
+    height   : 17px !important;
+  }
+
+  &--cancel {
+    background  : $color-surface;
+    color       : $color-text-muted;
+    border      : 1.5px solid $color-border;
+    box-shadow  : $shadow-card;
+
+    &:hover {
+      background  : $color-surface-alt;
+      border-color: rgba(102, 126, 234, 0.35);
+      color       : $color-text;
+      transform   : translateY(-1px);
+    }
+
+    &:active { transform: translateY(0); }
+  }
+
+  &--submit {
+    background: $gradient-primary;
+    color     : #ffffff;
+    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.35);
+
+    mat-icon { color: rgba(255,255,255,0.9) !important; }
+
+    &:hover {
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.50);
+      transform : translateY(-1px);
+    }
+
+    &:active { transform: translateY(0); }
+  }
+}
+
+// ── Responsive ─────────────────────────────────────────────────────────────
+@media (max-width: 480px) {
+  .store-form-dialog {
+    min-width: unset;
+  }
+
+  .store-form-dialog__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .store-form-dialog__header,
+  .store-form-dialog__body {
+    padding-left : 20px;
+    padding-right: 20px;
+  }
+
+  .store-form-dialog__actions {
+    padding: 16px 20px 24px;
+  }
+}
