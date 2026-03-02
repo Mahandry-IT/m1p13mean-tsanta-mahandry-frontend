@@ -1,47 +1,79 @@
-<div class="dialog">
-  <div class="dialog__header">
-    <div class="dialog__icon">
-      <mat-icon>{{ isInfo ? 'sell' : (isCreate ? 'add_circle_outline' : 'edit_outline') }}</mat-icon>
+<div class="type-form-dialog">
+
+  <!-- En-tête -->
+  <div class="type-form-dialog__header">
+    <div class="type-form-dialog__icon-wrap">
+      <div class="type-form-dialog__icon">
+        <mat-icon>{{ isInfo ? 'sell' : (isCreate ? 'add_circle_outline' : 'edit_outline') }}</mat-icon>
+      </div>
     </div>
-    <div class="dialog__titles">
-      <h2>{{ isInfo ? 'Infos type' : (isCreate ? 'Ajouter type' : 'Modifier type') }}</h2>
-      <p>{{ isInfo ? 'Détails du type' : 'Renseignez les informations ci-dessous' }}</p>
-    </div>
+    <h2 class="type-form-dialog__title">{{ isInfo ? 'Infos type' : (isCreate ? 'Ajouter type' : 'Modifier type') }}</h2>
+    <p class="type-form-dialog__subtitle">
+      {{ isInfo ? 'Détails du type' : (isCreate ? 'Remplissez les informations ci-dessous' : 'Modifiez les informations ci-dessous') }}
+    </p>
   </div>
 
-  <form [formGroup]="form" (ngSubmit)="submit()" class="dialog__body">
-    <div class="field">
-      <label>Nom</label>
-      <div class="field__wrap" [class.field__wrap--disabled]="isInfo">
-        <input formControlName="name" placeholder="ex: PC" />
+  <!-- Formulaire -->
+  <form [formGroup]="form" (ngSubmit)="submit()">
+
+    <div class="type-form-dialog__body">
+      <div class="type-form-dialog__grid">
+
+        <!-- Nom -->
+        <div class="tf-field">
+          <label class="tf-field__label">
+            <mat-icon>badge</mat-icon>
+            Nom
+          </label>
+          <div class="tf-field__input-wrap" [class.tf-field__input-wrap--disabled]="isInfo">
+            <input class="tf-field__input" formControlName="name" placeholder="ex : PC" />
+          </div>
+          <span class="tf-field__error" *ngIf="form.get('name')?.invalid && form.get('name')?.touched">
+            Ce champ est requis.
+          </span>
+        </div>
+
+        <!-- Slug -->
+        <div class="tf-field">
+          <label class="tf-field__label">
+            <mat-icon>link</mat-icon>
+            Slug
+          </label>
+          <div class="tf-field__input-wrap" [class.tf-field__input-wrap--disabled]="isInfo">
+            <input class="tf-field__input" formControlName="slug" placeholder="ex : pc" />
+          </div>
+        </div>
+
+        <!-- Catégorie -->
+        <div class="tf-field">
+          <label class="tf-field__label">
+            <mat-icon>category</mat-icon>
+            Catégorie
+          </label>
+          <div class="tf-field__input-wrap" [class.tf-field__input-wrap--disabled]="isInfo">
+            <mat-select class="tf-field__select" formControlName="categoryId" [disabled]="isInfo" placeholder="Sélectionner une catégorie">
+              <mat-option *ngFor="let c of categoryOptions" [value]="c.id">{{ c.label }}</mat-option>
+            </mat-select>
+          </div>
+          <span class="tf-field__error" *ngIf="form.get('categoryId')?.invalid && form.get('categoryId')?.touched">
+            Catégorie requise.
+          </span>
+        </div>
+
       </div>
-      <div class="field__error" *ngIf="form.get('name')?.touched && form.get('name')?.invalid">Nom requis</div>
     </div>
 
-    <div class="field">
-      <label>Slug</label>
-      <div class="field__wrap" [class.field__wrap--disabled]="isInfo">
-        <input formControlName="slug" placeholder="ex: pc" />
-      </div>
-    </div>
-
-    <div class="field">
-      <label>Catégorie</label>
-      <div class="field__wrap" [class.field__wrap--disabled]="isInfo">
-        <mat-select formControlName="categoryId" [disabled]="isInfo" placeholder="Sélectionner une catégorie">
-          <mat-option *ngFor="let c of categoryOptions" [value]="c.id">{{ c.label }}</mat-option>
-        </mat-select>
-      </div>
-      <div class="field__error" *ngIf="form.get('categoryId')?.touched && form.get('categoryId')?.invalid">Catégorie requise</div>
-    </div>
-
-    <div class="dialog__actions">
-      <button type="button" class="btn btn--cancel" (click)="close()">Fermer</button>
-      <button *ngIf="!isInfo" type="submit" class="btn btn--submit">
+    <!-- Actions -->
+    <div class="type-form-dialog__actions">
+      <button class="tf-btn tf-btn--cancel" type="button" (click)="close()">
+        Fermer
+      </button>
+      <button *ngIf="!isInfo" class="tf-btn tf-btn--submit" type="submit">
         <mat-icon>save_outlined</mat-icon>
         Enregistrer
       </button>
     </div>
+
   </form>
 </div>
 

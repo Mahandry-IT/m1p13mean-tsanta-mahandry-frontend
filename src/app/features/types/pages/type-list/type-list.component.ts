@@ -47,8 +47,6 @@ export class TypeListComponent {
       next: (res) => {
         const type = res?.data ?? res?.type ?? res;
         this.dialog.open(TypeFormComponent, {
-          width: '760px',
-          maxWidth: '96vw',
           data: { mode: 'info', type },
         });
       },
@@ -64,8 +62,6 @@ export class TypeListComponent {
       next: (res) => {
         const type = res?.data ?? res?.type ?? res;
         const ref = this.dialog.open(TypeFormComponent, {
-          width: '760px',
-          maxWidth: '96vw',
           data: { mode: 'edit', type },
         });
 
@@ -114,8 +110,6 @@ export class TypeListComponent {
 
   onAdd(): void {
     const ref = this.dialog.open(TypeFormComponent, {
-      width: '760px',
-      maxWidth: '96vw',
       data: { mode: 'create', type: {} },
     });
 

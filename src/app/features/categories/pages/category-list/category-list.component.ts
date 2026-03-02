@@ -42,8 +42,6 @@ export class CategoryListComponent {
       next: (res) => {
         const category = res?.data ?? res?.category ?? res;
         this.dialog.open(CategoryFormComponent, {
-          width: '700px',
-          maxWidth: '96vw',
           data: { mode: 'info', category },
         });
       },
@@ -59,8 +57,6 @@ export class CategoryListComponent {
       next: (res) => {
         const category = res?.data ?? res?.category ?? res;
         const ref = this.dialog.open(CategoryFormComponent, {
-          width: '700px',
-          maxWidth: '96vw',
           data: { mode: 'edit', category },
         });
 
@@ -109,8 +105,6 @@ export class CategoryListComponent {
 
   onAdd(): void {
     const ref = this.dialog.open(CategoryFormComponent, {
-      width: '700px',
-      maxWidth: '96vw',
       data: { mode: 'create', category: {} },
     });
 
