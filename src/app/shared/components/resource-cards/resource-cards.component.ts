@@ -192,6 +192,9 @@ export class ResourceCardsComponent<TItem extends Record<string, any>> implement
   }
 
   private onDependencyChanged(changedParam: string): void {
+    // 1) Mettre à jour disable/enable des champs dépendants en premier
+    this.refreshDependentDisabledStates();
+
     const ctrls = Array.isArray(this.filterControls) ? this.filterControls : [];
     for (const f of ctrls) {
       const ro = f.remoteOptions;
@@ -207,8 +210,6 @@ export class ResourceCardsComponent<TItem extends Record<string, any>> implement
       this.loadRemoteOptionsFor(f);
     }
 
-    // mettre à jour disabled/enabled des champs dépendants
-    this.refreshDependentDisabledStates();
 
     this.cdr.markForCheck();
   }
@@ -272,7 +273,7 @@ export class ResourceCardsComponent<TItem extends Record<string, any>> implement
           items = data.items;
         } else {
           // fallback: première propriété array
-          for (const [k, v] of Object.entries(data ?? {})) {
+          for (const [, v] of Object.entries(data ?? {})) {
             if (Array.isArray(v)) {
               items = v as any[];
               break;
@@ -368,6 +369,11 @@ export class ResourceCardsComponent<TItem extends Record<string, any>> implement
       });
   }
 
+  /** Permet au parent de forcer un rechargement */
+  refresh(): void {
+    this.load();
+  }
+
   onPage(event: any): void {
     this.pagination = { ...this.pagination, page: event.pageIndex + 1, limit: event.pageSize };
     this.load();
@@ -394,23 +400,35 @@ export class ResourceCardsComponent<TItem extends Record<string, any>> implement
     if (!this.imageField) return null;
 
     const val = (row as any)?.[this.imageField];
-    if (!val) return null;
+    if (val === null || val === undefined) return null;
 
-    // string
-    if (typeof val === 'string') return val;
-
-    // {link}
-    if (typeof val === 'object' && !Array.isArray(val)) {
-      const link = (val as any)?.link;
-      return typeof link === 'string' && link.trim() ? link.trim() : null;
+    // string direct
+    if (typeof val === 'string') {
+      const s = val.trim();
+      return s ? s : null;
     }
 
-    // array
-    if (Array.isArray(val) && val.length) {
-      const first = val[0];
-      if (typeof first === 'string') return first;
+    // array (0..n)
+    if (Array.isArray(val)) {
+      if (val.length === 0) return null;
+      const first = val.find((x) => x != null);
+      if (!first) return null;
+
+      if (typeof first === 'string') {
+        const s = first.trim();
+        return s ? s : null;
+      }
+
       const link = (first as any)?.link;
-      return typeof link === 'string' && link.trim() ? link.trim() : null;
+      if (typeof link === 'string' && link.trim()) return link.trim();
+      return null;
+    }
+
+    // objet { link }
+    if (typeof val === 'object') {
+      const link = (val as any)?.link;
+      if (typeof link === 'string' && link.trim()) return link.trim();
+      return null;
     }
 
     return null;

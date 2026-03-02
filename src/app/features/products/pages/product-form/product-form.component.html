@@ -1,0 +1,97 @@
+<h2 mat-dialog-title>
+  <ng-container [ngSwitch]="data.mode">
+    <span *ngSwitchCase="'create'">Nouveau produit</span>
+    <span *ngSwitchCase="'edit'">Modifier le produit</span>
+    <span *ngSwitchDefault>Détails du produit</span>
+  </ng-container>
+</h2>
+
+<mat-dialog-content class="product-form">
+  <form [formGroup]="form" class="product-form__form">
+    <mat-form-field appearance="outline" class="w-100">
+      <mat-label>Nom</mat-label>
+      <input matInput formControlName="name" placeholder="Nom du produit" />
+      <mat-error *ngIf="form.get('name')?.touched && form.get('name')?.invalid">Nom requis</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="w-100">
+      <mat-label>Description</mat-label>
+      <textarea matInput formControlName="description" rows="4" placeholder="Description..."></textarea>
+    </mat-form-field>
+
+    <div class="product-form__images">
+      <div class="product-form__images-head">
+        <div class="product-form__section-title">Images (nouvelles)</div>
+        <button mat-stroked-button type="button" (click)="openUploadDialog()" [disabled]="isInfo">Choisir des images</button>
+      </div>
+
+      <div class="product-form__chips" *ngIf="newImages.length">
+        <div class="product-form__chip" *ngFor="let f of newImages; let i = index">
+          <span class="product-form__chip-name">{{ f.name }}</span>
+          <button mat-icon-button type="button" (click)="removeNewImage(i)" [disabled]="isInfo" aria-label="Supprimer">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <div class="product-form__hint" *ngIf="!newImages.length">Aucun nouveau fichier sélectionné.</div>
+
+      <div class="product-form__existing" *ngIf="(data.product.images?.length ?? 0) > 0">
+        <div class="product-form__hint">Images existantes (lecture seule)</div>
+        <div class="product-form__existing-grid">
+          <img *ngFor="let img of data.product.images" [src]="img.link" alt="image" />
+        </div>
+      </div>
+    </div>
+
+    <div class="product-form__section">
+      <div class="product-form__section-head">
+        <div class="product-form__section-title">Catégories & Types</div>
+        <button mat-stroked-button type="button" (click)="addCategoryRow()" [disabled]="isInfo">Ajouter</button>
+      </div>
+
+      <div formArrayName="categories" class="product-form__categories">
+        <div
+          class="product-form__category-row"
+          *ngFor="let row of categoriesArray.controls; let i = index"
+          [formGroupName]="i"
+        >
+          <mat-form-field appearance="outline" class="product-form__field">
+            <mat-label>Catégorie</mat-label>
+            <mat-select formControlName="categoryId" [disabled]="isInfo">
+              <mat-option [value]="''">—</mat-option>
+              <mat-option *ngFor="let c of categoryOptions" [value]="c.id">{{ c.label }}</mat-option>
+            </mat-select>
+            <mat-error *ngIf="row.get('categoryId')?.touched && row.get('categoryId')?.invalid">Catégorie requise</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="product-form__field">
+            <mat-label>Types</mat-label>
+            <mat-select formControlName="typeIds" multiple [disabled]="isInfo || !row.get('categoryId')?.value">
+              <mat-option *ngFor="let t of typeOptionsFor(row.get('categoryId')?.value)" [value]="t.id">{{ t.label }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <button
+            mat-icon-button
+            type="button"
+            class="product-form__remove"
+            (click)="removeCategoryRow(i)"
+            [disabled]="isInfo"
+            aria-label="Supprimer la ligne"
+          >
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="close()">Fermer</button>
+  <button mat-flat-button color="primary" type="button" (click)="submit()" *ngIf="!isInfo">
+    {{ isCreate ? 'Créer' : 'Enregistrer' }}
+  </button>
+</mat-dialog-actions>
+

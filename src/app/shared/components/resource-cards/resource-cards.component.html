@@ -60,7 +60,7 @@
     </mat-form-field>
 
     <button mat-stroked-button type="button" (click)="clearFilters()">
-      <mat-icon>backspace</mat-icon>
+      <mat-icon>clear_all</mat-icon>
       Réinitialiser
     </button>
   </div>
@@ -79,19 +79,18 @@
       Aucun résultat trouvé.
     </div>
 
-    <div class="resource-cards__sort" *ngIf="enableServerSort">
-      <div class="resource-cards__sort-label">Tri:</div>
-      <div matSort (matSortChange)="onSortChange($event)" class="resource-cards__sort-row">
-        <div class="resource-cards__sort-item" [mat-sort-header]="titleField">{{ titleField }}</div>
-        <div *ngIf="descriptionField" class="resource-cards__sort-item" [mat-sort-header]="descriptionField">{{ descriptionField }}</div>
-      </div>
-    </div>
-
     <div class="resource-cards__grid" *ngIf="items.length">
       <mat-card class="resource-cards__card" *ngFor="let row of items; trackBy: trackById">
-        <ng-container *ngIf="imageUrlOf(row) as img">
-          <img mat-card-image [src]="img" alt="image" />
-        </ng-container>
+
+        <!-- Image via background-image pour contrôle total de la taille -->
+        <div
+          *ngIf="imageUrlOf(row) as img"
+          class="resource-cards__card-img"
+          [style.background-image]="'url(' + img + ')'"
+        ></div>
+
+        <!-- Placeholder si pas d'image -->
+        <div *ngIf="!imageUrlOf(row)" class="resource-cards__card-img resource-cards__card-img--placeholder"></div>
 
         <mat-card-header>
           <mat-card-title>{{ titleOf(row) }}</mat-card-title>
@@ -112,6 +111,7 @@
             <mat-icon>delete_outline</mat-icon>
           </button>
         </mat-card-actions>
+
       </mat-card>
     </div>
 
@@ -125,4 +125,3 @@
     ></mat-paginator>
   </ng-container>
 </section>
-
