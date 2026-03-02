@@ -6,6 +6,7 @@ import { ToastService } from '../../../../core/services/toast.service';
 import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { StoreProductCardsComponent, StoreProductCardsFilterControl } from '../../../../shared/components/store-product-cards/store-product-cards.component';
 import { MyProductsFormComponent } from '../my-products-form/my-products-form.component';
+import { MyProductsAddDialogComponent } from '../my-products-add-dialog/my-products-add-dialog.component';
 
 @Component({
   selector: 'app-my-products-page',
@@ -172,6 +173,32 @@ export class MyProductsPageComponent implements OnInit {
     };
   }
 
+  private toNum(v: any): number | null {
+    if (v === null || v === undefined || v === '') return null;
+    if (typeof v === 'object' && v && '$numberDecimal' in v) return this.toNum((v as any).$numberDecimal);
+    const n = Number(String(v).replace(',', '.'));
+    return Number.isFinite(n) ? n : null;
+  }
+
+  private ensureStoreDataWithPriceHistory(product: any, storeId: string, price: number): any[] {
+    const storeData = Array.isArray(product?.storeData) ? [...product.storeData] : [];
+    const idx = storeData.findIndex((sd: any) => String(sd?.storeId ?? '') === String(storeId));
+
+    const entry = idx >= 0 ? { ...(storeData[idx] ?? {}) } : { storeId };
+    const hist = Array.isArray(entry?.priceHistory) ? [...entry.priceHistory] : [];
+
+    hist.push({
+      price,
+      updatedAt: new Date().toISOString(),
+    });
+
+    entry.priceHistory = hist;
+    if (idx >= 0) storeData[idx] = entry;
+    else storeData.push(entry);
+
+    return storeData;
+  }
+
   onInfo(row: any): void {
     const id = this.getId(row);
     if (!id) return;
@@ -182,7 +209,7 @@ export class MyProductsPageComponent implements OnInit {
         this.dialog.open(MyProductsFormComponent, {
           width: '900px',
           maxWidth: '96vw',
-          data: { mode: 'info', product },
+          data: { mode: 'info', product, storeId: this.selectedStoreId ?? null },
         });
       },
       error: (err) => this.toast.error(err?.message ?? 'Erreur lors du chargement'),
@@ -193,20 +220,32 @@ export class MyProductsPageComponent implements OnInit {
     const id = this.getId(row);
     if (!id) return;
 
+    if (!this.selectedStoreId) {
+      this.toast.error('Sélectionnez une boutique avant de modifier le prix.');
+      return;
+    }
+
     this.api.get<any>(`/products/${encodeURIComponent(id)}`).subscribe({
       next: (res) => {
         const product = res?.data ?? res?.product ?? res;
         const ref = this.dialog.open(MyProductsFormComponent, {
           width: '900px',
           maxWidth: '96vw',
-          data: { mode: 'edit', product },
+          data: { mode: 'edit', product, storeId: this.selectedStoreId ?? null },
         });
 
         ref.afterClosed().subscribe((payload) => {
           if (!payload) return;
 
+          // 1) update info produit (name/desc/cats/images)
           const { json, formData } = this.cleanUpdatePayload(payload);
           const hasFiles = Array.isArray(payload?.newImages) && payload.newImages.length > 0;
+
+          // 2) si un nouveau prix a été saisi => on ajoute une entrée priceHistory dans storeData
+          const p = this.toNum(payload?.newPrice);
+          if (p !== null) {
+            json.storeData = this.ensureStoreDataWithPriceHistory(product, String(this.selectedStoreId), p);
+          }
 
           const req$ = hasFiles
             ? this.api.patch<any>(`/products/${encodeURIComponent(id)}`, formData)
@@ -253,30 +292,135 @@ export class MyProductsPageComponent implements OnInit {
   }
 
   onAdd(): void {
-    const ref = this.dialog.open(MyProductsFormComponent, {
-      width: '900px',
+    // on impose un storeId sélectionné pour l'ajout (car storeData.storeId requis)
+    if (!this.selectedStoreId) {
+      this.toast.error('Sélectionnez une boutique avant d\'ajouter un produit.');
+      return;
+    }
+
+    const ref = this.dialog.open(MyProductsAddDialogComponent, {
       maxWidth: '96vw',
-      data: { mode: 'create', product: {} },
+      data: { storeId: this.selectedStoreId },
     });
 
-    ref.afterClosed().subscribe((payload) => {
-      if (!payload) return;
+    ref.afterClosed().subscribe((choice) => {
+      if (!choice) return;
 
-      const hasFiles = Array.isArray(payload?.newImages) && payload.newImages.length > 0;
-      const { json, formData } = this.cleanCreatePayload(payload);
+      // Mode 1: utiliser produit existant -> ajouter entrée storeData.priceHistory
+      if (choice.mode === 'existing') {
+        const productId = String(choice.productId ?? '').trim();
+        const price = this.toNum(choice.price);
+        if (!productId || price === null) {
+          this.toast.error('Produit et prix requis');
+          return;
+        }
 
-      const req$ = hasFiles
-        ? this.api.post<any>('/products', formData)
-        : this.api.post<any>('/products', json);
+        // charger le produit, puis patch storeData
+        this.api.get<any>(`/products/${encodeURIComponent(productId)}`).subscribe({
+          next: (res) => {
+            const product = res?.data ?? res?.product ?? res;
+            const storeData = this.ensureStoreDataWithPriceHistory(product, String(this.selectedStoreId), price);
 
-      req$.subscribe({
-        next: () => {
-          this.toast.success('Produit ajouté');
-          this.storeProductCards?.load();
-        },
-        error: (err) => this.toast.error(err?.message ?? 'Erreur lors de la création'),
+            this.api.patch<any>(`/products/${encodeURIComponent(productId)}`, { storeData }).subscribe({
+              next: () => {
+                this.toast.success('Produit associé à la boutique');
+                this.storeProductCards?.load();
+              },
+              error: (err) => this.toast.error(err?.message ?? 'Erreur lors de l\'association'),
+            });
+          },
+          error: (err) => this.toast.error(err?.message ?? 'Erreur lors du chargement'),
+        });
+
+        return;
+      }
+
+      // Mode 2: créer nouveau produit -> on ouvre le form complet, puis POST /products
+      const defaultPrice = this.toNum(choice.defaultPrice);
+      if (defaultPrice === null) {
+        this.toast.error('Prix par défaut requis');
+        return;
+      }
+
+      const ref2 = this.dialog.open(MyProductsFormComponent, {
+        width: '900px',
+        maxWidth: '96vw',
+        data: { mode: 'create', product: {}, storeId: this.selectedStoreId },
+      });
+
+      ref2.afterClosed().subscribe((payload) => {
+        if (!payload) return;
+
+        const hasFiles = Array.isArray(payload?.newImages) && payload.newImages.length > 0;
+        const { json, formData } = this.cleanCreatePayload(payload);
+
+        // prix par défaut du nouveau produit
+        json.defaultPrice = defaultPrice;
+
+        // créer storeData pour la boutique sélectionnée (avec currentPrice et 1 entrée d'historique)
+        json.storeData = [
+          {
+            storeId: String(this.selectedStoreId),
+            currentPrice: defaultPrice,
+            priceHistory: [{ price: defaultPrice, updatedAt: new Date().toISOString() }],
+            promotions: [],
+            stockMovements: [],
+          },
+        ];
+
+        if (hasFiles) {
+          // on complète le FormData existant (qui contient déjà name/description/categories/images)
+          formData.append('defaultPrice', String(defaultPrice));
+          this.appendStoreDataToFormData(formData, json.storeData);
+
+          // IMPORTANT: cleanCreatePayload a omis storeData; on vient de l’ajouter.
+          this.api.post<any>('/products', formData).subscribe({
+            next: () => {
+              this.toast.success('Produit ajouté');
+              this.storeProductCards?.load();
+            },
+            error: (err) => this.toast.error(err?.message ?? 'Erreur lors de la création'),
+          });
+          return;
+        }
+
+        // JSON
+        this.api.post<any>('/products', json).subscribe({
+          next: () => {
+            this.toast.success('Produit ajouté');
+            this.storeProductCards?.load();
+          },
+          error: (err) => this.toast.error(err?.message ?? 'Erreur lors de la création'),
+        });
       });
     });
+  }
+
+  private appendStoreDataToFormData(fd: FormData, storeData: any[]): void {
+    const list = Array.isArray(storeData) ? storeData : [];
+
+    for (let i = 0; i < list.length; i++) {
+      const sd = list[i] ?? {};
+      if (sd.storeId != null) fd.append(`storeData[${i}][storeId]`, String(sd.storeId));
+      if (sd.currentPrice != null) fd.append(`storeData[${i}][currentPrice]`, String(sd.currentPrice));
+
+      const hist = Array.isArray(sd.priceHistory) ? sd.priceHistory : [];
+      for (let j = 0; j < hist.length; j++) {
+        const h = hist[j] ?? {};
+        if (h.price != null) fd.append(`storeData[${i}][priceHistory][${j}][price]`, String(h.price));
+        if (h.updatedAt != null) fd.append(`storeData[${i}][priceHistory][${j}][updatedAt]`, String(h.updatedAt));
+      }
+
+      const promos = Array.isArray(sd.promotions) ? sd.promotions : [];
+      for (let j = 0; j < promos.length; j++) {
+        fd.append(`storeData[${i}][promotions][${j}]`, JSON.stringify(promos[j]));
+      }
+
+      const moves = Array.isArray(sd.stockMovements) ? sd.stockMovements : [];
+      for (let j = 0; j < moves.length; j++) {
+        fd.append(`storeData[${i}][stockMovements][${j}]`, JSON.stringify(moves[j]));
+      }
+    }
   }
 
   /**

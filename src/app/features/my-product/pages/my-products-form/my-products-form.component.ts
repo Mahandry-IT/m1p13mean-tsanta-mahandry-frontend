@@ -17,17 +17,35 @@ export interface MyProductsCategoryDto {
   typeIds: string[];
 }
 
+export interface MyProductsPriceHistoryDto {
+  price: any;
+  updatedAt: string;
+}
+
+export interface MyProductsStoreDataDto {
+  storeId: string;
+  currentPrice?: any;
+  createdAt?: string;
+  priceHistory?: MyProductsPriceHistoryDto[];
+  promotions?: any[];
+  stockMovements?: any[];
+}
+
 export interface MyProductsDto {
   _id?: string;
   name?: string;
   description?: string;
   images?: MyProductsImageDto[];
   categories?: MyProductsCategoryDto[];
+  defaultPrice?: any;
+  storeData?: MyProductsStoreDataDto[];
 }
 
 export interface MyProductsFormDialogData {
   mode: MyProductsFormMode;
   product: MyProductsDto;
+  /** boutique ciblée (pour afficher/éditer le prix) */
+  storeId?: string | null;
 }
 
 @Component({
@@ -52,6 +70,9 @@ export class MyProductsFormComponent implements OnInit {
   /** cache pour éviter reload types répétés */
   private loadedTypeCategories = new Set<string>();
 
+  /** Prix affiché en mode info (dernier prix ou fallback) */
+  lastPrice: number | null = null;
+
   constructor(
     private readonly fb: FormBuilder,
     private readonly api: ApiService,
@@ -71,13 +92,54 @@ export class MyProductsFormComponent implements OnInit {
     return (this.dialogData.mode ?? 'info') === 'create';
   }
 
+  private toNum(v: any): number | null {
+    if (v === null || v === undefined || v === '') return null;
+    if (typeof v === 'object' && v && '$numberDecimal' in v) return this.toNum((v as any).$numberDecimal);
+    const n = Number(String(v).replace(',', '.'));
+    return Number.isFinite(n) ? n : null;
+  }
+
+  private lastPriceFromHistory(sd: any): number | null {
+    const hist = Array.isArray(sd?.priceHistory) ? sd.priceHistory : [];
+    if (!hist.length) return null;
+    const last = [...hist]
+      .sort((a: any, b: any) => new Date(a?.updatedAt ?? 0).getTime() - new Date(b?.updatedAt ?? 0).getTime())
+      .pop();
+    return this.toNum(last?.price);
+  }
+
+  private computeLastPrice(product: MyProductsDto, storeId: string | null | undefined): number | null {
+    const list = Array.isArray(product?.storeData) ? product.storeData : [];
+
+    if (storeId) {
+      const match = list.find((x: any) => String(x?.storeId ?? '') === String(storeId));
+      const ph = this.lastPriceFromHistory(match);
+      if (ph !== null) return ph;
+      const cp = this.toNum(match?.currentPrice);
+      if (cp !== null) return cp;
+    }
+
+    for (let i = list.length - 1; i >= 0; i--) {
+      const ph = this.lastPriceFromHistory(list[i]);
+      if (ph !== null) return ph;
+      const cp = this.toNum(list[i]?.currentPrice);
+      if (cp !== null) return cp;
+    }
+
+    return this.toNum((product as any)?.defaultPrice);
+  }
+
   ngOnInit(): void {
     const p = this.dialogData.product ?? {};
+
+    this.lastPrice = this.computeLastPrice(p, this.dialogData.storeId ?? null);
 
     this.form = this.fb.group({
       name: [{ value: p.name ?? '', disabled: this.isInfo }, [Validators.required]],
       description: [{ value: p.description ?? '', disabled: this.isInfo }],
       categories: this.fb.array([]),
+      // en edit: nouveau prix à ajouter dans priceHistory
+      newPrice: [{ value: null, disabled: this.isInfo }, [Validators.min(0)]],
     });
 
     const incoming = Array.isArray(p.categories) ? p.categories : [];
@@ -258,7 +320,6 @@ export class MyProductsFormComponent implements OnInit {
       return;
     }
 
-    // on renvoie tout ce qu'il faut au parent pour faire FormData
     const raw = this.form.getRawValue();
     const categories = (raw.categories ?? []).map((c: any) => ({
       categoryId: String(c.categoryId ?? '').trim(),
@@ -270,6 +331,7 @@ export class MyProductsFormComponent implements OnInit {
       description: raw.description,
       categories,
       newImages: this.newImages,
+      newPrice: raw.newPrice,
     });
   }
 }

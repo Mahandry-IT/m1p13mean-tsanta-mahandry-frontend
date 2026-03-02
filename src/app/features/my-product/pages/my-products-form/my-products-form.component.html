@@ -31,6 +31,28 @@
   <div class="pf-dialog__body">
     <form [formGroup]="form" class="pf-form">
 
+      <!-- Dernier prix (lecture seule) -->
+      <div class="pf-field" *ngIf="isInfo">
+        <label class="pf-field__label">
+          <mat-icon>payments</mat-icon>
+          Dernier prix
+        </label>
+        <div class="pf-field__wrap pf-field__wrap--disabled">
+          <input class="pf-field__input" [value]="(lastPrice === null ? '—' : (lastPrice + ''))" disabled />
+        </div>
+      </div>
+
+      <!-- Nouveau prix (pour update: ajoute une entrée priceHistory) -->
+      <div class="pf-field" *ngIf="!isInfo">
+        <label class="pf-field__label">
+          <mat-icon>payments</mat-icon>
+          Nouveau prix (boutique)
+        </label>
+        <div class="pf-field__wrap" [class.pf-field__wrap--disabled]="isInfo">
+          <input class="pf-field__input" type="number" formControlName="newPrice" placeholder="ex : 299.99" />
+        </div>
+      </div>
+
       <!-- Nom -->
       <div class="pf-field">
         <label class="pf-field__label">
