@@ -115,7 +115,17 @@
 
         <mat-card-header>
           <mat-card-title>{{ titleOf(row) }}</mat-card-title>
-          <mat-card-subtitle class="store-product-cards__price">{{ formatPrice(priceOf(row)) }}</mat-card-subtitle>
+
+          <ng-container *ngIf="priceTemplate; else defaultPriceTpl">
+            <ng-container
+              [ngTemplateOutlet]="priceTemplate"
+              [ngTemplateOutletContext]="priceContextOf(row)"
+            ></ng-container>
+          </ng-container>
+
+          <ng-template #defaultPriceTpl>
+            <mat-card-subtitle class="store-product-cards__price">{{ formatPrice(priceOf(row)) }}</mat-card-subtitle>
+          </ng-template>
         </mat-card-header>
 
         <mat-card-actions align="end" *ngIf="isInfonable || isEditable || isDeletable">

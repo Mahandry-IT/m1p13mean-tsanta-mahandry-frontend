@@ -357,7 +357,7 @@ button.store-product-cards__add {
 // ── Gallery ────────────────────────────────────────────────────────────────
 .store-product-cards__gallery {
   width     : 100%;
-  padding   : 14px 14px 10px;
+  padding   : 0;        // ← était '14px 14px 10px', le padding poussait l'image
   background: $color-surface;
 }
 
@@ -365,8 +365,8 @@ button.store-product-cards__add {
   width              : 100%;
   height             : 180px;
   border-radius      : $radius-md;
-  background-size    : contain;
-  background-position: center;
+  background-size    : contain;          // ← était 'contain', passez à 'cover'
+  background-position: center center;  // ← expliciter les deux axes
   background-repeat  : no-repeat;
   border             : 1px solid $color-border;
   background-color   : $color-surface;

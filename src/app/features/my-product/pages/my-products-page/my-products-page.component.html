@@ -11,6 +11,28 @@
       </mat-form-field>
     </div>
 
+    <!-- Template prix custom (promo + fallback) -->
+    <ng-template
+      #myPriceTpl
+      let-basePrice="basePrice"
+      let-finalPrice="finalPrice"
+      let-hasPromo="hasPromo"
+      let-promoPercent="promoPercent"
+      let-format="format"
+    >
+      <mat-card-subtitle class="store-product-cards__price my-products__price">
+        <ng-container *ngIf="!hasPromo; else promoTpl">
+          <span class="my-products__price-final">{{ format(basePrice) }}</span>
+        </ng-container>
+
+        <ng-template #promoTpl>
+          <span class="my-products__price-final">{{ format(finalPrice) }}</span>
+          <span class="my-products__price-base">{{ format(basePrice) }}</span>
+          <span class="my-products__promo-badge" *ngIf="promoPercent as p">-{{ p }}%</span>
+        </ng-template>
+      </mat-card-subtitle>
+    </ng-template>
+
     <app-store-product-cards
       [endpoint]="endpoint"
       [listEndpoint]="listEndpoint"
@@ -23,6 +45,8 @@
       [isEditable]="true"
       [isDeletable]="true"
       [isAddable]="true"
+      [priceTemplate]="myPriceTpl"
+      [priceResolver]="priceResolver"
     ></app-store-product-cards>
 
   </app-page>

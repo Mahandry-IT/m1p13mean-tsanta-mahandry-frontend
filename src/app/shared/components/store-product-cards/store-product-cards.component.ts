@@ -8,6 +8,7 @@ import {
   OnInit,
   Output,
   SimpleChanges,
+  TemplateRef,
 } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { Sort } from '@angular/material/sort';
@@ -114,6 +115,24 @@ export class StoreProductCardsComponent<TItem extends Record<string, any>> imple
   private selectOptionsLoading = new Map<string, boolean>();
 
   private lastLoadSignature: string | null = null;
+
+  /**
+   * Template optionnel pour surcharger l’affichage du prix sous le titre.
+   * Contexte disponible dans le template: implicit(row) + price.
+   */
+  @Input() priceTemplate: TemplateRef<StoreProductCardsPriceTemplateContext<TItem>> | null = null;
+
+  /**
+   * Formatter le prix (par défaut: EUR). Peut être surchargé côté page.
+   * Utile si tu veux afficher Ar, MGA, etc.
+   */
+  @Input() priceFormatter: ((price: number | null, row?: TItem) => string) | null = null;
+
+  /**
+   * Callback optionnel pour calculer le prix + promo côté page (TS).
+   * Si fourni, il remplace la logique interne (storeData/defaultPrice) dans le contexte.
+   */
+  @Input() priceResolver: ((row: TItem) => Partial<Pick<StoreProductCardsPriceTemplateContext<TItem>, 'basePrice' | 'finalPrice' | 'hasPromo' | 'promoPercent'>> | null) | null = null;
 
   constructor(
     private readonly resourceList: ResourceListService,
@@ -458,32 +477,114 @@ export class StoreProductCardsComponent<TItem extends Record<string, any>> imple
 
     const toNum = (v: any): number | null => {
       if (v === null || v === undefined || v === '') return null;
+
+      // Support mongoose Decimal128 sérialisé: { $numberDecimal: "299.99" }
+      if (typeof v === 'object' && v && '$numberDecimal' in v) {
+        return toNum((v as any).$numberDecimal);
+      }
+
       const n = Number(String(v).replace(',', '.'));
       return Number.isFinite(n) ? n : null;
     };
 
+    const lastPriceFromHistory = (sd: any): number | null => {
+      const hist = Array.isArray(sd?.priceHistory) ? sd.priceHistory : [];
+      if (!hist.length) return null;
+
+      const last = [...hist]
+        .sort((a: any, b: any) => {
+          const ta = new Date(a?.updatedAt ?? 0).getTime();
+          const tb = new Date(b?.updatedAt ?? 0).getTime();
+          return ta - tb;
+        })
+        .pop();
+      return toNum(last?.price);
+    };
+
     if (this.storeId) {
       const match = list.find((x: any) => String(x?.storeId ?? '') === String(this.storeId));
+      // 1) dernier priceHistory, 2) currentPrice
+      const ph = lastPriceFromHistory(match);
+      if (ph !== null) return ph;
+
       const p = toNum(match?.currentPrice);
       if (p !== null) return p;
     }
 
-    // fallback: dernier item qui a un currentPrice
+    // fallback: dernier storeData qui a un prix (d'abord priceHistory, sinon currentPrice)
     for (let i = list.length - 1; i >= 0; i--) {
+      const ph = lastPriceFromHistory(list[i]);
+      if (ph !== null) return ph;
+
       const p = toNum(list[i]?.currentPrice);
       if (p !== null) return p;
     }
 
-    return this.defaultPrice;
+    return toNum((row as any)?.defaultPrice) ?? this.defaultPrice;
   }
 
   formatPrice(price: number | null): string {
+    if (this.priceFormatter) return this.priceFormatter(price);
     if (price === null) return '—';
     try {
       return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(price);
     } catch {
       return `${price} €`;
     }
+  }
+
+  /**
+   * Contexte consommé par priceTemplate.
+   * - basePrice: prix “normal” (dernier storeData si dispo, sinon default)
+   * - finalPrice: prix après promo (si promo), sinon basePrice
+   * - promoPercent: réduction en % (0..100)
+   */
+  priceContextOf(row: TItem): StoreProductCardsPriceTemplateContext<TItem> {
+    // base avec la logique interne existante
+    let basePrice = this.priceOf(row);
+
+    // promo “par défaut” (fallback)
+    const rawPromo = (row as any)?.promoPercent ?? (row as any)?.promotionPercent ?? (row as any)?.discountPercent;
+    const promoPercentFallback = Number(rawPromo);
+    const hasPromoFallback = Number.isFinite(promoPercentFallback) && promoPercentFallback > 0;
+
+    let finalPrice: number | null = basePrice;
+    let hasPromo = hasPromoFallback;
+    let promoPercent: number | null = hasPromoFallback ? promoPercentFallback : null;
+
+    if (hasPromo && basePrice !== null) {
+      finalPrice = Math.max(0, basePrice - (basePrice * (promoPercent ?? 0)) / 100);
+    }
+
+    // si la page fournit un resolver, on l’utilise
+    if (this.priceResolver) {
+      const resolved = this.priceResolver(row);
+      if (resolved) {
+        if (resolved.basePrice !== undefined) basePrice = resolved.basePrice ?? null;
+        if (resolved.hasPromo !== undefined) hasPromo = !!resolved.hasPromo;
+        if (resolved.promoPercent !== undefined) promoPercent = resolved.promoPercent ?? null;
+        if (resolved.finalPrice !== undefined) {
+          finalPrice = resolved.finalPrice ?? null;
+        } else {
+          // si pas de finalPrice mais promo active => on peut déduire
+          if (hasPromo && basePrice !== null && promoPercent !== null) {
+            finalPrice = Math.max(0, basePrice - (basePrice * promoPercent) / 100);
+          } else {
+            finalPrice = basePrice;
+          }
+        }
+      }
+    }
+
+    return {
+      $implicit: row,
+      row,
+      basePrice,
+      finalPrice,
+      hasPromo,
+      promoPercent: hasPromo ? promoPercent : null,
+      format: (p: number | null) => this.formatPrice(p),
+    };
   }
 
   private rowIdOf(row: TItem): string {
@@ -582,3 +683,12 @@ export interface StoreProductCardsFilterControl {
   defaultValue?: string | number | boolean | null;
 }
 
+export interface StoreProductCardsPriceTemplateContext<TItem> {
+  $implicit: TItem;
+  row: TItem;
+  basePrice: number | null;
+  finalPrice: number | null;
+  hasPromo: boolean;
+  promoPercent: number | null;
+  format: (price: number | null) => string;
+}

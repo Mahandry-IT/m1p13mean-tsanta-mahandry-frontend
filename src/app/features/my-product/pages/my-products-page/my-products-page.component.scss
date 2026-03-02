@@ -7,6 +7,7 @@ $color-text-muted : #6b7280;
 $color-border     : rgba(102, 126, 234, 0.14);
 $color-surface    : #ffffff;
 $color-surface-alt: #f8f7ff;
+$color-error      : #e03131;
 $radius-md        : 16px;
 $shadow-card      : 0 4px 24px rgba(102, 126, 234, 0.10), 0 1px 4px rgba(0,0,0,0.05);
 
@@ -132,4 +133,40 @@ $shadow-card      : 0 4px 24px rgba(102, 126, 234, 0.10), 0 1px 4px rgba(0,0,0,0
   // Important: certains thèmes MDC ajoutent un margin-top implicite.
   // On force l'alignement sur la même baseline que la search.
   margin: 0 !important;
+}
+
+// ── Prix (template custom) ────────────────────────────────────────────────
+.my-products__price {
+  /* mat-card-subtitle s'affiche déjà en block, mais on force pour éviter tout collage au titre */
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+  width: 100%;
+}
+
+.my-products__price-final {
+  font-weight: 900;
+  color: $color-secondary;
+}
+
+.my-products__price-base {
+  text-decoration: line-through;
+  opacity: 0.55;
+  font-weight: 700;
+}
+
+.my-products__promo-badge {
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: rgba(224, 49, 49, 0.10);
+  border: 1px solid rgba(224, 49, 49, 0.25);
+  color: $color-error;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 22px;
 }
