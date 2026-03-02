@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 
 import { ApiService } from '../../../../core/services/api.service';
 import { ToastService } from '../../../../core/services/toast.service';
+import { StoreProductCardsFilterControl } from '../../../../shared/components/store-product-cards/store-product-cards.component';
 
 @Component({
   selector: 'app-my-products-page',
@@ -17,6 +18,35 @@ export class MyProductsPageComponent implements OnInit {
 
   stores: Array<{ id: string; name: string }> = [];
   selectedStoreId: string | null = null;
+
+  productFilters: StoreProductCardsFilterControl[] = [
+    {
+      label: 'Catégorie',
+      param: 'categoryId',
+      type: 'select',
+      remoteOptions: {
+        endpoint: '/categories',
+        itemsKey: 'items',
+        valueField: '_id',
+        labelField: 'name',
+        params: { page: 1, limit: 200, sortBy: 'createdAt', sortDir: 'desc' },
+      },
+    },
+    {
+      label: 'Type',
+      param: 'typeId',
+      type: 'select',
+      remoteOptions: {
+        endpoint: '/types',
+        itemsKey: 'items',
+        valueField: '_id',
+        labelField: 'name',
+        dependsOn: ['categoryId'],
+        params: { page: 1, limit: 200, sortBy: 'createdAt', sortDir: 'desc' },
+      },
+      disabledWhenMissingDeps: true,
+    },
+  ];
 
   constructor(
     private readonly api: ApiService,
@@ -59,4 +89,3 @@ export class MyProductsPageComponent implements OnInit {
     };
   }
 }
-

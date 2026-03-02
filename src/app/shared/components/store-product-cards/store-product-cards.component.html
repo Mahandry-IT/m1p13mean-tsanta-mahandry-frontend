@@ -24,6 +24,52 @@
     </button>
   </div>
 
+  <!-- Filters -->
+  <div class="store-product-cards__filters" *ngIf="filterControls.length">
+    <mat-form-field
+      *ngFor="let f of filterControls"
+      appearance="outline"
+      class="store-product-cards__filter"
+    >
+      <mat-label>{{ f.label }}</mat-label>
+
+      <mat-select
+        *ngIf="f.type === 'select'"
+        [formControl]="getFilterCtrl(f.param)"
+      >
+        <mat-option [value]="null">Tous</mat-option>
+        <mat-option *ngIf="isSelectOptionsLoading(f.param)" [disabled]="true">Chargement…</mat-option>
+        <mat-option
+          *ngFor="let opt of getSelectOptions(f.param, f.options)"
+          [value]="opt.value"
+        >
+          {{ opt.label }}
+        </mat-option>
+      </mat-select>
+
+      <input
+        *ngIf="f.type === 'number'"
+        matInput
+        type="number"
+        [placeholder]="f.placeholder || ''"
+        [formControl]="getFilterCtrl(f.param)"
+      />
+
+      <input
+        *ngIf="f.type === 'text'"
+        matInput
+        type="text"
+        [placeholder]="f.placeholder || ''"
+        [formControl]="getFilterCtrl(f.param)"
+      />
+    </mat-form-field>
+
+    <button mat-stroked-button type="button" (click)="clearFilters()">
+      <mat-icon>clear_all</mat-icon>
+      Réinitialiser
+    </button>
+  </div>
+
   <!-- Loading -->
   <div class="store-product-cards__state" *ngIf="loading">Chargement en cours…</div>
 

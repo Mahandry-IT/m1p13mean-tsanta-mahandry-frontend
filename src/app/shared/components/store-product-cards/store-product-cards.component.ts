@@ -16,6 +16,7 @@ import { debounceTime, distinctUntilChanged, startWith } from 'rxjs/operators';
 import { ApiError } from '../../../core/models/api-error.model';
 import { PaginationMeta } from '../../../core/models/pagination.model';
 import { ResourceListService } from '../../../core/services/resource-list.service';
+import { ApiService } from '../../../core/services/api.service';
 
 /**
  * Variante de ResourceCards dédiée aux produits avec prix (storeData).
@@ -98,30 +99,293 @@ export class StoreProductCardsComponent<TItem extends Record<string, any>> imple
   /** id de ligne -> url image sélectionnée */
   private selectedImageByRowId = new Map<string, string>();
 
+  /**
+   * Filtres UI (en plus de la recherche q).
+   * Chaque filtre est envoyé comme query param (filtre.param = value).
+   */
+  @Input() filterControls: StoreProductCardsFilterControl[] = [];
+
+  /** param -> ctrl */
+  filterForm = new Map<string, FormControl<any>>();
+
+  /** options calculées (param -> options) */
+  private selectOptions = new Map<string, StoreProductCardsFilterOption[]>();
+  /** statut chargement options (param -> boolean) */
+  private selectOptionsLoading = new Map<string, boolean>();
+
+  private lastLoadSignature: string | null = null;
+
   constructor(
     private readonly resourceList: ResourceListService,
+    private readonly api: ApiService,
     private readonly cdr: ChangeDetectorRef,
   ) {
     this.searchCtrl.valueChanges
       .pipe(startWith(this.searchCtrl.value), debounceTime(300), distinctUntilChanged())
       .subscribe(() => {
         this.pagination = { ...this.pagination, page: 1 };
-        this.load();
+        this.triggerLoadIfNeeded(false);
       });
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['listEndpoint'] || changes['endpoint'] || changes['filters'] || changes['itemsKey'] || changes['storeId']) {
-      this.pagination = { ...this.pagination, page: 1, limit: this.pageSize };
-      this.load();
+    if (changes['filterControls']) {
+      this.setupFilterControls();
+      this.loadRemoteOptions();
+    }
+
+    if (changes['listEndpoint'] || changes['itemsKey']) {
+      this.triggerLoadIfNeeded(true);
+      return;
+    }
+
+    // filters est souvent recréé côté parent => on déduplique via signature
+    if (changes['filters']) {
+      this.triggerLoadIfNeeded(true);
     }
   }
 
   ngOnInit(): void {
+    this.setupFilterControls();
+    this.loadRemoteOptions();
+
     if (this.listEndpoint) {
-      this.pagination = { ...this.pagination, page: 1, limit: this.pageSize };
-      this.load();
+      this.triggerLoadIfNeeded(true);
     }
+  }
+
+  private stableStringify(obj: any): string {
+    if (obj === null || obj === undefined) return '';
+    if (Array.isArray(obj)) return `[${obj.map((x) => this.stableStringify(x)).join(',')}]`;
+    if (typeof obj !== 'object') return String(obj);
+    const keys = Object.keys(obj).sort();
+    return `{${keys.map((k) => `${k}:${this.stableStringify(obj[k])}`).join(',')}}`;
+  }
+
+  private computeLoadSignature(): string {
+    const sortPart = this.enableServerSort && this.sort.active && this.sort.direction
+      ? `${this.sort.active}:${this.sort.direction}`
+      : '';
+    const uiFilters = this.uiFilterParams();
+    return [
+      `list=${this.listEndpoint}`,
+      `itemsKey=${this.itemsKey ?? ''}`,
+      `page=${this.pagination.page}`,
+      `limit=${this.pagination.limit}`,
+      `q=${this.searchCtrl.value ?? ''}`,
+      `filters=${this.stableStringify(this.filters ?? {})}`,
+      `ui=${this.stableStringify(uiFilters)}`,
+      `sort=${sortPart}`,
+    ].join('|');
+  }
+
+  private triggerLoadIfNeeded(resetPage = false): void {
+    if (resetPage) {
+      this.pagination = { ...this.pagination, page: 1, limit: this.pageSize };
+    }
+
+    const sig = this.computeLoadSignature();
+    if (sig === this.lastLoadSignature) return;
+    this.lastLoadSignature = sig;
+    this.load();
+  }
+
+  private setupFilterControls(): void {
+    this.filterForm.clear();
+
+    const ctrls = Array.isArray(this.filterControls) ? this.filterControls : [];
+    for (const f of ctrls) {
+      if (!f?.param) continue;
+
+      const shouldStartDisabled = this.shouldDisableFilterAtStart(f);
+      const fc = new FormControl<any>({ value: f.defaultValue ?? null, disabled: shouldStartDisabled });
+      this.filterForm.set(f.param, fc);
+
+      fc.valueChanges.pipe(debounceTime(150), distinctUntilChanged()).subscribe(() => {
+        this.onDependencyChanged(f.param);
+        this.pagination = { ...this.pagination, page: 1 };
+        this.triggerLoadIfNeeded(false);
+      });
+    }
+
+    this.refreshDependentDisabledStates();
+  }
+
+  private shouldDisableFilterAtStart(f: StoreProductCardsFilterControl): boolean {
+    if (f.type !== 'select') return false;
+    if (!f.disabledWhenMissingDeps) return false;
+    const deps = f.remoteOptions?.dependsOn;
+    if (!deps?.length) return false;
+    return this.isMissingDeps(deps);
+  }
+
+  private refreshDependentDisabledStates(): void {
+    const ctrls = Array.isArray(this.filterControls) ? this.filterControls : [];
+    for (const f of ctrls) {
+      if (f.type !== 'select') continue;
+      if (!f.disabledWhenMissingDeps) continue;
+      const deps = f.remoteOptions?.dependsOn;
+      if (!deps?.length) continue;
+
+      const ctrl = this.getFilterCtrl(f.param);
+      const shouldDisable = this.isMissingDeps(deps);
+
+      if (shouldDisable && ctrl.enabled) {
+        ctrl.disable({ emitEvent: false });
+        ctrl.setValue(null, { emitEvent: false });
+      }
+      if (!shouldDisable && ctrl.disabled) {
+        ctrl.enable({ emitEvent: false });
+      }
+    }
+  }
+
+  private onDependencyChanged(changedParam: string): void {
+    this.refreshDependentDisabledStates();
+
+    const ctrls = Array.isArray(this.filterControls) ? this.filterControls : [];
+    for (const f of ctrls) {
+      const ro = f.remoteOptions;
+      if (f.type !== 'select' || !ro?.dependsOn?.length) continue;
+      if (!ro.dependsOn.includes(changedParam)) continue;
+
+      if (f.disabledWhenMissingDeps && this.isMissingDeps(ro.dependsOn)) {
+        this.getFilterCtrl(f.param).setValue(null, { emitEvent: false });
+      }
+
+      this.loadRemoteOptionsFor(f);
+    }
+
+    this.cdr.markForCheck();
+  }
+
+  private isMissingDeps(dependsOn: string[]): boolean {
+    for (const dep of dependsOn) {
+      const v = this.getFilterCtrl(dep).value;
+      if (v === null || v === undefined || v === '') return true;
+    }
+    return false;
+  }
+
+  private loadRemoteOptions(): void {
+    const ctrls = Array.isArray(this.filterControls) ? this.filterControls : [];
+    for (const f of ctrls) {
+      if (f.type !== 'select') continue;
+      if (!f.remoteOptions?.endpoint) continue;
+      this.loadRemoteOptionsFor(f);
+    }
+  }
+
+  private loadRemoteOptionsFor(f: StoreProductCardsFilterControl): void {
+    const ro = f.remoteOptions;
+    if (!ro?.endpoint) return;
+
+    if (ro.dependsOn?.length && this.isMissingDeps(ro.dependsOn)) {
+      this.selectOptions.set(f.param, []);
+      this.selectOptionsLoading.set(f.param, false);
+      this.cdr.markForCheck();
+      return;
+    }
+
+    this.selectOptionsLoading.set(f.param, true);
+    this.cdr.markForCheck();
+
+    const params: Record<string, string | number | boolean | null | undefined> = {
+      ...(ro.params ?? {}),
+    };
+
+    if (ro.dependsOn?.length) {
+      for (const dep of ro.dependsOn) {
+        params[dep] = this.getFilterCtrl(dep).value;
+      }
+    }
+
+    if (params['page'] === undefined) params['page'] = 1;
+    if (params['limit'] === undefined) params['limit'] = 200;
+
+    this.api.get<any>(ro.endpoint, params).subscribe({
+      next: (res) => {
+        const data = res?.data ?? res;
+
+        let items: any[] = [];
+        if (ro.itemsKey && Array.isArray(data?.[ro.itemsKey])) {
+          items = data[ro.itemsKey];
+        } else if (Array.isArray(data?.items)) {
+          items = data.items;
+        } else if (Array.isArray(data)) {
+          items = data;
+        } else {
+          for (const [, v] of Object.entries(data ?? {})) {
+            if (Array.isArray(v)) {
+              items = v as any[];
+              break;
+            }
+          }
+        }
+
+        const valueField = (ro.valueField ?? '_id').trim();
+        const labelField = (ro.labelField ?? 'name').trim();
+
+        const opts: StoreProductCardsFilterOption[] = (items ?? [])
+          .map((it) => {
+            const value = it?.[valueField] ?? it?.id;
+            const label = it?.[labelField] ?? it?.label ?? it?.title ?? value;
+            if (value === undefined || value === null) return null;
+            return {
+              value: value as any,
+              label: String(label ?? '').trim() || String(value),
+            };
+          })
+          .filter(Boolean) as StoreProductCardsFilterOption[];
+
+        this.selectOptions.set(f.param, opts);
+        this.selectOptionsLoading.set(f.param, false);
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.selectOptions.set(f.param, []);
+        this.selectOptionsLoading.set(f.param, false);
+        this.cdr.markForCheck();
+      },
+    });
+  }
+
+  getSelectOptions(param: string, fallback?: StoreProductCardsFilterOption[]): StoreProductCardsFilterOption[] {
+    return this.selectOptions.get(param) ?? (fallback ?? []);
+  }
+
+  isSelectOptionsLoading(param: string): boolean {
+    return this.selectOptionsLoading.get(param) ?? false;
+  }
+
+  clearFilters(): void {
+    for (const ctrl of this.filterForm.values()) {
+      ctrl.setValue(null, { emitEvent: false });
+    }
+    this.pagination = { ...this.pagination, page: 1 };
+    this.lastLoadSignature = null;
+    this.load();
+    this.loadRemoteOptions();
+    this.cdr.markForCheck();
+  }
+
+  getFilterCtrl(param: string): FormControl<any> {
+    const existing = this.filterForm.get(param);
+    if (existing) return existing;
+
+    const fc = new FormControl<any>(null);
+    this.filterForm.set(param, fc);
+    return fc;
+  }
+
+  private uiFilterParams(): Record<string, string | number | boolean | null | undefined> {
+    const out: Record<string, string | number | boolean | null | undefined> = {};
+    for (const [param, ctrl] of this.filterForm.entries()) {
+      const v = ctrl.value;
+      if (v === null || v === undefined || v === '') continue;
+      out[param] = v;
+    }
+    return out;
   }
 
   load(): void {
@@ -139,13 +403,15 @@ export class StoreProductCardsComponent<TItem extends Record<string, any>> imple
       sortParams[this.sortDirParam] = this.sort.direction;
     }
 
+    const uiFilters = this.uiFilterParams();
+
     this.resourceList
       .fetchPage<TItem>({
         endpoint: this.listEndpoint,
         page: this.pagination.page,
         limit: this.pagination.limit,
         q: this.searchCtrl.value,
-        filters: { ...(this.filters ?? {}), ...sortParams },
+        filters: { ...(this.filters ?? {}), ...uiFilters, ...sortParams },
         itemsKey: this.itemsKey,
       })
       .subscribe({
@@ -166,13 +432,13 @@ export class StoreProductCardsComponent<TItem extends Record<string, any>> imple
 
   onPage(event: any): void {
     this.pagination = { ...this.pagination, page: event.pageIndex + 1, limit: event.pageSize };
-    this.load();
+    this.triggerLoadIfNeeded(false);
   }
 
   onSortChange(sort: Sort): void {
     this.sort = sort;
     this.pagination = { ...this.pagination, page: 1 };
-    this.load();
+    this.triggerLoadIfNeeded(false);
   }
 
   titleOf(row: TItem): string {
@@ -288,3 +554,31 @@ export class StoreProductCardsComponent<TItem extends Record<string, any>> imple
 
   trackById = (_: number, row: TItem) => (row as any)?._id ?? (row as any)?.id ?? _;
 }
+
+export interface StoreProductCardsFilterOption {
+  label: string;
+  value: string | number | boolean;
+}
+
+export type StoreProductCardsFilterType = 'select' | 'number' | 'text';
+
+export interface StoreProductCardsRemoteOptionsConfig {
+  endpoint: string;
+  itemsKey?: string | null;
+  valueField?: string;
+  labelField?: string;
+  params?: Record<string, string | number | boolean | null | undefined>;
+  dependsOn?: string[];
+}
+
+export interface StoreProductCardsFilterControl {
+  label: string;
+  param: string;
+  type: StoreProductCardsFilterType;
+  options?: StoreProductCardsFilterOption[];
+  remoteOptions?: StoreProductCardsRemoteOptionsConfig;
+  disabledWhenMissingDeps?: boolean;
+  placeholder?: string;
+  defaultValue?: string | number | boolean | null;
+}
+
