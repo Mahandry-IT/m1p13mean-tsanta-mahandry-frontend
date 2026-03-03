@@ -1,0 +1,758 @@
+// ── Design tokens ──────────────────────────────────────────────────────────
+$gradient-primary : linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+$color-primary    : #667eea;
+$color-secondary  : #764ba2;
+$color-text       : #1a1a2e;
+$color-text-muted : #6b7280;
+$color-border     : rgba(102, 126, 234, 0.14);
+$color-surface    : #ffffff;
+$color-surface-alt: #f8f7ff;
+$color-error      : #e03131;
+$radius-sm        : 8px;
+$radius-md        : 16px;
+$radius-lg        : 24px;
+$font-body        : 'Segoe UI', system-ui, sans-serif;
+$shadow-card      : 0 4px 24px rgba(102, 126, 234, 0.10), 0 1px 4px rgba(0,0,0,0.05);
+$shadow-card-hover: 0 12px 40px rgba(102, 126, 234, 0.18), 0 2px 8px rgba(0,0,0,0.07);
+
+// ── Keyframes ──────────────────────────────────────────────────────────────
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -600px 0; }
+  100% { background-position:  600px 0; }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+// ── Root ───────────────────────────────────────────────────────────────────
+.store-product-cards {
+  display       : flex;
+  flex-direction: column;
+  gap           : 20px;
+  font-family   : $font-body;
+  animation     : fade-in 0.3s ease both;
+  padding       : 24px 32px;
+  background    : $color-surface-alt;
+  border-radius : $radius-lg;
+}
+
+// ── Toolbar ────────────────────────────────────────────────────────────────
+.store-product-cards__toolbar {
+  display    : flex;
+  gap        : 12px;
+  align-items: center;
+  height     : 44px;
+}
+
+// ── Search pill ────────────────────────────────────────────────────────────
+.store-product-cards__search {
+  flex       : 0 0 clamp(200px, 25%, 320px);
+  height     : 44px !important;
+  display    : block !important;
+
+  &.mat-mdc-form-field {
+    height  : 44px !important;
+    overflow: hidden !important;
+  }
+
+  .mat-mdc-form-field-subscript-wrapper,
+  ::ng-deep .mat-mdc-form-field-subscript-wrapper {
+    display : none !important;
+    height  : 0 !important;
+    overflow: hidden !important;
+  }
+
+  ::ng-deep {
+    .mat-mdc-form-field,
+    .mat-mdc-text-field-wrapper { overflow: hidden !important; }
+
+    .mdc-notched-outline,
+    .mdc-notched-outline__leading,
+    .mdc-notched-outline__notch,
+    .mdc-notched-outline__trailing { display: none !important; }
+
+    .mdc-text-field__ripple,
+    .mdc-line-ripple { display: none !important; }
+
+    .mat-mdc-text-field-wrapper {
+      border-radius : 50px !important;
+      background    : $color-surface !important;
+      box-shadow    : 0 2px 12px rgba(102, 126, 234, 0.10), 0 1px 3px rgba(0,0,0,0.05) !important;
+      border        : 1.5px solid $color-border !important;
+      padding       : 0 !important;
+      height        : 44px !important;
+      min-height    : 44px !important;
+      max-height    : 44px !important;
+      transition    : border-color 0.2s ease, box-shadow 0.2s ease !important;
+
+      &:hover { border-color: rgba(102, 126, 234, 0.4) !important; }
+      &::before, &::after { display: none !important; }
+    }
+
+    &.mat-focused .mat-mdc-text-field-wrapper {
+      border-color: $color-primary !important;
+      box-shadow  : 0 0 0 3px rgba(102, 126, 234, 0.13),
+      0 2px 12px rgba(102, 126, 234, 0.10) !important;
+    }
+
+    .mat-mdc-form-field-flex {
+      height     : 44px !important;
+      display    : flex !important;
+      align-items: center !important;
+      padding    : 0 4px 0 14px !important;
+      box-sizing : border-box !important;
+    }
+
+    .mat-mdc-form-field-infix {
+      padding    : 0 !important;
+      min-height : unset !important;
+      height     : 44px !important;
+      border-top : none !important;
+      display    : flex !important;
+      align-items: center !important;
+      box-sizing : border-box !important;
+    }
+
+    .mat-mdc-form-field-icon-prefix {
+      display    : flex !important;
+      align-items: center !important;
+      height     : 44px !important;
+      padding    : 0 6px 0 0 !important;
+      align-self : center !important;
+      margin-top : 6px !important;
+    }
+
+    .mat-mdc-form-field-icon-suffix {
+      display    : flex !important;
+      align-items: center !important;
+      height     : 44px !important;
+      padding    : 0 !important;
+      align-self : center !important;
+      margin-top : 6px !important;
+    }
+
+    .mat-mdc-floating-label { display: none !important; }
+
+    input.mat-mdc-input-element {
+      font-size   : 14px !important;
+      font-weight : 400 !important;
+      color       : $color-text !important;
+      padding     : 0 !important;
+      margin      : 0 !important;
+      height      : 44px !important;
+      line-height : 44px !important;
+      box-sizing  : border-box !important;
+      caret-color : $color-primary !important;
+      align-self  : center !important;
+
+      &::placeholder {
+        color  : $color-text-muted !important;
+        opacity: 0.7;
+      }
+    }
+  }
+}
+
+// ── Refresh button ─────────────────────────────────────────────────────────
+button.store-product-cards__refresh {
+  height       : 44px !important;
+  padding      : 0 20px !important;
+  border-radius: 50px !important;
+  font-weight  : 600 !important;
+  font-size    : 14px !important;
+  border       : 1px solid $color-border !important;
+  color        : $color-secondary !important;
+  background   : $color-surface !important;
+  box-shadow   : $shadow-card;
+  transition   : background 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease !important;
+  white-space  : nowrap;
+
+  mat-icon {
+    font-size   : 18px !important;
+    width       : 18px !important;
+    height      : 18px !important;
+    margin-right: 6px !important;
+    color       : $color-secondary;
+    transition  : transform 0.4s ease;
+  }
+
+  &:hover {
+    background: $color-surface-alt !important;
+    box-shadow: $shadow-card-hover !important;
+    transform : translateY(-1px) !important;
+
+    mat-icon { transform: rotate(180deg); }
+  }
+}
+
+// ── Add button ─────────────────────────────────────────────────────────────
+button.store-product-cards__add {
+  height       : 44px !important;
+  padding      : 0 20px !important;
+  border-radius: 50px !important;
+  font-weight  : 600 !important;
+  font-size    : 14px !important;
+  border       : none !important;
+  color        : #ffffff !important;
+  background   : $gradient-primary !important;
+  box-shadow   : 0 4px 16px rgba(102, 126, 234, 0.30) !important;
+  transition   : box-shadow 0.2s ease, transform 0.2s ease !important;
+  white-space  : nowrap;
+
+  mat-icon {
+    font-size   : 18px !important;
+    width       : 18px !important;
+    height      : 18px !important;
+    margin-right: 6px !important;
+    color       : rgba(255, 255, 255, 0.9) !important;
+  }
+
+  &:hover {
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.50) !important;
+    transform : translateY(-1px) !important;
+  }
+
+  &:active { transform: translateY(0) !important; }
+}
+
+// ── Loading / Error states ─────────────────────────────────────────────────
+.store-product-cards__state {
+  display        : flex;
+  align-items    : center;
+  justify-content: center;
+  gap            : 12px;
+  padding        : 48px 0;
+  font-size      : 14px;
+  color          : $color-text-muted;
+
+  &::before {
+    content      : '';
+    display      : block;
+    width        : 20px;
+    height       : 20px;
+    border-radius: 50%;
+    border       : 2px solid $color-border;
+    border-top   : 2px solid $color-primary;
+    animation    : spin 0.7s linear infinite;
+    flex-shrink  : 0;
+  }
+}
+
+.store-product-cards__state--error {
+  background   : rgba(224, 49, 49, 0.07);
+  border       : 1px solid rgba(224, 49, 49, 0.2);
+  border-radius: $radius-md;
+  color        : $color-error;
+  padding      : 16px 20px;
+
+  &::before { display: none; }
+}
+
+// ── Empty ──────────────────────────────────────────────────────────────────
+.store-product-cards__empty {
+  display        : flex;
+  flex-direction : column;
+  align-items    : center;
+  justify-content: center;
+  gap            : 12px;
+  padding        : 64px 0;
+  color          : $color-text-muted;
+  font-size      : 14px;
+}
+
+// ── Grid ───────────────────────────────────────────────────────────────────
+.store-product-cards__grid {
+  display              : grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap                  : 20px;
+  animation            : fade-in 0.25s ease both;
+}
+
+// ── Card ───────────────────────────────────────────────────────────────────
+.store-product-cards__card {
+  border-radius : $radius-md !important;
+  border        : 1px solid $color-border !important;
+  box-shadow    : $shadow-card !important;
+  background    : $color-surface !important;
+  transition    : transform 0.25s ease, box-shadow 0.25s ease !important;
+  overflow      : hidden !important;
+  display       : flex !important;
+  flex-direction: column !important;
+
+  &:hover {
+    transform : translateY(-4px) !important;
+    box-shadow: $shadow-card-hover !important;
+  }
+
+  // Gradient accent top bar
+  &::before {
+    content   : '';
+    display   : block;
+    height    : 3px;
+    background: $gradient-primary;
+  }
+
+  mat-card-header {
+    padding: 12px 20px 6px !important;
+
+    .mat-mdc-card-title {
+      font-size  : 15px !important;
+      font-weight: 700 !important;
+      color      : $color-text !important;
+    }
+  }
+
+  mat-card-actions {
+    padding   : 8px 12px 14px !important;
+    border-top: 1px solid $color-border;
+    margin-top: auto;
+  }
+
+  // Action buttons
+  button[mat-icon-button] {
+    width        : 32px !important;
+    height       : 32px !important;
+    border-radius: $radius-sm !important;
+    transition   : background 0.15s ease !important;
+
+    mat-icon {
+      font-size : 17px !important;
+      width     : 17px !important;
+      height    : 17px !important;
+      color     : $color-text-muted;
+      transition: color 0.15s ease;
+    }
+
+    &:nth-child(1):hover {
+      background: rgba(102, 126, 234, 0.1) !important;
+      mat-icon { color: $color-primary !important; }
+    }
+
+    &:nth-child(2):hover {
+      background: rgba(34, 197, 94, 0.1) !important;
+      mat-icon { color: #16a34a !important; }
+    }
+
+    &:nth-child(3):hover,
+    &:last-child:hover {
+      background: rgba(224, 49, 49, 0.08) !important;
+      mat-icon { color: $color-error !important; }
+    }
+  }
+}
+
+.store-product-cards__card > ng-container {
+  display: block;
+  padding: 0 16px 8px;
+}
+
+.store-product-cards__card-price {
+  padding: 0 16px 8px;
+}
+
+// ── Price ──────────────────────────────────────────────────────────────────
+.store-product-cards__price {
+  font-size  : 15px !important;
+  font-weight: 800 !important;
+  color      : $color-secondary !important;
+}
+
+// ── Gallery ────────────────────────────────────────────────────────────────
+.store-product-cards__gallery {
+  width     : 100%;
+  padding   : 0;
+  background: $color-surface;
+  position  : relative;
+}
+
+// Image principale (background-image) : sans ça le conteneur n'a pas de hauteur => invisible
+.store-product-cards__gallery-main {
+  width              : 100%;
+  height             : 180px;
+  border-radius      : $radius-md;
+  background-size    : contain;
+  background-position: center center;
+  background-repeat  : no-repeat;
+  border             : 1px solid $color-border;
+  background-color   : $color-surface;
+}
+
+.store-product-cards__fav {
+  position     : absolute;
+  top          : 10px;
+  right        : 10px;
+  width        : 38px;
+  height       : 38px;
+  border-radius: 999px;
+  border       : 1px solid rgba(224, 49, 49, 0.22);
+  background   : rgba(255, 255, 255, 0.92);
+  box-shadow   : 0 6px 18px rgba(0,0,0,0.10);
+  display      : inline-flex;
+  align-items  : center;
+  justify-content: center;
+  cursor       : pointer;
+  transition   : transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+  z-index      : 2;
+
+  mat-icon {
+    font-size: 20px !important;
+    width    : 20px !important;
+    height   : 20px !important;
+    color    : $color-error;
+  }
+
+  &:hover { transform: translateY(-1px); }
+  &:active { transform: translateY(0); }
+
+  &--active {
+    background : rgba(224, 49, 49, 0.10);
+    border-color: rgba(224, 49, 49, 0.35);
+  }
+}
+
+// ── Thumbnails ─────────────────────────────────────────────────────────────
+.store-product-cards__gallery-thumbs {
+  display        : flex;
+  gap            : 8px;
+  padding-top    : 10px;
+  overflow-x     : auto;
+  scrollbar-width: none;
+  &::-webkit-scrollbar { display: none; }
+}
+
+.store-product-cards__thumb {
+  width             : 56px;
+  height            : 42px;
+  flex-shrink       : 0;
+  border-radius     : $radius-sm;
+  border            : 1.5px solid $color-border;
+  background-size   : contain;
+  background-position: center;
+  background-repeat : no-repeat;
+  background-color  : $color-surface;
+  cursor            : pointer;
+  outline           : none;
+  transition        : border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+
+  &:hover {
+    transform   : translateY(-1px);
+    border-color: rgba(102, 126, 234, 0.45);
+    box-shadow  : 0 3px 10px rgba(102, 126, 234, 0.15);
+  }
+
+  &--active {
+    border-color: $color-primary;
+    box-shadow  : 0 0 0 2px rgba(102, 126, 234, 0.25);
+    transform   : translateY(-1px);
+  }
+}
+
+// ── Paginator ─────────────────────────────────────────────────────────────
+mat-paginator {
+  background : transparent !important;
+  border     : none !important;
+  box-shadow : none !important;
+  font-family: $font-body !important;
+
+  ::ng-deep {
+    .mat-mdc-paginator-outer-container {
+      display        : flex !important;
+      justify-content: center !important;
+      align-items    : center !important;
+    }
+
+    .mat-mdc-paginator-container {
+      display        : inline-flex !important;
+      align-items    : center !important;
+      justify-content: center !important;
+      gap            : 0 !important;
+      padding        : 5px 8px !important;
+      min-height     : unset !important;
+      background     : $color-surface !important;
+      border         : 1.5px solid $color-border !important;
+      border-radius  : 50px !important;
+      box-shadow     : $shadow-card !important;
+      flex-wrap      : nowrap !important;
+    }
+
+    .mat-mdc-paginator-page-size {
+      display    : flex !important;
+      align-items: center !important;
+      gap        : 8px !important;
+      margin     : 0 !important;
+      padding    : 0 12px 0 4px !important;
+      border-right: 1.5px solid $color-border !important;
+      height     : 34px !important;
+    }
+
+    .mat-mdc-paginator-page-size-label {
+      font-size  : 12px !important;
+      font-weight: 500 !important;
+      color      : $color-text-muted !important;
+      white-space: nowrap !important;
+      margin     : 0 !important;
+    }
+
+    .mat-mdc-paginator-page-size-select {
+      margin: 0 !important;
+      width : 72px !important;
+
+      .mat-mdc-form-field-subscript-wrapper { display: none !important; }
+
+      .mdc-notched-outline,
+      .mdc-notched-outline__leading,
+      .mdc-notched-outline__notch,
+      .mdc-notched-outline__trailing,
+      .mdc-line-ripple,
+      .mdc-text-field__ripple { display: none !important; }
+
+      .mat-mdc-text-field-wrapper {
+        background   : $color-surface-alt !important;
+        border       : 1.5px solid $color-border !important;
+        border-radius: 50px !important;
+        padding      : 0 10px !important;
+        height       : 28px !important;
+        min-height   : unset !important;
+        overflow     : hidden !important;
+        box-shadow   : none !important;
+        transition   : border-color 0.15s ease !important;
+
+        &::before, &::after { display: none !important; }
+        &:hover { border-color: rgba(102, 126, 234, 0.4) !important; }
+      }
+
+      .mat-mdc-form-field-flex {
+        height     : 28px !important;
+        padding    : 0 !important;
+        align-items: center !important;
+        display    : flex !important;
+      }
+
+      .mat-mdc-form-field-infix {
+        padding    : 0 !important;
+        min-height : unset !important;
+        height     : 28px !important;
+        display    : flex !important;
+        align-items: center !important;
+        border-top : none !important;
+      }
+
+      .mat-mdc-select           { font-size: 13px !important; font-weight: 600 !important; color: $color-text !important; }
+      .mat-mdc-select-trigger   { height: 28px !important; display: flex !important; align-items: center !important; }
+      .mat-mdc-select-value     { font-size: 13px !important; font-weight: 600 !important; color: $color-text !important; }
+      .mat-mdc-select-arrow-wrapper { height: 28px !important; display: flex !important; align-items: center !important; }
+      .mat-mdc-select-arrow     { color: $color-secondary !important; }
+
+      &.mat-focused .mat-mdc-text-field-wrapper {
+        border-color: $color-primary !important;
+        box-shadow  : 0 0 0 2px rgba(102, 126, 234, 0.12) !important;
+      }
+    }
+
+    .mat-mdc-paginator-range-actions {
+      display    : flex !important;
+      align-items: center !important;
+      gap        : 2px !important;
+      margin     : 0 !important;
+      padding    : 0 4px 0 10px !important;
+    }
+
+    .mat-mdc-paginator-range-label {
+      font-size  : 13px !important;
+      font-weight: 500 !important;
+      color      : $color-text-muted !important;
+      padding    : 0 10px !important;
+      margin     : 0 !important;
+      white-space: nowrap !important;
+    }
+
+    .mat-mdc-icon-button {
+      width          : 32px !important;
+      height         : 32px !important;
+      padding        : 0 !important;
+      border-radius  : 50% !important;
+      display        : flex !important;
+      align-items    : center !important;
+      justify-content: center !important;
+      transition     : background 0.15s ease, transform 0.15s ease !important;
+
+      .mat-mdc-button-touch-target { display: none !important; }
+
+      svg {
+        width : 24px !important;
+        height: 24px !important;
+        fill  : $color-secondary !important;
+      }
+
+      .mat-icon {
+        font-size      : 20px !important;
+        width          : 20px !important;
+        height         : 20px !important;
+        color          : $color-secondary !important;
+        display        : flex !important;
+        align-items    : center !important;
+        justify-content: center !important;
+      }
+
+      &:hover:not([disabled]) {
+        background: rgba(102, 126, 234, 0.1) !important;
+        transform : scale(1.1) !important;
+      }
+
+      &[disabled] {
+        opacity: 0.3 !important;
+        svg       { fill : $color-text-muted !important; }
+        .mat-icon { color: $color-text-muted !important; }
+      }
+    }
+  }
+}
+
+// ── Filters ─────────────────────────────────────────────────────────────────
+.store-product-cards__filters {
+  display    : flex;
+  flex-wrap  : wrap;
+  gap        : 12px;
+  align-items: center;
+  padding    : 14px 18px;
+  background : $color-surface;
+  border     : 1.5px solid $color-border;
+  border-radius: $radius-md;
+  box-shadow : $shadow-card;
+  animation  : fade-in 0.25s ease both;
+}
+
+.store-product-cards__filter {
+  flex      : 0 0 auto;
+  min-width : 150px;
+  max-width : 220px;
+  height    : 44px !important;
+  display   : block !important;
+
+  &.mat-mdc-form-field {
+    height  : 44px !important;
+    overflow: hidden !important;
+  }
+
+  .mat-mdc-form-field-subscript-wrapper { display: none !important; height: 0 !important; }
+
+  ::ng-deep {
+    .mdc-notched-outline,
+    .mdc-notched-outline__leading,
+    .mdc-notched-outline__notch,
+    .mdc-notched-outline__trailing { display: none !important; }
+
+    .mdc-line-ripple,
+    .mdc-text-field__ripple { display: none !important; }
+
+    .mat-mdc-text-field-wrapper {
+      border-radius : 50px !important;
+      background    : $color-surface !important;
+      border        : 1.5px solid $color-border !important;
+      box-shadow    : 0 2px 8px rgba(102, 126, 234, 0.07) !important;
+      padding       : 0 !important;
+      height        : 44px !important;
+      min-height    : 44px !important;
+      max-height    : 44px !important;
+      overflow      : hidden !important;
+      transition    : border-color 0.2s ease, box-shadow 0.2s ease !important;
+
+      &:hover { border-color: rgba(102, 126, 234, 0.4) !important; }
+      &::before, &::after { display: none !important; }
+    }
+
+    &.mat-focused .mat-mdc-text-field-wrapper {
+      border-color: $color-primary !important;
+      box-shadow  : 0 0 0 3px rgba(102, 126, 234, 0.12) !important;
+    }
+
+    .mat-mdc-form-field-flex {
+      height     : 44px !important;
+      display    : flex !important;
+      align-items: center !important;
+      padding    : 0 14px !important;
+      box-sizing : border-box !important;
+    }
+
+    .mat-mdc-form-field-infix {
+      padding    : 0 !important;
+      min-height : unset !important;
+      height     : 44px !important;
+      border-top : none !important;
+      display    : flex !important;
+      align-items: center !important;
+      box-sizing : border-box !important;
+    }
+
+    .mat-mdc-floating-label {
+      font-size  : 13px !important;
+      font-weight: 500 !important;
+      color      : $color-text-muted !important;
+      top        : 50% !important;
+      transform  : translateY(-50%) !important;
+      position   : absolute !important;
+    }
+
+    &.mat-focused .mat-mdc-floating-label,
+    &.ng-dirty .mat-mdc-floating-label,
+    .mat-mdc-floating-label.mdc-floating-label--float-above { display: none !important; }
+
+    input.mat-mdc-input-element {
+      font-size  : 13px !important;
+      font-weight: 500 !important;
+      color      : $color-text !important;
+      padding    : 0 !important;
+      margin     : 0 !important;
+      height     : 44px !important;
+      line-height: 44px !important;
+      caret-color: $color-primary !important;
+
+      &::placeholder { color: $color-text-muted !important; opacity: 0.6; }
+    }
+
+    .mat-mdc-select,
+    .mat-mdc-select-value { font-size: 13px !important; font-weight: 500 !important; color: $color-text !important; }
+
+    .mat-mdc-select-placeholder { color: $color-text-muted !important; opacity: 0.8 !important; }
+
+    .mat-mdc-select-arrow { color: $color-secondary !important; }
+  }
+}
+
+.store-product-cards__filters button[mat-stroked-button] {
+  height       : 40px !important;
+  padding      : 0 16px !important;
+  border-radius: 50px !important;
+  font-weight  : 600 !important;
+  font-size    : 13px !important;
+  border       : 1px solid $color-border !important;
+  color        : $color-text-muted !important;
+  background   : $color-surface-alt !important;
+  transition   : all 0.2s ease !important;
+  white-space  : nowrap;
+
+  mat-icon {
+    font-size   : 16px !important;
+    width       : 16px !important;
+    height      : 16px !important;
+    margin-right: 5px !important;
+  }
+
+  &:hover {
+    border-color: rgba(102, 126, 234, 0.35) !important;
+    color       : $color-text !important;
+    transform   : translateY(-1px) !important;
+  }
+}
+
+// ── Responsive ─────────────────────────────────────────────────────────────
+@media (max-width: 640px) {
+  .store-product-cards__toolbar { flex-wrap: wrap; height: auto; }
+  .store-product-cards__grid    { grid-template-columns: 1fr; }
+}

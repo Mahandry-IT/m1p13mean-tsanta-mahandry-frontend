@@ -1,0 +1,192 @@
+<div class="pf-dialog">
+
+  <!-- En-tête -->
+  <div class="pf-dialog__header">
+    <div class="pf-dialog__icon-wrap">
+      <div class="pf-dialog__icon">
+        <ng-container [ngSwitch]="dialogData.mode">
+          <mat-icon *ngSwitchCase="'create'">add_circle_outline</mat-icon>
+          <mat-icon *ngSwitchCase="'edit'">edit_outline</mat-icon>
+          <mat-icon *ngSwitchDefault>inventory_2</mat-icon>
+        </ng-container>
+      </div>
+    </div>
+    <h2 class="pf-dialog__title">
+      <ng-container [ngSwitch]="dialogData.mode">
+        <span *ngSwitchCase="'create'">Nouveau produit</span>
+        <span *ngSwitchCase="'edit'">Modifier le produit</span>
+        <span *ngSwitchDefault>Détails du produit</span>
+      </ng-container>
+    </h2>
+    <p class="pf-dialog__subtitle">
+      <ng-container [ngSwitch]="dialogData.mode">
+        <span *ngSwitchCase="'create'">Remplissez les informations ci-dessous</span>
+        <span *ngSwitchCase="'edit'">Modifiez les informations du produit</span>
+        <span *ngSwitchDefault>Informations du produit en lecture seule</span>
+      </ng-container>
+    </p>
+  </div>
+
+  <!-- Corps -->
+  <div class="pf-dialog__body">
+    <form [formGroup]="form" class="pf-form">
+
+      <!-- Dernier prix (lecture seule) -->
+      <div class="pf-field" *ngIf="isInfo">
+        <label class="pf-field__label">
+          <mat-icon>payments</mat-icon>
+          Dernier prix
+        </label>
+        <div class="pf-field__wrap pf-field__wrap--disabled">
+          <input class="pf-field__input" [value]="(lastPrice === null ? '—' : (lastPrice + ''))" disabled />
+        </div>
+      </div>
+
+      <!-- Nouveau prix (pour update: ajoute une entrée priceHistory) -->
+      <div class="pf-field" *ngIf="!isInfo">
+        <label class="pf-field__label">
+          <mat-icon>payments</mat-icon>
+          Nouveau prix (boutique)
+        </label>
+        <div class="pf-field__wrap" [class.pf-field__wrap--disabled]="isInfo">
+          <input class="pf-field__input" type="number" formControlName="newPrice" placeholder="ex : 299.99" />
+        </div>
+      </div>
+
+      <!-- Nom -->
+      <div class="pf-field">
+        <label class="pf-field__label">
+          <mat-icon>badge</mat-icon>
+          Nom du produit
+        </label>
+        <div class="pf-field__wrap" [class.pf-field__wrap--disabled]="isInfo">
+          <input class="pf-field__input" formControlName="name" placeholder="ex : MacBook Pro 14''" />
+        </div>
+        <span class="pf-field__error" *ngIf="form.get('name')?.touched && form.get('name')?.invalid">
+          Le nom est requis.
+        </span>
+      </div>
+
+      <!-- Description -->
+      <div class="pf-field">
+        <label class="pf-field__label">
+          <mat-icon>subject</mat-icon>
+          Description
+        </label>
+        <div class="pf-field__wrap pf-field__wrap--textarea" [class.pf-field__wrap--disabled]="isInfo">
+          <textarea class="pf-field__input pf-field__textarea" formControlName="description" rows="3" placeholder="Décrivez le produit…"></textarea>
+        </div>
+      </div>
+
+      <!-- Images -->
+      <div class="pf-section">
+        <div class="pf-section__head">
+          <div class="pf-section__title">
+            <mat-icon>photo_library</mat-icon>
+            Images
+          </div>
+          <button class="pf-btn pf-btn--sm pf-btn--outline" type="button" (click)="openUploadDialog()" [disabled]="isInfo">
+            <mat-icon>upload</mat-icon>
+            Choisir des images
+          </button>
+        </div>
+
+        <!-- Chips nouveaux fichiers -->
+        <div class="pf-chips" *ngIf="newImages.length">
+          <div class="pf-chip" *ngFor="let f of newImages; let i = index">
+            <mat-icon>insert_drive_file</mat-icon>
+            <span class="pf-chip__name">{{ f.name }}</span>
+            <button class="pf-chip__remove" type="button" (click)="removeNewImage(i)" [disabled]="isInfo">
+              <mat-icon>close</mat-icon>
+            </button>
+          </div>
+        </div>
+        <div class="pf-hint" *ngIf="!newImages.length">
+          <mat-icon>info_outline</mat-icon>
+          Aucun nouveau fichier sélectionné.
+        </div>
+
+        <!-- Images existantes -->
+        <div class="pf-existing" *ngIf="(dialogData.product.images?.length ?? 0) > 0">
+          <div class="pf-existing__label">Images existantes</div>
+          <div class="pf-existing__grid">
+            <div class="pf-existing__thumb" *ngFor="let img of (dialogData.product.images ?? [])">
+              <img [src]="img.link" alt="image" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Catégories & Types -->
+      <div class="pf-section">
+        <div class="pf-section__head">
+          <div class="pf-section__title">
+            <mat-icon>category</mat-icon>
+            Catégories &amp; Types
+          </div>
+          <button class="pf-btn pf-btn--sm pf-btn--outline" type="button" (click)="addCategoryRow()" [disabled]="isInfo">
+            <mat-icon>add</mat-icon>
+            Ajouter
+          </button>
+        </div>
+
+        <div formArrayName="categories" class="pf-categories">
+          <div
+            class="pf-category-row"
+            *ngFor="let row of categoriesArray.controls; let i = index"
+            [formGroupName]="i"
+          >
+            <!-- Catégorie select -->
+            <div class="pf-field pf-field--inline">
+              <label class="pf-field__label">Catégorie</label>
+              <div class="pf-field__wrap pf-field__wrap--select" [class.pf-field__wrap--disabled]="isInfo">
+                <mat-select formControlName="categoryId" class="pf-select" panelClass="pf-select-panel">
+                  <mat-option [value]="''">—</mat-option>
+                  <mat-option *ngFor="let c of categoryOptions" [value]="c.id">{{ c.label }}</mat-option>
+                </mat-select>
+              </div>
+              <span class="pf-field__error" *ngIf="row.get('categoryId')?.touched && row.get('categoryId')?.invalid">
+                Requis
+              </span>
+            </div>
+
+            <!-- Types multi-select -->
+            <div class="pf-field pf-field--inline">
+              <label class="pf-field__label">Types</label>
+              <div class="pf-field__wrap pf-field__wrap--select"
+                   [class.pf-field__wrap--disabled]="isInfo || !row.get('categoryId')?.value">
+                <mat-select formControlName="typeIds" multiple class="pf-select" panelClass="pf-select-panel">
+                  <mat-option *ngFor="let t of typeOptionsFor(row.get('categoryId')?.value)" [value]="t.id">
+                    {{ t.label }}
+                  </mat-option>
+                </mat-select>
+              </div>
+            </div>
+
+            <!-- Supprimer ligne -->
+            <button class="pf-remove-btn" type="button" (click)="removeCategoryRow(i)" [disabled]="isInfo" matTooltip="Supprimer">
+              <mat-icon>delete_outline</mat-icon>
+            </button>
+          </div>
+
+          <div class="pf-hint" *ngIf="categoriesArray.length === 0">
+            <mat-icon>info_outline</mat-icon>
+            Aucune catégorie ajoutée.
+          </div>
+        </div>
+      </div>
+
+    </form>
+  </div>
+
+  <!-- Actions -->
+  <div class="pf-dialog__actions">
+    <button class="pf-btn pf-btn--cancel" type="button" (click)="close()">Fermer</button>
+    <button *ngIf="!isInfo" class="pf-btn pf-btn--submit" type="button" (click)="submit()">
+      <mat-icon>{{ isCreate ? 'add_circle_outline' : 'save_outlined' }}</mat-icon>
+      {{ isCreate ? 'Créer' : 'Enregistrer' }}
+    </button>
+  </div>
+
+</div>
+

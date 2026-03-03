@@ -1,0 +1,134 @@
+<div class="promo-form-dialog">
+
+  <!-- En-tête -->
+  <div class="promo-form-dialog__header">
+    <div class="promo-form-dialog__icon-wrap">
+      <div class="promo-form-dialog__icon">
+        <mat-icon>{{ isInfo ? 'local_offer' : (isCreate ? 'add_circle_outline' : 'edit_outline') }}</mat-icon>
+      </div>
+    </div>
+    <h2 class="promo-form-dialog__title">
+      {{ isInfo ? 'Infos promotion' : (isCreate ? 'Ajouter une promotion' : 'Modifier la promotion') }}
+    </h2>
+    <p class="promo-form-dialog__subtitle">
+      {{ isInfo ? 'Détails de la promotion en lecture seule' : 'Renseignez les champs ci-dessous' }}
+    </p>
+  </div>
+
+  <!-- Corps -->
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <div class="promo-form-dialog__body">
+      <div class="promo-form-dialog__grid">
+
+        <!-- ID Boutique -->
+        <div class="pf-field">
+          <label class="pf-field__label">
+            <mat-icon>store</mat-icon>
+            Boutique
+          </label>
+          <div class="pf-field__wrap pf-field__wrap--select" [class.pf-field__wrap--disabled]="isInfo">
+            <mat-select class="pf-field__select" formControlName="storeId" [disabled]="isInfo">
+              <mat-option [value]="''">—</mat-option>
+              <mat-option *ngFor="let s of storeOptions" [value]="s.id">{{ s.label }}</mat-option>
+            </mat-select>
+          </div>
+          <span class="pf-field__error" *ngIf="form.get('storeId')?.touched && form.get('storeId')?.invalid">Requis</span>
+        </div>
+
+        <!-- ID Produit -->
+        <div class="pf-field">
+          <label class="pf-field__label">
+            <mat-icon>inventory_2</mat-icon>
+            Produit
+          </label>
+          <div class="pf-field__wrap pf-field__wrap--select" [class.pf-field__wrap--disabled]="isInfo || loadingProducts">
+            <mat-select class="pf-field__select" formControlName="productId" [disabled]="isInfo || loadingProducts">
+              <mat-option [value]="''">—</mat-option>
+              <mat-option *ngIf="loadingProducts" [disabled]="true">Chargement…</mat-option>
+              <mat-option *ngFor="let p of productOptions" [value]="p.id">{{ p.label }}</mat-option>
+            </mat-select>
+          </div>
+          <span class="pf-field__error" *ngIf="form.get('productId')?.touched && form.get('productId')?.invalid">Requis</span>
+        </div>
+
+        <!-- Remise -->
+        <div class="pf-field">
+          <label class="pf-field__label">
+            <mat-icon>percent</mat-icon>
+            Remise (%)
+          </label>
+          <div class="pf-field__wrap" [class.pf-field__wrap--disabled]="isInfo">
+            <input class="pf-field__input" type="number" formControlName="discount" placeholder="ex : 20" />
+          </div>
+          <span class="pf-field__error" *ngIf="form.get('discount')?.touched && form.get('discount')?.invalid">Valeur entre 0 et 100</span>
+        </div>
+
+        <!-- Active -->
+        <div class="pf-field">
+          <label class="pf-field__label">
+            <mat-icon>toggle_on</mat-icon>
+            Active
+          </label>
+          <div class="pf-field__wrap pf-field__wrap--select" [class.pf-field__wrap--disabled]="isInfo">
+            <mat-select class="pf-field__select" formControlName="isActive" [disabled]="isInfo">
+              <mat-option [value]="true">Oui</mat-option>
+              <mat-option [value]="false">Non</mat-option>
+            </mat-select>
+          </div>
+        </div>
+
+        <!-- Début -->
+        <div class="pf-field">
+          <label class="pf-field__label">
+            <mat-icon>event</mat-icon>
+            Début
+          </label>
+          <div class="pf-field__wrap" [class.pf-field__wrap--disabled]="isInfo">
+            <input class="pf-field__input" type="datetime-local" formControlName="startDate" />
+          </div>
+          <span class="pf-field__error" *ngIf="form.get('startDate')?.touched && form.get('startDate')?.invalid">Requis</span>
+        </div>
+
+        <!-- Fin -->
+        <div class="pf-field">
+          <label class="pf-field__label">
+            <mat-icon>event_busy</mat-icon>
+            Fin
+          </label>
+          <div class="pf-field__wrap" [class.pf-field__wrap--disabled]="isInfo">
+            <input class="pf-field__input" type="datetime-local" formControlName="endDate" />
+          </div>
+          <span class="pf-field__error" *ngIf="form.get('endDate')?.touched && form.get('endDate')?.invalid">Requis</span>
+        </div>
+
+        <!-- Description (pleine largeur) -->
+        <div class="pf-field pf-field--full">
+          <label class="pf-field__label">
+            <mat-icon>subject</mat-icon>
+            Description
+          </label>
+          <div class="pf-field__wrap pf-field__wrap--textarea" [class.pf-field__wrap--disabled]="isInfo">
+            <textarea class="pf-field__input pf-field__textarea" formControlName="description" rows="3" placeholder="Décrivez la promotion…"></textarea>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="promo-form-dialog__actions">
+      <button class="pf-btn pf-btn--cancel" type="button" (click)="close()">Fermer</button>
+
+      <button *ngIf="isCreate && !isInfo" class="pf-btn pf-btn--suggest" type="button" (click)="suggest()">
+        <mat-icon>auto_awesome</mat-icon>
+        Suggérer
+      </button>
+
+      <button *ngIf="!isInfo" class="pf-btn pf-btn--submit" type="submit">
+        <mat-icon>save_outlined</mat-icon>
+        {{ isCreate ? 'Créer' : 'Enregistrer' }}
+      </button>
+    </div>
+  </form>
+
+</div>

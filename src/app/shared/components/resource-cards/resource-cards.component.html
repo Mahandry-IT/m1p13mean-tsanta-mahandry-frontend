@@ -1,0 +1,152 @@
+<section class="resource-cards">
+  <!-- Toolbar -->
+  <div class="resource-cards__toolbar">
+    <mat-form-field appearance="outline" class="resource-cards__search">
+      <mat-icon matPrefix style="color:#667eea;font-size:18px;margin-right:4px;margin-left:4px">search</mat-icon>
+      <input matInput [formControl]="searchCtrl" placeholder="Tapez pour rechercher…" />
+      <button
+        mat-icon-button matSuffix type="button"
+        (click)="searchCtrl.setValue('')"
+        [disabled]="!searchCtrl.value"
+      >
+        <mat-icon style="font-size:16px">close</mat-icon>
+      </button>
+    </mat-form-field>
+
+    <button mat-stroked-button class="resource-cards__refresh" type="button" (click)="load()">
+      <mat-icon>refresh</mat-icon>
+      Rafraîchir
+    </button>
+
+    <button *ngIf="isAddable" mat-flat-button class="resource-cards__add" type="button" (click)="onAdd()">
+      <mat-icon>add</mat-icon>
+      Ajouter
+    </button>
+  </div>
+
+  <!-- Filters -->
+  <div class="resource-cards__filters" *ngIf="filterControls.length">
+    <mat-form-field
+      *ngFor="let f of filterControls"
+      appearance="outline"
+      class="resource-cards__filter"
+    >
+      <mat-label>{{ f.label }}</mat-label>
+
+      <mat-select
+        *ngIf="f.type === 'select'"
+        [formControl]="getFilterCtrl(f.param)"
+      >
+        <mat-option [value]="null">Tous</mat-option>
+        <mat-option *ngIf="isSelectOptionsLoading(f.param)" [disabled]="true">Chargement…</mat-option>
+        <mat-option
+          *ngFor="let opt of getSelectOptions(f.param, f.options)"
+          [value]="opt.value"
+        >
+          {{ opt.label }}
+        </mat-option>
+      </mat-select>
+
+      <input
+        *ngIf="f.type === 'number'"
+        matInput
+        type="number"
+        [placeholder]="f.placeholder || ''"
+        [formControl]="getFilterCtrl(f.param)"
+      />
+
+      <input
+        *ngIf="f.type === 'text'"
+        matInput
+        type="text"
+        [placeholder]="f.placeholder || ''"
+        [formControl]="getFilterCtrl(f.param)"
+      />
+    </mat-form-field>
+
+    <button mat-stroked-button type="button" (click)="clearFilters()">
+      <mat-icon>clear_all</mat-icon>
+      Réinitialiser
+    </button>
+  </div>
+
+  <!-- Loading -->
+  <div class="resource-cards__state" *ngIf="loading">Chargement en cours…</div>
+
+  <!-- Error -->
+  <div class="resource-cards__state resource-cards__state--error" *ngIf="error">
+    <strong>Erreur :</strong>&nbsp;{{ error.message }}
+  </div>
+
+  <!-- Content -->
+  <ng-container *ngIf="!loading && !error">
+    <div class="resource-cards__empty" *ngIf="items.length === 0">
+      Aucun résultat trouvé.
+    </div>
+
+    <div class="resource-cards__grid" *ngIf="items.length">
+      <mat-card class="resource-cards__card" *ngFor="let row of items; trackBy: trackById">
+
+        <!-- Galerie d'images -->
+        <div class="resource-cards__gallery" *ngIf="imageUrlsOf(row).length > 0; else imgPlaceholder">
+          <!-- Image principale -->
+          <div
+            class="resource-cards__card-img"
+            [style.background-image]="'url(' + activeImageOf(row) + ')'"
+          ></div>
+
+          <!-- Miniatures (visible seulement si > 1 image) -->
+          <div class="resource-cards__thumbnails" *ngIf="imageUrlsOf(row).length > 1">
+            <button
+              *ngFor="let img of imageUrlsOf(row); let i = index"
+              type="button"
+              class="resource-cards__thumb"
+              [class.resource-cards__thumb--active]="activeImageIndex(row) === i"
+              (click)="selectImage(row, i); $event.stopPropagation()"
+            >
+              <div
+                class="resource-cards__thumb-img"
+                [style.background-image]="'url(' + img + ')'"
+              ></div>
+            </button>
+          </div>
+        </div>
+
+        <!-- Placeholder si pas d'image -->
+        <ng-template #imgPlaceholder>
+          <div class="resource-cards__card-img resource-cards__card-img--placeholder"></div>
+        </ng-template>
+
+        <mat-card-header>
+          <mat-card-title>{{ titleOf(row) }}</mat-card-title>
+        </mat-card-header>
+
+        <mat-card-content *ngIf="descriptionField">
+          <p class="resource-cards__desc">{{ descriptionOf(row) }}</p>
+        </mat-card-content>
+
+        <mat-card-actions align="end" *ngIf="isInfonable || isEditable || isDeletable">
+          <button *ngIf="isInfonable" mat-icon-button type="button" matTooltip="Infos" (click)="info.emit(row)">
+            <mat-icon>info_outline</mat-icon>
+          </button>
+          <button *ngIf="isEditable" mat-icon-button type="button" matTooltip="Modifier" (click)="edit.emit(row)">
+            <mat-icon>edit_outline</mat-icon>
+          </button>
+          <button *ngIf="isDeletable" mat-icon-button type="button" matTooltip="Supprimer" (click)="delete.emit(row)">
+            <mat-icon>delete_outline</mat-icon>
+          </button>
+        </mat-card-actions>
+
+      </mat-card>
+    </div>
+
+    <mat-paginator
+      [length]="pagination.total"
+      [pageIndex]="pagination.page - 1"
+      [pageSize]="pagination.limit"
+      [pageSizeOptions]="pageSizeOptions"
+      (page)="onPage($event)"
+      aria-label="Pagination"
+    ></mat-paginator>
+  </ng-container>
+</section>

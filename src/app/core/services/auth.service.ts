@@ -2,9 +2,6 @@ import { Injectable } from '@angular/core';
 import { Observable, map } from 'rxjs';
 import { ApiService } from './api.service';
 
-declare const localStorage: any;
-declare const window: any;
-
 export interface LoginRequest {
   email: string;
   password: string;
@@ -80,7 +77,9 @@ export class AuthService {
   constructor(private readonly api: ApiService) {}
 
   private get isBrowser(): boolean {
-    return typeof window !== 'undefined' && typeof localStorage !== 'undefined';
+    const w = (globalThis as any).window;
+    const ls = (globalThis as any).localStorage;
+    return typeof w !== 'undefined' && typeof ls !== 'undefined';
   }
 
   login(payload: LoginRequest): Observable<{ token: string; raw: LoginResponse }> {
@@ -136,25 +135,20 @@ export class AuthService {
   /** Stocke la homepage renvoyée par le backend après login */
   setHomePage(homePage: string | null | undefined): void {
     if (!this.isBrowser) return;
-
-    if (typeof homePage === 'string' && homePage.trim()) {
-      localStorage.setItem(AuthService.HOME_PAGE_KEY, homePage);
-      return;
-    }
-    localStorage.removeItem(AuthService.HOME_PAGE_KEY);
+    (globalThis as any).localStorage.setItem(AuthService.HOME_PAGE_KEY, homePage?.trim() ? homePage : '');
+    if (!homePage?.trim()) (globalThis as any).localStorage.removeItem(AuthService.HOME_PAGE_KEY);
   }
 
   /** Récupère la homepage stockée après login */
   getHomePage(): string | null {
     if (!this.isBrowser) return null;
-
-    const v = localStorage.getItem(AuthService.HOME_PAGE_KEY);
+    const v = (globalThis as any).localStorage.getItem(AuthService.HOME_PAGE_KEY);
     return v && v.trim() ? v : null;
   }
 
   clearHomePage(): void {
     if (!this.isBrowser) return;
-    localStorage.removeItem(AuthService.HOME_PAGE_KEY);
+    (globalThis as any).localStorage.removeItem(AuthService.HOME_PAGE_KEY);
   }
 
   /**
@@ -188,27 +182,23 @@ export class AuthService {
   /** Stocke l'utilisateur renvoyé par le backend après login */
   setUser(user: unknown | null | undefined): void {
     if (!this.isBrowser) return;
-
+    const ls = (globalThis as any).localStorage;
     if (user == null) {
-      localStorage.removeItem(AuthService.USER_KEY);
+      ls.removeItem(AuthService.USER_KEY);
       return;
     }
-
     try {
-      localStorage.setItem(AuthService.USER_KEY, JSON.stringify(user));
+      ls.setItem(AuthService.USER_KEY, JSON.stringify(user));
     } catch {
-      // si JSON.stringify échoue, on ne stocke rien (évite de casser l'app)
-      localStorage.removeItem(AuthService.USER_KEY);
+      ls.removeItem(AuthService.USER_KEY);
     }
   }
 
   /** Récupère l'utilisateur stocké après login */
   getUser<T = unknown>(): T | null {
     if (!this.isBrowser) return null;
-
-    const raw = localStorage.getItem(AuthService.USER_KEY);
+    const raw = (globalThis as any).localStorage.getItem(AuthService.USER_KEY);
     if (!raw) return null;
-
     try {
       return JSON.parse(raw) as T;
     } catch {
@@ -218,21 +208,34 @@ export class AuthService {
 
   clearUser(): void {
     if (!this.isBrowser) return;
-    localStorage.removeItem(AuthService.USER_KEY);
+    (globalThis as any).localStorage.removeItem(AuthService.USER_KEY);
   }
 
   setToken(token: string): void {
     if (!this.isBrowser) return;
-    localStorage.setItem(AuthService.TOKEN_KEY, token);
+    (globalThis as any).localStorage.setItem(AuthService.TOKEN_KEY, token);
   }
 
   getToken(): string | null {
     if (!this.isBrowser) return null;
-    return localStorage.getItem(AuthService.TOKEN_KEY);
+    const t = (globalThis as any).localStorage.getItem(AuthService.TOKEN_KEY);
+    return t && String(t).trim() ? String(t) : null;
   }
 
   clearToken(): void {
     if (!this.isBrowser) return;
-    localStorage.removeItem(AuthService.TOKEN_KEY);
+    (globalThis as any).localStorage.removeItem(AuthService.TOKEN_KEY);
+  }
+
+  /** Backend: POST /api/auth/logout */
+  logout(): Observable<unknown> {
+    return this.api.post<unknown>('/auth/logout', null);
+  }
+
+  /** Nettoie la session côté front */
+  clearSession(): void {
+    this.clearToken();
+    this.clearUser();
+    this.clearHomePage();
   }
 }

@@ -1,0 +1,68 @@
+<div class="mpad">
+
+  <!-- En-tête -->
+  <div class="mpad__header">
+    <div class="mpad__icon-wrap">
+      <div class="mpad__icon">
+        <mat-icon>add_shopping_cart</mat-icon>
+      </div>
+    </div>
+    <h2 class="mpad__title">Ajouter un produit</h2>
+    <p class="mpad__subtitle">Choisissez une option pour continuer</p>
+  </div>
+
+  <!-- Corps -->
+  <div class="mpad__body">
+
+    <!-- Mode switcher -->
+    <div class="mpad__mode">
+      <button type="button" class="mpad__mode-btn" [class.mpad__mode-btn--active]="mode === 'existing'" (click)="mode = 'existing'">
+        Produit existant
+      </button>
+      <button type="button" class="mpad__mode-btn" [class.mpad__mode-btn--active]="mode === 'new'" (click)="mode = 'new'">
+        Nouveau produit
+      </button>
+    </div>
+
+    <ng-container *ngIf="mode === 'existing'">
+      <div class="mpad__hint" *ngIf="!data.storeId">
+        Sélectionnez d'abord une boutique pour voir ses produits disponibles.
+      </div>
+
+      <mat-form-field appearance="outline" class="mpad__field">
+        <mat-label>Produit</mat-label>
+        <mat-select [formControl]="productIdCtrl" [disabled]="!data.storeId || loadingProducts">
+          <mat-option *ngIf="loadingProducts" [disabled]="true">Chargement…</mat-option>
+          <mat-option *ngFor="let p of productOptions" [value]="p.id">{{ p.label }}</mat-option>
+        </mat-select>
+        <mat-error *ngIf="productIdCtrl.touched && productIdCtrl.invalid">Requis</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="mpad__field">
+        <mat-label>Prix (boutique)</mat-label>
+        <input matInput type="number" [formControl]="priceCtrl" placeholder="ex : 299.99" />
+        <mat-error *ngIf="priceCtrl.touched && priceCtrl.invalid">Prix invalide</mat-error>
+      </mat-form-field>
+    </ng-container>
+
+    <ng-container *ngIf="mode === 'new'">
+      <mat-form-field appearance="outline" class="mpad__field">
+        <mat-label>Prix par défaut</mat-label>
+        <input matInput type="number" [formControl]="defaultPriceCtrl" placeholder="ex : 299.99" />
+        <mat-error *ngIf="defaultPriceCtrl.touched && defaultPriceCtrl.invalid">Prix invalide</mat-error>
+      </mat-form-field>
+
+      <div class="mpad__hint">
+        Vous remplirez le formulaire complet du produit à l'étape suivante.
+      </div>
+    </ng-container>
+
+  </div>
+
+  <!-- Actions -->
+  <div class="mpad__actions">
+    <button mat-stroked-button type="button" (click)="close()">Annuler</button>
+    <button mat-flat-button type="button" [disabled]="!canSubmit()" (click)="submit()">Continuer</button>
+  </div>
+
+</div>

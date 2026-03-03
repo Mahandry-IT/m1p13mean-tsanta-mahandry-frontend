@@ -1,0 +1,73 @@
+<div class="pf-dialog">
+
+  <div class="pf-dialog__header">
+    <div class="pf-dialog__icon-wrap">
+      <div class="pf-dialog__icon">
+        <mat-icon>shopping_cart</mat-icon>
+      </div>
+    </div>
+    <h2 class="pf-dialog__title">Détails du produit</h2>
+    <p class="pf-dialog__subtitle">Informations du produit en lecture seule</p>
+  </div>
+
+  <div class="pf-dialog__body">
+    <form [formGroup]="form" class="pf-form">
+
+      <!-- Prix affiché (promo -> dernier prix -> défaut) -->
+      <div class="pf-field">
+        <label class="pf-field__label">
+          <mat-icon>sell</mat-icon>
+          {{ displayPriceLabel || 'Prix' }}
+        </label>
+        <div class="pf-field__wrap pf-field__wrap--disabled">
+          <input class="pf-field__input" [value]="(displayPrice === null ? '—' : (displayPrice + ''))" disabled />
+        </div>
+      </div>
+
+      <!-- Nom -->
+      <div class="pf-field">
+        <label class="pf-field__label">
+          <mat-icon>badge</mat-icon>
+          Nom du produit
+        </label>
+        <div class="pf-field__wrap pf-field__wrap--disabled">
+          <input class="pf-field__input" formControlName="name" />
+        </div>
+      </div>
+
+      <!-- Description -->
+      <div class="pf-field">
+        <label class="pf-field__label">
+          <mat-icon>subject</mat-icon>
+          Description
+        </label>
+        <div class="pf-field__wrap pf-field__wrap--textarea pf-field__wrap--disabled">
+          <textarea class="pf-field__input pf-field__textarea" formControlName="description" rows="3"></textarea>
+        </div>
+      </div>
+
+      <!-- Images existantes -->
+      <div class="pf-section" *ngIf="(dialogData.product.images?.length ?? 0) > 0">
+        <div class="pf-section__head">
+          <div class="pf-section__title">
+            <mat-icon>photo_library</mat-icon>
+            Images
+          </div>
+        </div>
+
+        <div class="pf-existing__grid">
+          <div class="pf-existing__thumb" *ngFor="let img of (dialogData.product.images ?? [])">
+            <img [src]="img.link" alt="image" />
+          </div>
+        </div>
+      </div>
+
+    </form>
+  </div>
+
+  <div class="pf-dialog__actions">
+    <button class="pf-btn pf-btn--cancel" type="button" (click)="close()">Fermer</button>
+  </div>
+
+</div>
+
