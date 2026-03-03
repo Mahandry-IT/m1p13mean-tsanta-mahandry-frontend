@@ -51,6 +51,12 @@ export class BuyProductsPageComponent implements OnInit {
     },
   ];
 
+  /**
+   * Cache local pour pouvoir supprimer un favori sans que le backend ne renvoie automatiquement favoriteId dans /products/buy-product.
+   * Clé: `${productId}:${storeId}` => favoriteId
+   */
+  private favoriteIdByKey = new Map<string, string>();
+
   constructor(
     private readonly api: ApiService,
     private readonly toast: ToastService,
@@ -59,6 +65,7 @@ export class BuyProductsPageComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadStores();
+    this.loadMyFavorites();
   }
 
   private getId(row: any): string {
@@ -84,6 +91,30 @@ export class BuyProductsPageComponent implements OnInit {
       },
       error: (err: any) => this.toast.error(err?.message ?? 'Erreur lors du chargement des boutiques'),
     });
+  }
+
+  private loadMyFavorites(): void {
+    this.api.get<any>('/favorites/me').subscribe({
+      next: (res: any) => {
+        const data = res?.data ?? res;
+        const favs = Array.isArray(data?.favorites) ? data.favorites : (Array.isArray(data) ? data : []);
+
+        this.favoriteIdByKey.clear();
+        for (const f of favs) {
+          const pid = String(f?.productId ?? '').trim();
+          const sid = String(f?.storeId ?? '').trim();
+          const fid = String(f?.favoriteId ?? f?._id ?? f?.id ?? '').trim();
+          if (pid && sid && fid) this.favoriteIdByKey.set(this.favKey(pid, sid), fid);
+        }
+      },
+      error: () => {
+        // silencieux: l'écran reste utilisable même si les favoris ne chargent pas
+      },
+    });
+  }
+
+  private favKey(productId: string, storeId: string): string {
+    return `${String(productId)}:${String(storeId)}`;
   }
 
   get listFilters(): Record<string, any> {
@@ -186,10 +217,52 @@ export class BuyProductsPageComponent implements OnInit {
   }
 
   onFavoriteChange(ev: { row: any; isFavorite: boolean }): void {
-    // Pas d'API spécifiée pour les favoris => on se contente d'un toast et on laisse le parent câbler.
-    // Ici, on garde l'update optimiste déjà fait par le composant.
-    const name = String(ev?.row?.name ?? '').trim();
-    this.toast.success(`${name || 'Produit'}: ${ev.isFavorite ? 'ajouté aux' : 'retiré des'} favoris`);
+    const productId = String(ev?.row?._id ?? ev?.row?.id ?? '').trim();
+    const storeId = String(this.selectedStoreId ?? ev?.row?.storeId ?? '').trim();
+
+    if (!productId || !storeId) {
+      this.toast.error('Choix du magasin et du produit requis pour gérer les favoris.');
+      // rollback UI (le composant a déjà togglé)
+      try { (ev.row as any).isFavorite = !ev.isFavorite; } catch {}
+      return;
+    }
+
+    // AJOUT
+    if (ev.isFavorite) {
+      this.api.post<any>('/favorites/me', { productId, storeId }).subscribe({
+        next: (res: any) => {
+          const fid = String(res?.data?.favorite?.favoriteId ?? res?.data?.favorite?._id ?? res?.data?.favorite?.id ?? '').trim();
+          if (fid) this.favoriteIdByKey.set(this.favKey(productId, storeId), fid);
+          this.toast.success('Ajouté aux favoris');
+        },
+        error: (err) => {
+          this.toast.error(err?.message ?? 'Erreur lors de l\'ajout du favori');
+          // rollback
+          try { (ev.row as any).isFavorite = false; } catch {}
+        },
+      });
+      return;
+    }
+
+    // SUPPRESSION
+    const favoriteId = this.favoriteIdByKey.get(this.favKey(productId, storeId)) ?? '';
+    if (!favoriteId) {
+      this.toast.error('Impossible de supprimer: favoriteId introuvable.');
+      // rollback
+      try { (ev.row as any).isFavorite = true; } catch {}
+      return;
+    }
+
+    this.api.delete<any>(`/favorites/me/${encodeURIComponent(favoriteId)}`).subscribe({
+      next: () => {
+        this.favoriteIdByKey.delete(this.favKey(productId, storeId));
+        this.toast.success('Retiré des favoris');
+      },
+      error: (err) => {
+        this.toast.error(err?.message ?? 'Erreur lors de la suppression du favori');
+        // rollback
+        try { (ev.row as any).isFavorite = true; } catch {}
+      },
+    });
   }
 }
-

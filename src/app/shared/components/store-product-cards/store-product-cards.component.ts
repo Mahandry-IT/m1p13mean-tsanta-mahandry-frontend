@@ -141,6 +141,12 @@ export class StoreProductCardsComponent<TItem extends Record<string, any>> imple
    */
   @Input() priceResolver: ((row: TItem) => Partial<Pick<StoreProductCardsPriceTemplateContext<TItem>, 'basePrice' | 'finalPrice' | 'hasPromo' | 'promoPercent'>> | null) | null = null;
 
+  /**
+   * Permet au parent de transformer / enrichir les items après chargement (ex: favorites -> product).
+   * Si async, retourner une Promise.
+   */
+  @Input() itemsMapper: ((items: TItem[]) => TItem[] | Promise<TItem[]>) | null = null;
+
   constructor(
     private readonly resourceList: ResourceListService,
     private readonly api: ApiService,
@@ -442,10 +448,33 @@ export class StoreProductCardsComponent<TItem extends Record<string, any>> imple
       })
       .subscribe({
         next: (res) => {
-          this.items = res.items;
-          this.pagination = res.pagination;
-          this.loading = false;
-          this.cdr.markForCheck();
+          const applyItems = (mapped: TItem[]) => {
+            this.items = mapped;
+            this.pagination = res.pagination;
+            this.loading = false;
+            this.cdr.markForCheck();
+          };
+
+          if (this.itemsMapper) {
+            try {
+              const out = this.itemsMapper(res.items);
+              if (out && typeof (out as any).then === 'function') {
+                (out as Promise<TItem[]>).then(
+                  (mapped) => applyItems(mapped ?? []),
+                  () => applyItems(res.items),
+                );
+                return;
+              }
+              applyItems((out as TItem[]) ?? res.items);
+              return;
+            } catch {
+              // fallback
+              applyItems(res.items);
+              return;
+            }
+          }
+
+          applyItems(res.items);
         },
         error: (err: ApiError) => {
           this.error = err;
@@ -534,7 +563,7 @@ export class StoreProductCardsComponent<TItem extends Record<string, any>> imple
     if (this.priceFormatter) return this.priceFormatter(price);
     if (price === null) return '—';
     try {
-      return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(price);
+      return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'MGA' }).format(price);
     } catch {
       return `${price} Ar`;
     }
