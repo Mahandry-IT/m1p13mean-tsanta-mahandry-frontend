@@ -12,6 +12,9 @@ import { NewPasswordComponent } from './pages/new-password/new-password.componen
 import { ForgotPasswordComponent } from './pages/forgot-password/forgot-password.component';
 import { ResetPasswordComponent } from './pages/reset-password/reset-password.component';
 import { LogoutComponent } from './pages/logout/logout.component';
+import { LoginAdminComponent } from './pages/login-admin/login-admin.component';
+import { LoginCustomerComponent } from './pages/login-customer/login-customer.component';
+import { LoginManagerComponent } from './pages/login-manager/login-manager.component';
 
 @NgModule({
   declarations: [
@@ -23,6 +26,9 @@ import { LogoutComponent } from './pages/logout/logout.component';
     NewPasswordComponent,
     ForgotPasswordComponent,
     ResetPasswordComponent,
+    LoginAdminComponent,
+    LoginCustomerComponent,
+    LoginManagerComponent
   ],
   imports: [
     CommonModule,
