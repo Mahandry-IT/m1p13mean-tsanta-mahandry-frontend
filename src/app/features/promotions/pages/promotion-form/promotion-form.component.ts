@@ -118,7 +118,11 @@ export class PromotionFormComponent implements OnInit {
     this.api.get<any>('/stores/my').subscribe({
       next: (res: any) => {
         const data = res?.data ?? res;
-        const arr = Array.isArray(data) ? data : (Array.isArray(data?.items) ? data.items : []);
+        const arr =
+          (Array.isArray(data) ? data : null) ??
+          (Array.isArray(data?.stores) ? data.stores : null) ??
+          (Array.isArray(data?.items) ? data.items : null) ??
+          [];
 
         this.storeOptions = (arr ?? [])
           .map((s: any) => ({

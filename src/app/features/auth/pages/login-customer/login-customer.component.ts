@@ -30,7 +30,7 @@ export class LoginCustomerComponent {
       nonNullable: true,
       validators: [Validators.required, Validators.email],
     }),
-    password: new FormControl<string>('tsanta123!', {
+    password: new FormControl<string>('j8jvyO59bE29', {
       nonNullable: true,
       validators: [Validators.required, Validators.minLength(6)],
     }),
