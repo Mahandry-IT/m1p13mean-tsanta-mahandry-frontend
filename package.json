@@ -43,6 +43,7 @@
     "express": "^5.1.0",
     "google-libphonenumber": "^3.2.44",
     "intl-tel-input": "^19.5.7",
+    "libphonenumber-js": "^1.12.38",
     "ngx-bootstrap": "^21.0.1",
     "ngx-intl-tel-input": "^17.0.0",
     "rxjs": "~7.8.0",

@@ -1,0 +1,34 @@
+<app-shell>
+  <app-page headTitle="Promotions">
+
+    <div class="promo-list__filters">
+      <mat-form-field appearance="outline" class="promo-list__store">
+        <mat-label>Boutique</mat-label>
+        <mat-select [(ngModel)]="selectedStoreId" (selectionChange)="onStoreChange()">
+          <mat-option *ngFor="let s of stores" [value]="s.id">{{ s.name }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <div class="promo-list__hint" *ngIf="!selectedStoreId">
+      Sélectionnez une boutique pour afficher les promotions.
+    </div>
+
+    <app-resource-list
+      *ngIf="selectedStoreId"
+      [endpoint]="endpoint"
+      [columns]="columns"
+      [filters]="listFilters"
+      [resolves]="resolves"
+      [isInfonable]="true"
+      [isEditable]="true"
+      [isDeletable]="true"
+      [isAddable]="true"
+      (info)="onInfo($event)"
+      (edit)="onEdit($event)"
+      (delete)="onDelete($event)"
+      (add)="onAdd()"
+    ></app-resource-list>
+
+  </app-page>
+</app-shell>

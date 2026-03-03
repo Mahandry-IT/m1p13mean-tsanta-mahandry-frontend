@@ -1,0 +1,524 @@
+// Copie conforme de product-form.component.scss
+
+// ── Design tokens ─────────────────────────────────────────────────────────────
+$gradient-primary : linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+$color-primary    : #667eea;
+$color-secondary  : #764ba2;
+$color-error      : #e03131;
+$color-text       : #1a1a2e;
+$color-text-muted : #6b7280;
+$color-border     : rgba(102, 126, 234, 0.14);
+$color-surface    : #ffffff;
+$color-surface-alt: #f8f7ff;
+$font-body        : 'Segoe UI', system-ui, sans-serif;
+$shadow-card      : 0 4px 24px rgba(102, 126, 234, 0.10), 0 1px 4px rgba(0,0,0,0.05);
+
+// ── Animations ───────────────────────────────────────────────────────────────
+@keyframes dialog-in {
+  from { opacity: 0; transform: translateY(12px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes icon-pop {
+  0%   { transform: scale(0.5); opacity: 0; }
+  70%  { transform: scale(1.12); }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes row-in {
+  from { opacity: 0; transform: translateX(-6px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+// ── Conteneur ────────────────────────────────────────────────────────────────
+.pf-dialog {
+  font-family: $font-body;
+  width      : min(900px, 96vw);
+  max-width  : 96vw;
+  box-sizing : border-box;
+  overflow-x : hidden;
+  display    : flex;
+  flex-direction: column;
+  animation  : dialog-in 0.28s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+// ── En-tête ─────────────────────────────────────────────────────────────────
+.pf-dialog__header {
+  display       : flex;
+  flex-direction: column;
+  align-items   : center;
+  padding       : 32px 32px 20px;
+  text-align    : center;
+  background    : $color-surface-alt;
+  border-bottom : 1.5px solid $color-border;
+  position      : relative;
+
+  &::before {
+    content      : '';
+    position     : absolute;
+    top: 0; left: 0; right: 0;
+    height       : 3px;
+    background   : $gradient-primary;
+  }
+}
+
+.pf-dialog__icon-wrap {
+  animation    : icon-pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s both;
+  margin-bottom: 12px;
+}
+
+.pf-dialog__icon {
+  width          : 56px;
+  height         : 56px;
+  border-radius  : 50%;
+  background     : linear-gradient(135deg, rgba(102,126,234,0.12), rgba(118,75,162,0.12));
+  border         : 2px solid rgba(102, 126, 234, 0.2);
+  display        : flex;
+  align-items    : center;
+  justify-content: center;
+
+  mat-icon {
+    font-size: 24px !important;
+    width    : 24px !important;
+    height   : 24px !important;
+    background: $gradient-primary;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+}
+
+.pf-dialog__title {
+  font-size  : 18px;
+  font-weight: 700;
+  color      : $color-text;
+  margin     : 0 0 4px;
+}
+
+.pf-dialog__subtitle {
+  font-size : 13px;
+  color     : $color-text-muted;
+  margin    : 0;
+  line-height: 1.5;
+}
+
+// ── Corps ───────────────────────────────────────────────────────────────────
+.pf-dialog__body {
+  padding   : 24px 32px 8px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  max-height: 70vh;
+
+  // Scrollbar fine et stylée
+  &::-webkit-scrollbar { width: 4px; }
+  &::-webkit-scrollbar-track { background: transparent; }
+  &::-webkit-scrollbar-thumb { background: rgba(102, 126, 234, 0.2); border-radius: 99px; }
+}
+
+.pf-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+// ── Champ ───────────────────────────────────────────────────────────────────
+.pf-field {
+  display       : flex;
+  flex-direction: column;
+  gap           : 6px;
+
+  &--inline { flex: 1; min-width: 0; overflow: hidden; }
+}
+
+.pf-field__label {
+  display    : flex;
+  align-items: center;
+  gap        : 5px;
+  font-size  : 11px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color      : $color-text-muted;
+
+  mat-icon {
+    font-size: 13px !important;
+    width    : 13px !important;
+    height   : 13px !important;
+    color    : $color-primary;
+    opacity  : 0.7;
+  }
+}
+
+.pf-field__wrap {
+  background   : $color-surface;
+  border       : 1.5px solid $color-border;
+  border-radius: 12px;
+  padding      : 0 14px;
+  height       : 44px;
+  display      : flex;
+  align-items  : center;
+  transition   : border-color 0.2s ease, box-shadow 0.2s ease;
+  box-shadow   : 0 1px 4px rgba(102, 126, 234, 0.05);
+
+  &:focus-within {
+    border-color: $color-primary;
+    box-shadow  : 0 0 0 3px rgba(102, 126, 234, 0.12);
+  }
+
+  &:hover:not(.pf-field__wrap--disabled) {
+    border-color: rgba(102, 126, 234, 0.35);
+  }
+
+  &--textarea {
+    height     : auto;
+    padding    : 10px 14px;
+    align-items: flex-start;
+  }
+
+  &--select {
+    padding : 0 10px 0 14px;
+    cursor  : pointer;
+    min-width: 0;
+    overflow : hidden;
+  }
+
+  &--disabled {
+    background: $color-surface-alt;
+    cursor    : default;
+
+    .pf-field__input, .pf-select { color: $color-text-muted !important; cursor: default; }
+  }
+}
+
+.pf-field__input {
+  width      : 100%;
+  border     : none;
+  outline    : none;
+  background : transparent;
+  font-family: $font-body;
+  font-size  : 14px;
+  font-weight: 500;
+  color      : $color-text;
+  caret-color: $color-primary;
+  resize     : none;
+
+  &::placeholder { color: rgba(107, 114, 128, 0.5); font-weight: 400; }
+  &:disabled { color: $color-text-muted; cursor: default; }
+}
+
+.pf-field__textarea {
+  line-height: 1.6;
+  padding    : 2px 0;
+  min-height : 72px;
+}
+
+.pf-field__error {
+  font-size  : 11px;
+  color      : $color-error;
+  font-weight: 500;
+  padding-left: 4px;
+}
+
+// ── Select (Material dans notre wrapper) ─────────────────────────────────────
+.pf-select {
+  width    : 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  font-size: 14px !important;
+  color    : $color-text !important;
+
+  ::ng-deep {
+    .mat-mdc-select-trigger {
+      height     : 44px !important;
+      display    : flex !important;
+      align-items: center !important;
+    }
+
+    .mat-mdc-select-value {
+      font-size  : 14px !important;
+      font-weight: 500 !important;
+      color      : $color-text !important;
+    }
+
+    .mat-mdc-select-placeholder { color: rgba(107, 114, 128, 0.5) !important; }
+
+    .mat-mdc-select-arrow-wrapper {
+      height     : 44px !important;
+      display    : flex !important;
+      align-items: center !important;
+    }
+
+    .mat-mdc-select-arrow { color: $color-secondary !important; }
+  }
+}
+
+// ── Section ─────────────────────────────────────────────────────────────────
+.pf-section {
+  border-top : 1.5px solid $color-border;
+  padding-top: 16px;
+  display    : flex;
+  flex-direction: column;
+  gap        : 12px;
+}
+
+.pf-section__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.pf-section__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: $color-text;
+
+  mat-icon {
+    font-size: 16px !important;
+    width    : 16px !important;
+    height   : 16px !important;
+    color    : $color-secondary;
+    opacity  : 0.9;
+  }
+}
+
+// ── Chips fichiers ──────────────────────────────────────────────────────────
+.pf-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pf-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: rgba(102, 126, 234, 0.10);
+  border: 1px solid rgba(102, 126, 234, 0.18);
+
+  mat-icon {
+    font-size: 16px !important;
+    width    : 16px !important;
+    height   : 16px !important;
+    color    : $color-primary;
+  }
+}
+
+.pf-chip__name {
+  font-size: 12px;
+  color: $color-text;
+  max-width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pf-chip__remove {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  mat-icon {
+    font-size: 16px !important;
+    width    : 16px !important;
+    height   : 16px !important;
+    color    : $color-text-muted;
+  }
+
+  &:hover mat-icon {
+    color: $color-error;
+  }
+}
+
+.pf-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: $color-text-muted;
+
+  mat-icon {
+    font-size: 15px !important;
+    width    : 15px !important;
+    height   : 15px !important;
+    opacity  : 0.7;
+  }
+}
+
+// ── Images existantes ────────────────────────────────────────────────────────
+.pf-existing {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed rgba(102, 126, 234, 0.22);
+}
+
+.pf-existing__label {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: $color-text-muted;
+  letter-spacing: 0.6px;
+  margin-bottom: 8px;
+}
+
+.pf-existing__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  gap: 10px;
+}
+
+.pf-existing__thumb {
+  width: 100%;
+  height: 76px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1.5px solid rgba(102, 126, 234, 0.18);
+  background: rgba(102, 126, 234, 0.06);
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+  }
+}
+
+// ── Catégories rows ─────────────────────────────────────────────────────────
+.pf-categories {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pf-category-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px;
+  border: 1.5px solid rgba(102, 126, 234, 0.14);
+  border-radius: 14px;
+  background: rgba(248, 247, 255, 0.6);
+  animation: row-in 0.2s ease both;
+}
+
+.pf-remove-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  border: 1.5px solid rgba(224, 49, 49, 0.22);
+  background: rgba(224, 49, 49, 0.06);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  margin-top: 18px;
+
+  mat-icon {
+    font-size: 18px !important;
+    width    : 18px !important;
+    height   : 18px !important;
+    color    : $color-error;
+  }
+
+  &:hover {
+    background: rgba(224, 49, 49, 0.10);
+  }
+}
+
+// ── Boutons ─────────────────────────────────────────────────────────────────
+.pf-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 16px;
+  border-radius: 12px;
+  border: 1.5px solid transparent;
+  cursor: pointer;
+  font-family: $font-body;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  transition: transform 0.06s ease, box-shadow 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+
+  mat-icon {
+    font-size: 18px !important;
+    width    : 18px !important;
+    height   : 18px !important;
+  }
+
+  &:active { transform: translateY(1px); }
+
+  &--sm {
+    height: 36px;
+    padding: 0 12px;
+    font-size: 12px;
+    border-radius: 10px;
+
+    mat-icon {
+      font-size: 16px !important;
+      width    : 16px !important;
+      height   : 16px !important;
+    }
+  }
+
+  &--outline {
+    background: transparent;
+    border-color: rgba(102, 126, 234, 0.22);
+    color: $color-secondary;
+
+    &:hover {
+      background: rgba(102, 126, 234, 0.06);
+      border-color: rgba(102, 126, 234, 0.32);
+    }
+  }
+
+  &--cancel {
+    background: transparent;
+    border-color: rgba(107, 114, 128, 0.24);
+    color: $color-text-muted;
+
+    &:hover {
+      border-color: rgba(107, 114, 128, 0.34);
+      background: rgba(107, 114, 128, 0.06);
+    }
+  }
+
+  &--submit {
+    background: $gradient-primary;
+    color: white;
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.22);
+
+    &:hover {
+      box-shadow: 0 10px 30px rgba(102, 126, 234, 0.28);
+    }
+  }
+}
+
+.pf-dialog__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 14px 32px 22px;
+  border-top: 1.5px solid $color-border;
+  background: white;
+}
+
+// Panel select
+.pf-select-panel {
+  ::ng-deep {
+    .mat-mdc-option {
+      font-size: 13px !important;
+    }
+  }
+}
+

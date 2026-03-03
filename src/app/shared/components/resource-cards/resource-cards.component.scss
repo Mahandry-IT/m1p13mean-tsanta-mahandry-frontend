@@ -1,0 +1,837 @@
+// ── Design tokens ──────────────────────────────────────────────────────────
+$gradient-primary : linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+$color-primary    : #667eea;
+$color-secondary  : #764ba2;
+$color-text       : #1a1a2e;
+$color-text-muted : #6b7280;
+$color-border     : rgba(102, 126, 234, 0.14);
+$color-surface    : #ffffff;
+$color-surface-alt: #f8f7ff;
+$color-error      : #e03131;
+$radius-sm        : 8px;
+$radius-md        : 16px;
+$radius-lg        : 24px;
+$font-body        : 'Segoe UI', system-ui, sans-serif;
+$shadow-card      : 0 4px 24px rgba(102, 126, 234, 0.10), 0 1px 4px rgba(0,0,0,0.05);
+$shadow-card-hover: 0 12px 40px rgba(102, 126, 234, 0.18), 0 2px 8px rgba(0,0,0,0.07);
+
+// ── Keyframes ──────────────────────────────────────────────────────────────
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+// ── Root ───────────────────────────────────────────────────────────────────
+.resource-cards {
+  display       : flex;
+  flex-direction: column;
+  gap           : 20px;
+  font-family   : $font-body;
+  animation     : fade-in 0.3s ease both;
+  padding       : 24px 32px;
+  background    : $color-surface-alt;
+  border-radius : $radius-lg;
+}
+
+// ── Toolbar ────────────────────────────────────────────────────────────────
+.resource-cards__toolbar {
+  display    : flex;
+  gap        : 12px;
+  align-items: center;
+  height     : 44px;
+}
+
+// ── Search (pill — identique resource-list) ────────────────────────────────
+.resource-cards__search {
+  flex       : 0 0 clamp(200px, 25%, 320px);
+  height     : 44px !important;
+  display    : block !important;
+
+  &.mat-mdc-form-field {
+    height  : 44px !important;
+    overflow: hidden !important;
+  }
+
+  .mat-mdc-form-field-subscript-wrapper,
+  ::ng-deep .mat-mdc-form-field-subscript-wrapper {
+    display : none !important;
+    height  : 0 !important;
+    overflow: hidden !important;
+  }
+
+  ::ng-deep {
+    .mat-mdc-form-field,
+    .mat-mdc-text-field-wrapper { overflow: hidden !important; }
+
+    .mdc-notched-outline,
+    .mdc-notched-outline__leading,
+    .mdc-notched-outline__notch,
+    .mdc-notched-outline__trailing { display: none !important; }
+
+    .mdc-text-field__ripple,
+    .mdc-line-ripple { display: none !important; }
+
+    .mat-mdc-text-field-wrapper {
+      border-radius : 50px !important;
+      background    : $color-surface !important;
+      box-shadow    : 0 2px 12px rgba(102, 126, 234, 0.10), 0 1px 3px rgba(0,0,0,0.05) !important;
+      border        : 1.5px solid $color-border !important;
+      padding       : 0 !important;
+      height        : 44px !important;
+      min-height    : 44px !important;
+      max-height    : 44px !important;
+      transition    : border-color 0.2s ease, box-shadow 0.2s ease !important;
+
+      &:hover { border-color: rgba(102, 126, 234, 0.4) !important; }
+      &::before, &::after { display: none !important; }
+    }
+
+    &.mat-focused .mat-mdc-text-field-wrapper {
+      border-color: $color-primary !important;
+      box-shadow  : 0 0 0 3px rgba(102, 126, 234, 0.13),
+      0 2px 12px rgba(102, 126, 234, 0.10) !important;
+    }
+
+    .mat-mdc-form-field-flex {
+      height     : 44px !important;
+      display    : flex !important;
+      align-items: center !important;
+      padding    : 0 4px 0 14px !important;
+      box-sizing : border-box !important;
+    }
+
+    .mat-mdc-form-field-infix {
+      padding    : 0 !important;
+      min-height : unset !important;
+      height     : 44px !important;
+      border-top : none !important;
+      display    : flex !important;
+      align-items: center !important;
+      box-sizing : border-box !important;
+    }
+
+    .mat-mdc-form-field-icon-prefix {
+      display    : flex !important;
+      align-items: center !important;
+      height     : 44px !important;
+      padding    : 0 6px 0 0 !important;
+      align-self : center !important;
+      margin-top : 6px !important;
+    }
+
+    .mat-mdc-form-field-icon-suffix {
+      display    : flex !important;
+      align-items: center !important;
+      height     : 44px !important;
+      padding    : 0 !important;
+      align-self : center !important;
+      margin-top : 6px !important;
+    }
+
+    .mat-mdc-floating-label { display: none !important; }
+
+    input.mat-mdc-input-element {
+      font-size   : 14px !important;
+      font-weight : 400 !important;
+      color       : $color-text !important;
+      padding     : 0 !important;
+      margin      : 0 !important;
+      height      : 44px !important;
+      line-height : 44px !important;
+      box-sizing  : border-box !important;
+      caret-color : $color-primary !important;
+      align-self  : center !important;
+
+      &::placeholder {
+        color  : $color-text-muted !important;
+        opacity: 0.7;
+      }
+    }
+  }
+}
+
+// ── Refresh button ─────────────────────────────────────────────────────────
+button.resource-cards__refresh {
+  height       : 44px !important;
+  padding      : 0 20px !important;
+  border-radius: 50px !important;
+  font-weight  : 600 !important;
+  font-size    : 14px !important;
+  border       : 1px solid $color-border !important;
+  color        : $color-secondary !important;
+  background   : $color-surface !important;
+  box-shadow   : $shadow-card;
+  transition   : background 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease !important;
+  white-space  : nowrap;
+
+  mat-icon {
+    font-size   : 18px !important;
+    width       : 18px !important;
+    height      : 18px !important;
+    margin-right: 6px !important;
+    color       : $color-secondary;
+    transition  : transform 0.4s ease;
+  }
+
+  &:hover {
+    background: $color-surface-alt !important;
+    box-shadow: $shadow-card-hover !important;
+    transform : translateY(-1px) !important;
+
+    mat-icon { transform: rotate(180deg); }
+  }
+}
+
+// ── Add button ─────────────────────────────────────────────────────────────
+button.resource-cards__add {
+  height       : 44px !important;
+  padding      : 0 20px !important;
+  border-radius: 50px !important;
+  font-weight  : 700 !important;
+  font-size    : 14px !important;
+  white-space  : nowrap;
+  background   : $gradient-primary !important;
+  color        : #fff !important;
+  box-shadow   : $shadow-card;
+  transition   : transform 0.2s ease, box-shadow 0.2s ease;
+
+  mat-icon {
+    font-size   : 18px !important;
+    width       : 18px !important;
+    height      : 18px !important;
+    margin-right: 6px !important;
+    color       : #fff !important;
+  }
+
+  &:hover {
+    transform : translateY(-1px);
+    box-shadow: $shadow-card-hover;
+  }
+}
+
+// ── Filters bar ────────────────────────────────────────────────────────────
+.resource-cards__filters {
+  display    : flex;
+  flex-wrap  : wrap;
+  gap        : 12px;
+  align-items: center;
+  padding    : 14px 18px;
+  background : $color-surface;
+  border     : 1.5px solid $color-border;
+  border-radius: $radius-md;
+  box-shadow : $shadow-card;
+  animation  : fade-in 0.25s ease both;
+}
+
+// Chaque mat-form-field filtre — pill compact via ::ng-deep
+.resource-cards__filter {
+  flex      : 0 0 auto;
+  min-width : 150px;
+  max-width : 220px;
+  height    : 44px !important;
+  display   : block !important;
+
+  &.mat-mdc-form-field {
+    height  : 44px !important;
+    overflow: hidden !important;
+  }
+
+  .mat-mdc-form-field-subscript-wrapper { display: none !important; height: 0 !important; }
+
+  ::ng-deep {
+    // Supprime le outline notché Material
+    .mdc-notched-outline,
+    .mdc-notched-outline__leading,
+    .mdc-notched-outline__notch,
+    .mdc-notched-outline__trailing { display: none !important; }
+
+    .mdc-line-ripple,
+    .mdc-text-field__ripple { display: none !important; }
+
+    // Wrapper = pill
+    .mat-mdc-text-field-wrapper {
+      border-radius : 50px !important;
+      background    : $color-surface !important;
+      border        : 1.5px solid $color-border !important;
+      box-shadow    : 0 2px 8px rgba(102, 126, 234, 0.07) !important;
+      padding       : 0 !important;
+      height        : 44px !important;
+      min-height    : 44px !important;
+      max-height    : 44px !important;
+      overflow      : hidden !important;
+      transition    : border-color 0.2s ease, box-shadow 0.2s ease !important;
+
+      &:hover { border-color: rgba(102, 126, 234, 0.4) !important; }
+      &::before, &::after { display: none !important; }
+    }
+
+    &.mat-focused .mat-mdc-text-field-wrapper {
+      border-color: $color-primary !important;
+      box-shadow  : 0 0 0 3px rgba(102, 126, 234, 0.12) !important;
+    }
+
+    .mat-mdc-form-field-flex {
+      height     : 44px !important;
+      display    : flex !important;
+      align-items: center !important;
+      padding    : 0 14px !important;
+      box-sizing : border-box !important;
+    }
+
+    .mat-mdc-form-field-infix {
+      padding    : 0 !important;
+      min-height : unset !important;
+      height     : 44px !important;
+      border-top : none !important;
+      display    : flex !important;
+      align-items: center !important;
+      box-sizing : border-box !important;
+    }
+
+    // Label flottant → label fixe au centre
+    .mat-mdc-floating-label {
+      font-size  : 13px !important;
+      font-weight: 500 !important;
+      color      : $color-text-muted !important;
+      top        : 50% !important;
+      transform  : translateY(-50%) !important;
+      position   : absolute !important;
+    }
+
+    // Masque le label quand valeur présente ou focus
+    &.mat-mdc-form-field-has-icon-prefix .mat-mdc-floating-label,
+    &.mat-focused .mat-mdc-floating-label,
+    &.ng-dirty .mat-mdc-floating-label,
+    .mat-mdc-floating-label.mdc-floating-label--float-above { display: none !important; }
+
+    input.mat-mdc-input-element {
+      font-size  : 13px !important;
+      font-weight: 500 !important;
+      color      : $color-text !important;
+      padding    : 0 !important;
+      margin     : 0 !important;
+      height     : 44px !important;
+      line-height: 44px !important;
+      caret-color: $color-primary !important;
+
+      &::placeholder { color: $color-text-muted !important; opacity: 0.6; }
+    }
+
+    // Select
+    .mat-mdc-select {
+      font-size  : 13px !important;
+      font-weight: 500 !important;
+      color      : $color-text !important;
+    }
+
+    .mat-mdc-select-trigger {
+      height     : 44px !important;
+      display    : flex !important;
+      align-items: center !important;
+    }
+
+    .mat-mdc-select-value {
+      font-size  : 13px !important;
+      font-weight: 500 !important;
+      color      : $color-text !important;
+    }
+
+    .mat-mdc-select-placeholder {
+      color  : $color-text-muted !important;
+      opacity: 0.8 !important;
+    }
+
+    .mat-mdc-select-arrow-wrapper {
+      height     : 44px !important;
+      display    : flex !important;
+      align-items: center !important;
+    }
+
+    .mat-mdc-select-arrow { color: $color-secondary !important; }
+
+    .mat-mdc-form-field-subscript-wrapper { display: none !important; }
+  }
+}
+
+
+// Bouton Réinitialiser
+.resource-cards__filters button[mat-stroked-button] {
+  height       : 40px !important;
+  padding      : 0 16px !important;
+  border-radius: 50px !important;
+  font-weight  : 600 !important;
+  font-size    : 13px !important;
+  border       : 1px solid $color-border !important;
+  color        : $color-text-muted !important;
+  background   : $color-surface-alt !important;
+  transition   : all 0.2s ease !important;
+  white-space  : nowrap;
+
+  mat-icon {
+    font-size   : 16px !important;
+    width       : 16px !important;
+    height      : 16px !important;
+    margin-right: 5px !important;
+  }
+
+  &:hover {
+    border-color: rgba(102, 126, 234, 0.35) !important;
+    color       : $color-text !important;
+    transform   : translateY(-1px) !important;
+  }
+}
+
+// ── Sort bar ───────────────────────────────────────────────────────────────
+.resource-cards__sort {
+  display    : flex;
+  align-items: center;
+  gap        : 10px;
+}
+
+.resource-cards__sort-label {
+  font-size  : 12px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color      : $color-text-muted;
+}
+
+.resource-cards__sort-row {
+  display: flex;
+  gap    : 6px;
+}
+
+.resource-cards__sort-item {
+  font-size    : 12px;
+  font-weight  : 600;
+  padding      : 4px 12px;
+  border-radius: 50px;
+  border       : 1.5px solid $color-border;
+  background   : $color-surface;
+  color        : $color-text-muted;
+  cursor       : pointer;
+  transition   : all 0.15s ease;
+
+  &:hover, &[aria-sort] {
+    border-color: $color-primary;
+    color       : $color-primary;
+    background  : rgba(102, 126, 234, 0.06);
+  }
+}
+
+// ── Loading / Error / Empty ────────────────────────────────────────────────
+.resource-cards__state {
+  display        : flex;
+  align-items    : center;
+  justify-content: center;
+  gap            : 12px;
+  padding        : 48px 0;
+  font-size      : 14px;
+  color          : $color-text-muted;
+
+  &::before {
+    content      : '';
+    display      : block;
+    width        : 20px;
+    height       : 20px;
+    border-radius: 50%;
+    border       : 2px solid $color-border;
+    border-top   : 2px solid $color-primary;
+    animation    : spin 0.7s linear infinite;
+    flex-shrink  : 0;
+  }
+}
+
+.resource-cards__state--error {
+  background   : rgba(224, 49, 49, 0.07);
+  border       : 1px solid rgba(224, 49, 49, 0.2);
+  border-radius: $radius-md;
+  color        : $color-error;
+  padding      : 16px 20px;
+  font-size    : 14px;
+  gap          : 8px;
+
+  &::before { display: none; }
+  strong     { font-weight: 700; }
+}
+
+.resource-cards__empty {
+  display        : flex;
+  flex-direction : column;
+  align-items    : center;
+  justify-content: center;
+  gap            : 12px;
+  padding        : 64px 0;
+  color          : $color-text-muted;
+  font-size      : 14px;
+
+  &::before {
+    content    : '📭';
+    font-size  : 40px;
+    line-height: 1;
+  }
+}
+
+// ── Grid de cartes ─────────────────────────────────────────────────────────
+.resource-cards__grid {
+  display              : grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap                  : 20px;
+  animation            : fade-in 0.25s ease both;
+}
+
+// ── Card ───────────────────────────────────────────────────────────────────
+.resource-cards__card {
+  border-radius: $radius-md !important;
+  border       : 1px solid $color-border !important;
+  box-shadow   : $shadow-card !important;
+  background   : $color-surface !important;
+  transition   : transform 0.25s ease, box-shadow 0.25s ease !important;
+  overflow     : hidden !important;
+  display      : flex !important;
+  flex-direction: column !important;
+
+  &:hover {
+    transform : translateY(-4px) !important;
+    box-shadow: $shadow-card-hover !important;
+  }
+
+  // Bande gradient en haut
+  &::before {
+    content      : '';
+    display      : block;
+    height       : 3px;
+    background   : $gradient-primary;
+  }
+
+  // Image
+  img[mat-card-image] {
+    width     : 100% !important;
+    height    : 180px !important;
+    object-fit: cover !important;
+    margin    : 0 !important;
+    display   : block !important;
+  }
+
+  mat-card-header {
+    padding: 16px 20px 4px !important;
+
+    .mat-mdc-card-title {
+      font-size  : 15px !important;
+      font-weight: 700 !important;
+      color      : $color-text !important;
+      line-height: 1.4 !important;
+      margin     : 0 !important;
+    }
+  }
+
+  mat-card-content {
+    padding  : 8px 20px 12px !important;
+    flex     : 1 !important;
+  }
+
+  mat-card-actions {
+    padding    : 8px 12px 14px !important;
+    border-top : 1px solid $color-border;
+    margin-top : auto;
+    display    : flex !important;
+    justify-content: flex-end !important;
+  }
+}
+
+.resource-cards__desc {
+  font-size  : 13px;
+  color      : $color-text-muted;
+  line-height: 1.6;
+  margin     : 0;
+  display    : -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow   : hidden;
+}
+
+// ── Boutons d'action sur les cartes ───────────────────────────────────────
+.resource-cards__card {
+  button[mat-icon-button] {
+    width        : 32px !important;
+    height       : 32px !important;
+    border-radius: $radius-sm !important;
+    transition   : background 0.15s ease !important;
+
+    mat-icon {
+      font-size: 17px !important;
+      width    : 17px !important;
+      height   : 17px !important;
+      color    : $color-text-muted;
+      transition: color 0.15s ease;
+    }
+
+    &:nth-child(1):hover {
+      background: rgba(102, 126, 234, 0.1) !important;
+      mat-icon { color: $color-primary !important; }
+    }
+
+    &:nth-child(2):hover {
+      background: rgba(34, 197, 94, 0.1) !important;
+      mat-icon { color: #16a34a !important; }
+    }
+
+    &:nth-child(3):hover, &:last-child:hover {
+      background: rgba(224, 49, 49, 0.08) !important;
+      mat-icon { color: $color-error !important; }
+    }
+  }
+}
+
+// ── Paginator (identique resource-list) ───────────────────────────────────
+mat-paginator {
+  background  : transparent !important;
+  border      : none !important;
+  box-shadow  : none !important;
+  font-family : $font-body !important;
+
+  ::ng-deep {
+    .mat-mdc-paginator-outer-container {
+      display        : flex !important;
+      justify-content: center !important;
+      align-items    : center !important;
+    }
+
+    .mat-mdc-paginator-container {
+      display        : inline-flex !important;
+      align-items    : center !important;
+      justify-content: center !important;
+      gap            : 0 !important;
+      padding        : 5px 8px !important;
+      min-height     : unset !important;
+      background     : $color-surface !important;
+      border         : 1.5px solid $color-border !important;
+      border-radius  : 50px !important;
+      box-shadow     : $shadow-card !important;
+      flex-wrap      : nowrap !important;
+    }
+
+    .mat-mdc-paginator-page-size {
+      display    : flex !important;
+      align-items: center !important;
+      gap        : 8px !important;
+      margin     : 0 !important;
+      padding    : 0 12px 0 4px !important;
+      border-right: 1.5px solid $color-border !important;
+      height     : 34px !important;
+    }
+
+    .mat-mdc-paginator-page-size-label {
+      font-size  : 12px !important;
+      font-weight: 500 !important;
+      color      : $color-text-muted !important;
+      white-space: nowrap !important;
+      margin     : 0 !important;
+    }
+
+    .mat-mdc-paginator-page-size-select {
+      margin: 0 !important;
+      width : 72px !important;
+
+      .mat-mdc-form-field-subscript-wrapper { display: none !important; }
+
+      .mdc-notched-outline,
+      .mdc-notched-outline__leading,
+      .mdc-notched-outline__notch,
+      .mdc-notched-outline__trailing,
+      .mdc-line-ripple,
+      .mdc-text-field__ripple { display: none !important; }
+
+      .mat-mdc-text-field-wrapper {
+        background   : $color-surface-alt !important;
+        border       : 1.5px solid $color-border !important;
+        border-radius: 50px !important;
+        padding      : 0 10px !important;
+        height       : 28px !important;
+        min-height   : unset !important;
+        overflow     : hidden !important;
+        box-shadow   : none !important;
+        transition   : border-color 0.15s ease !important;
+
+        &::before, &::after { display: none !important; }
+        &:hover { border-color: rgba(102, 126, 234, 0.4) !important; }
+      }
+
+      .mat-mdc-form-field-flex {
+        height     : 28px !important;
+        padding    : 0 !important;
+        align-items: center !important;
+        display    : flex !important;
+      }
+
+      .mat-mdc-form-field-infix {
+        padding    : 0 !important;
+        min-height : unset !important;
+        height     : 28px !important;
+        display    : flex !important;
+        align-items: center !important;
+        border-top : none !important;
+      }
+
+      .mat-mdc-select { font-size: 13px !important; font-weight: 600 !important; color: $color-text !important; }
+      .mat-mdc-select-trigger { height: 28px !important; display: flex !important; align-items: center !important; }
+      .mat-mdc-select-value { font-size: 13px !important; font-weight: 600 !important; color: $color-text !important; }
+      .mat-mdc-select-arrow-wrapper { height: 28px !important; display: flex !important; align-items: center !important; }
+      .mat-mdc-select-arrow { color: $color-secondary !important; }
+
+      &.mat-focused .mat-mdc-text-field-wrapper {
+        border-color: $color-primary !important;
+        box-shadow  : 0 0 0 2px rgba(102, 126, 234, 0.12) !important;
+      }
+    }
+
+    .mat-mdc-paginator-range-actions {
+      display    : flex !important;
+      align-items: center !important;
+      gap        : 2px !important;
+      margin     : 0 !important;
+      padding    : 0 4px 0 10px !important;
+    }
+
+    .mat-mdc-paginator-range-label {
+      font-size  : 13px !important;
+      font-weight: 500 !important;
+      color      : $color-text-muted !important;
+      padding    : 0 10px !important;
+      margin     : 0 !important;
+      white-space: nowrap !important;
+    }
+
+    .mat-mdc-icon-button {
+      width          : 32px !important;
+      height         : 32px !important;
+      padding        : 0 !important;
+      border-radius  : 50% !important;
+      display        : flex !important;
+      align-items    : center !important;
+      justify-content: center !important;
+      transition     : background 0.15s ease, transform 0.15s ease !important;
+
+      .mat-mdc-button-touch-target { display: none !important; }
+
+      svg { width: 24px !important; height: 24px !important; fill: $color-secondary !important; }
+      .mat-icon { font-size: 20px !important; width: 20px !important; height: 20px !important; color: $color-secondary !important; }
+
+      &:hover:not([disabled]) { background: rgba(102, 126, 234, 0.1) !important; transform: scale(1.1) !important; }
+      &[disabled] { opacity: 0.3 !important; svg { fill: $color-text-muted !important; } .mat-icon { color: $color-text-muted !important; } }
+    }
+  }
+}
+
+// ── Responsive ─────────────────────────────────────────────────────────────
+@media (max-width: 640px) {
+  .resource-cards__toolbar  { flex-wrap: wrap; height: auto; }
+  .resource-cards__grid     { grid-template-columns: 1fr; }
+  .resource-cards__filters  { gap: 8px; }
+  .resource-cards__filter   { min-width: 140px; }
+}
+
+// ── Fix image débordement ──────────────────────────────────────────────────
+// Material MDC card a son propre wrapper — ::ng-deep nécessaire
+.resource-cards__card {
+  ::ng-deep {
+    // Conteneur interne MDC
+    .mat-mdc-card-image-container,
+    .mdc-card__media {
+      border-radius: $radius-md $radius-md 0 0 !important;
+      overflow     : hidden !important;
+    }
+
+    // L'image elle-même
+    img.mat-mdc-card-image,
+    img[mat-card-image] {
+      width      : 100% !important;
+      height     : 180px !important;
+      object-fit : cover !important;
+      object-position: center !important;
+      display    : block !important;
+      margin     : 0 !important;
+      max-width  : 100% !important;
+      border-radius: 0 !important; // le parent s'occupe des coins
+    }
+  }
+}
+
+// ── Card image gallery ─────────────────────────────────────────────────────
+.resource-cards__gallery {
+  display       : flex;
+  flex-direction: column;
+  flex-shrink   : 0;
+}
+
+.resource-cards__card-img {
+  width              : 100%;
+  height             : 180px;
+  background-size    : contain;
+  background-position: center;
+  background-repeat  : no-repeat;
+  flex-shrink        : 0;
+  transition         : background-image 0.2s ease;
+
+  &--placeholder {
+    background: linear-gradient(135deg, #f0f0ff 0%, #e8e0ff 100%);
+    display    : flex;
+    align-items: center;
+    justify-content: center;
+
+    &::after {
+      content    : '🖼️';
+      font-size  : 36px;
+      opacity    : 0.4;
+    }
+  }
+}
+
+// ── Thumbnails strip ────────────────────────────────────────────────────────
+.resource-cards__thumbnails {
+  display        : flex;
+  gap            : 6px;
+  padding        : 8px 10px;
+  overflow-x     : auto;
+  background     : $color-surface;
+  border-top     : 1px solid $color-border;
+  scrollbar-width: none;
+  &::-webkit-scrollbar { display: none; }
+}
+
+.resource-cards__thumb {
+  flex-shrink    : 0;
+  width          : 48px;
+  height         : 48px;
+  padding        : 0;
+  border         : 2px solid transparent;
+  border-radius  : $radius-sm;
+  cursor         : pointer;
+  background     : none;
+  transition     : border-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+  overflow       : hidden;
+
+  &:hover {
+    border-color: rgba(102, 126, 234, 0.5);
+    transform   : translateY(-1px);
+    box-shadow  : 0 3px 10px rgba(102, 126, 234, 0.2);
+  }
+
+  &--active {
+    border-color: $color-primary;
+    box-shadow  : 0 0 0 1px $color-primary, 0 3px 10px rgba(102, 126, 234, 0.25);
+    transform   : translateY(-1px);
+  }
+}
+
+.resource-cards__thumb-img {
+  width              : 100%;
+  height             : 100%;
+  background-size    : cover;
+  background-position: center;
+  background-repeat  : no-repeat;
+}

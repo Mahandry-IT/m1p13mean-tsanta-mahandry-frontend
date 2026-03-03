@@ -1,0 +1,198 @@
+// ── Design tokens (identiques à create) ──────────────────────────────────
+$gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+$color-primary: #667eea;
+$color-secondary: #764ba2;
+$color-text: #1a1a2e;
+$color-text-muted: #6b7280;
+$color-border: rgba(102, 126, 234, 0.15);
+$color-surface: #ffffff;
+
+$font-display: 'Georgia', 'Times New Roman', serif;
+$font-body: 'Segoe UI', system-ui, sans-serif;
+
+$radius-md: 16px;
+$radius-lg: 24px;
+$shadow-card: 0 8px 40px rgba(102, 126, 234, 0.13), 0 1px 6px rgba(0,0,0,0.05);
+
+// ── Animations (identiques à create) ─────────────────────────────────────
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse-ring {
+  0%   { transform: scale(0.95); opacity: 0.6; }
+  70%  { transform: scale(1.1);  opacity: 0; }
+  100% { transform: scale(0.95); opacity: 0; }
+}
+
+// ── Layout principal ──────────────────────────────────────────────────────
+.profile-edit {
+  display: grid;
+  place-items: center;
+  min-height: calc(100vh - 68px);
+  font-family: $font-body;
+  background: #f8f7ff;
+  padding: 48px 16px;
+}
+
+// ── Card ─────────────────────────────────────────────────────────────────
+.profile-edit__card {
+  width: 100%;
+  max-width: 520px;
+  background: $color-surface;
+  border: 1px solid $color-border;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-card;
+  padding: 40px 36px;
+  font-family: $font-body;
+  animation: fade-in-up 0.6s ease 0.15s both;
+}
+
+// ── Header (icône + titre + sous-titre) ──────────────────────────────────
+.profile-edit__header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 10px;
+  margin-bottom: 32px;
+}
+
+.profile-edit__icon {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  background: $gradient-primary;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 6px;
+
+  mat-icon {
+    color: #fff;
+    font-size: 26px;
+    width: 26px;
+    height: 26px;
+  }
+
+  // anneau pulsant
+  &::before {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: 20px;
+    background: $gradient-primary;
+    opacity: 0;
+    animation: pulse-ring 2.5s ease-out infinite;
+  }
+}
+
+.profile-edit__avatar {
+  width: 92px;
+  height: 92px;
+  border-radius: 999px;
+  overflow: hidden;
+  border: 3px solid rgba(102, 126, 234, 0.25);
+  box-shadow: 0 8px 18px rgba(102, 126, 234, 0.18);
+  background: #fff;
+  display: grid;
+  place-items: center;
+  margin: 6px 0 2px;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  &--placeholder {
+    background: #f3f4f6;
+
+    mat-icon {
+      color: $color-text-muted;
+      font-size: 38px;
+      width: 38px;
+      height: 38px;
+    }
+  }
+}
+
+.profile-edit__title {
+  margin: 0;
+  font-family: $font-display;
+  font-size: 24px;
+  font-weight: 700;
+  color: $color-text;
+  letter-spacing: -0.3px;
+}
+
+.profile-edit__subtitle {
+  margin: 0;
+  font-family: $font-body;
+  font-size: 13px;
+  line-height: 1.6;
+  color: $color-text-muted;
+}
+
+// ── Formulaire ───────────────────────────────────────────────────────────
+.profile-edit__form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+// ── Boutons d'action ─────────────────────────────────────────────────────
+.profile-edit__actions {
+  margin-top: 4px;
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+
+  ::ng-deep .mat-raised-button[color="primary"],
+  ::ng-deep button[mat-raised-button],
+  ::ng-deep button[mat-flat-button] {
+    background: $gradient-primary !important;
+    border-radius: 50px !important;
+    height: 48px;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+    box-shadow: 0 4px 20px rgba(102, 126, 234, 0.35) !important;
+    transition: transform 0.2s, box-shadow 0.2s !important;
+
+    &:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(102, 126, 234, 0.45) !important;
+    }
+  }
+
+  ::ng-deep button[mat-stroked-button] {
+    border-radius: 50px !important;
+    height: 48px;
+    font-size: 15px;
+    font-weight: 600;
+    border-color: $color-border !important;
+    color: $color-text-muted !important;
+    transition: all 0.2s ease !important;
+
+    &:hover:not(:disabled) {
+      border-color: rgba(102, 126, 234, 0.4) !important;
+      color: $color-text !important;
+      background: rgba(102, 126, 234, 0.05) !important;
+    }
+  }
+}
+
+// ── Responsive ───────────────────────────────────────────────────────────
+@media (max-width: 480px) {
+  .profile-edit__card {
+    padding: 28px 20px;
+  }
+
+  .profile-edit__actions {
+    flex-direction: column-reverse;
+  }
+}

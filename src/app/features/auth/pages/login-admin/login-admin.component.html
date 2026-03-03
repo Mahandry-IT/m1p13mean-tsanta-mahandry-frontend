@@ -1,0 +1,71 @@
+<app-page headTitle="Connexion Admin">
+  <section class="login">
+
+    <div class="login__form-panel">
+      <div class="login__card">
+
+        <header class="login__header">
+          <div class="login__icon">
+            <mat-icon>lock_open</mat-icon>
+          </div>
+          <h1 class="login__title">Se connecter (Admin)</h1>
+          <p class="login__subtitle">Identifiants pré-remplis pour test rapide.</p>
+        </header>
+
+        <form class="login__form" [formGroup]="form" (ngSubmit)="onSubmit()">
+
+          <app-input
+            name="email"
+            label="Email"
+            placeholder="admin@mail.com"
+            type="email"
+            autocomplete="email"
+            [required]="true"
+            [control]="form.controls.email"
+          ></app-input>
+
+          <app-input
+            name="password"
+            label="Mot de passe"
+            placeholder="admin"
+            type="password"
+            autocomplete="current-password"
+            [required]="true"
+            [control]="form.controls.password"
+          ></app-input>
+
+          <div class="login__forgot">
+            <a routerLink="/auth/forgot-password">Mot de passe oublié ?</a>
+          </div>
+
+          <div class="login__actions">
+            <app-button
+              text="Se connecter"
+              variant="raised"
+              color="accent"
+              type="submit"
+              [fullWidth]="true"
+              [loading]="loading"
+              [isenabled]="(isEnabled$ | async) ?? false"
+            ></app-button>
+          </div>
+
+          <div class="login__divider">
+            <span>ou</span>
+          </div>
+
+          <div class="login__register">
+            <p>Pas encore de compte ?</p>
+            <a routerLink="/auth/register" class="login__register-link">
+              Créer un compte gratuitement
+              <mat-icon>arrow_forward</mat-icon>
+            </a>
+          </div>
+
+        </form>
+      </div>
+    </div>
+
+  </section>
+</app-page>
+

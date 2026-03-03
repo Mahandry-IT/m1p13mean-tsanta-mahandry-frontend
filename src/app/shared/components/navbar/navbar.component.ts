@@ -1,8 +1,9 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { Router } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
 import { AuthService, UserResponse } from '../../../core/services/auth.service';
 import { MenuService } from '../../../core/services/menu.service';
 import { MenuModalService } from '../menu-modal/menu-modal.service';
-import { firstValueFrom } from 'rxjs';
 
 export interface NavbarUser {
   username?: string | null;
@@ -23,6 +24,7 @@ export class NavbarComponent {
     private readonly auth: AuthService,
     private readonly menus: MenuService,
     private readonly menuModal: MenuModalService,
+    private readonly router: Router,
   ) {}
 
   /**
@@ -52,11 +54,11 @@ export class NavbarComponent {
   }
 
   onEditProfile(): void {
-    // no-op (sera câblé plus tard)
+    this.router.navigateByUrl('/profile/edit');
   }
 
-  onLogout(): void {
-    // no-op (sera câblé plus tard)
+  async onLogout(): Promise<void> {
+    await this.router.navigateByUrl('/auth/logout');
   }
 
   get displayName(): string {

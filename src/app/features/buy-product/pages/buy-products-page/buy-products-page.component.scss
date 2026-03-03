@@ -1,0 +1,179 @@
+// ── Design tokens (locaux) ─────────────────────────────────────────────────
+$gradient-primary : linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+$color-primary    : #667eea;
+$color-secondary  : #764ba2;
+$color-text       : #1a1a2e;
+$color-text-muted : #6b7280;
+$color-border     : rgba(102, 126, 234, 0.14);
+$color-surface    : #ffffff;
+$color-surface-alt: #f8f7ff;
+$color-error      : #e03131;
+$radius-md        : 16px;
+$shadow-card      : 0 4px 24px rgba(102, 126, 234, 0.10), 0 1px 4px rgba(0,0,0,0.05);
+
+// ── Barre de filtre boutique ───────────────────────────────────────────────
+.my-products__filters {
+  display      : flex;
+  align-items  : center;
+  gap          : 12px;
+  margin-bottom: 0; // on colle au composant cards (qui a déjà son padding)
+  height       : 44px; // même hauteur que la search/toolbar
+
+  // Le mat-form-field ajoute souvent un padding/margin interne; on le neutralise pour l'alignement.
+  .mat-mdc-form-field {
+    margin: 0 !important;
+  }
+}
+
+// Place la barre "Boutique" au même niveau visuel que la recherche du composant cards
+// (le composant cards a un padding-top de 24px; on applique le même spacing ici)
+:host {
+  display: block;
+
+  // Ajuste légèrement la position verticale pour matcher la toolbar interne.
+  // Si besoin, tu peux affiner à +/−2px.
+  .my-products__filters {
+    padding: 24px 32px 0 32px;
+    position: relative;
+    z-index: 0;
+    pointer-events: auto;
+  }
+}
+
+// ── Select boutique — pill style ───────────────────────────────────────────
+.my-products__store {
+  flex      : 0 0 auto;
+  min-width : 200px;
+  max-width : 280px;
+  height    : 44px !important;
+  display   : block !important;
+
+  &.mat-mdc-form-field {
+    height  : 44px !important;
+    overflow: hidden !important;
+  }
+
+  .mat-mdc-form-field-subscript-wrapper,
+  ::ng-deep .mat-mdc-form-field-subscript-wrapper {
+    display : none !important;
+    height  : 0 !important;
+    overflow: hidden !important;
+  }
+
+  ::ng-deep {
+    .mdc-notched-outline,
+    .mdc-notched-outline__leading,
+    .mdc-notched-outline__notch,
+    .mdc-notched-outline__trailing { display: none !important; }
+
+    .mdc-line-ripple,
+    .mdc-text-field__ripple { display: none !important; }
+
+    .mat-mdc-text-field-wrapper {
+      border-radius : 50px !important;
+      background    : $color-surface !important;
+      border        : 1.5px solid $color-border !important;
+      box-shadow    : 0 2px 12px rgba(102, 126, 234, 0.10), 0 1px 3px rgba(0,0,0,0.05) !important;
+      padding       : 0 !important;
+      height        : 44px !important;
+      min-height    : 44px !important;
+      max-height    : 44px !important;
+      overflow      : hidden !important;
+      transition    : border-color 0.2s ease, box-shadow 0.2s ease !important;
+
+      &:hover { border-color: rgba(102, 126, 234, 0.4) !important; }
+      &::before, &::after { display: none !important; }
+    }
+
+    &.mat-focused .mat-mdc-text-field-wrapper {
+      border-color: $color-primary !important;
+      box-shadow  : 0 0 0 3px rgba(102, 126, 234, 0.13),
+      0 2px 12px rgba(102, 126, 234, 0.10) !important;
+    }
+
+    .mat-mdc-form-field-flex {
+      height     : 44px !important;
+      display    : flex !important;
+      align-items: center !important;
+      padding    : 0 14px !important;
+      box-sizing : border-box !important;
+    }
+
+    .mat-mdc-form-field-infix {
+      padding    : 0 !important;
+      min-height : unset !important;
+      height     : 44px !important;
+      border-top : none !important;
+      display    : flex !important;
+      align-items: center !important;
+      box-sizing : border-box !important;
+    }
+
+    // Label fixe au centre, masqué dès qu'une valeur est sélectionnée
+    .mat-mdc-floating-label {
+      font-size  : 13px !important;
+      font-weight: 500 !important;
+      color      : $color-text-muted !important;
+      top        : 50% !important;
+      transform  : translateY(-50%) !important;
+      position   : absolute !important;
+    }
+
+    &.mat-focused .mat-mdc-floating-label,
+    &.ng-dirty    .mat-mdc-floating-label,
+    .mat-mdc-floating-label.mdc-floating-label--float-above { display: none !important; }
+
+    .mat-mdc-select           { font-size: 13px !important; font-weight: 600 !important; color: $color-text !important; }
+    .mat-mdc-select-trigger   { height: 44px !important; display: flex !important; align-items: center !important; }
+    .mat-mdc-select-value     { font-size: 13px !important; font-weight: 600 !important; color: $color-text !important; }
+    .mat-mdc-select-placeholder { color: $color-text-muted !important; opacity: 0.8 !important; }
+    .mat-mdc-select-arrow-wrapper { height: 44px !important; display: flex !important; align-items: center !important; }
+    .mat-mdc-select-arrow     { color: $color-secondary !important; }
+
+    .mat-mdc-form-field-subscript-wrapper { display: none !important; }
+  }
+
+  // Important: certains thèmes MDC ajoutent un margin-top implicite.
+  // On force l'alignement sur la même baseline que la search.
+  margin: 0 !important;
+}
+
+// ── Prix (template custom) ────────────────────────────────────────────────
+.my-products__price {
+  display    : flex;
+  align-items: baseline;
+  gap        : 8px;
+  flex-wrap  : wrap;
+  padding    : 0 !important;
+  margin     : 0 !important;
+}
+
+
+.my-products__price-final {
+  font-size  : 16px;
+  font-weight: 800;
+  color      : #1a1a2e;   // prix final en noir/foncé comme la maquette
+}
+
+
+.my-products__price-base {
+  font-size      : 13px;
+  font-weight    : 400;
+  color          : #9ca3af;
+  text-decoration: line-through;
+}
+
+.my-products__promo-row {
+  padding: 2px 20px 10px;   // aligne avec le padding de la card header
+}
+
+.my-products__promo-badge {
+  display      : inline-block;
+  padding      : 3px 10px;
+  background   : #fff3e0;          // orange clair comme la maquette
+  color        : #e65100;          // orange foncé
+  font-size    : 11px;
+  font-weight  : 700;
+  border-radius: 4px;
+  letter-spacing: 0.3px;
+}

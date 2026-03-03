@@ -1,0 +1,21 @@
+<app-shell>
+  <app-page headTitle="Produits">
+    <app-resource-cards
+      [endpoint]="endpoint"
+      itemsKey="items"
+      titleField="name"
+      descriptionField="description"
+      imageField="images"
+      [enableServerSort]="true"
+      [isInfonable]="true"
+      [isEditable]="true"
+      [isDeletable]="true"
+      [isAddable]="true"
+      (info)="onInfo($event)"
+      (edit)="onEdit($event)"
+      (delete)="onDelete($event)"
+      (add)="onAdd()"
+      [filterControls]="productFilters"
+    ></app-resource-cards>
+  </app-page>
+</app-shell>

@@ -1,0 +1,62 @@
+<app-shell>
+  <app-page headTitle="Mes produits">
+
+    <div class="my-products__filters">
+      <mat-form-field appearance="outline" class="my-products__store">
+        <mat-label>Boutique</mat-label>
+        <mat-select [(ngModel)]="selectedStoreId">
+          <mat-option [value]="null">Tous</mat-option>
+          <mat-option *ngFor="let s of stores" [value]="s.id">{{ s.name }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <!-- Template prix custom (promo + fallback) -->
+    <ng-template
+      #myPriceTpl
+      let-basePrice="basePrice"
+      let-finalPrice="finalPrice"
+      let-hasPromo="hasPromo"
+      let-promoPercent="promoPercent"
+      let-format="format"
+    >
+      <mat-card-subtitle class="store-product-cards__price my-products__price">
+        <ng-container *ngIf="!hasPromo; else promoTpl">
+          <span class="my-products__price-final">{{ format(basePrice) }}</span>
+        </ng-container>
+
+        <ng-template #promoTpl>
+          <span class="my-products__price-final">{{ format(finalPrice) }}</span>
+          <span class="my-products__price-base">{{ format(basePrice) }}</span>
+        </ng-template>
+      </mat-card-subtitle>
+
+      <!-- Badge promo juste sous le prix -->
+      <div class="my-products__promo-row" *ngIf="hasPromo && promoPercent">
+        <span class="my-products__promo-badge">-{{ promoPercent }}%</span>
+      </div>
+    </ng-template>
+
+    <app-store-product-cards
+      [endpoint]="endpoint"
+      [listEndpoint]="listEndpoint"
+      itemsKey="products"
+      titleField="name"
+      imageField="images"
+      [filters]="listFilters"
+      [filterControls]="productFilters"
+      [isInfonable]="true"
+      [isEditable]="true"
+      [isDeletable]="true"
+      [isAddable]="true"
+      [priceTemplate]="myPriceTpl"
+      [priceResolver]="priceResolver"
+      (info)="onInfo($event)"
+      (edit)="onEdit($event)"
+      (delete)="onDelete($event)"
+      (add)="onAdd()"
+    ></app-store-product-cards>
+
+  </app-page>
+</app-shell>
+
