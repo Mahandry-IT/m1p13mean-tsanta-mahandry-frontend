@@ -197,6 +197,7 @@ export class MyProductsPageComponent implements OnInit {
       updatedAt: new Date().toISOString(),
     });
 
+    entry.currentPrice = price;
     entry.priceHistory = hist;
     if (idx >= 0) storeData[idx] = entry;
     else storeData.push(entry);
