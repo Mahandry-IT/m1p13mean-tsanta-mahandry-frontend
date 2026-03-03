@@ -69,6 +69,7 @@ export class LoginComponent {
 
           // homePage est renvoyé par le backend dans la réponse (pas dans le token)
           this.auth.setHomePage(raw.data?.homePage as string | undefined);
+          console.log('HomePage retournée par le backend:', raw.data?.homePage);
 
           // user est renvoyé par le backend dans la réponse
           this.auth.setUser(raw.data?.user);
