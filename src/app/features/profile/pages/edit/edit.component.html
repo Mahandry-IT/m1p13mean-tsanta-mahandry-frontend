@@ -1,0 +1,109 @@
+<app-page headTitle="Modifier le profil">
+  <section class="profile-edit">
+    <div class="profile-edit__card">
+
+      <header class="profile-edit__header">
+        <ng-template #avatarPlaceholder>
+          <div class="profile-edit__avatar profile-edit__avatar--placeholder">
+            <mat-icon>person</mat-icon>
+          </div>
+        </ng-template>
+        <div class="profile-edit__avatar" *ngIf="avatarUrl; else avatarPlaceholder">
+          <img [src]="avatarUrl" alt="Avatar" />
+        </div>
+
+        <h1 class="profile-edit__title">Modifier votre profil</h1>
+        <p class="profile-edit__subtitle">
+          Mettez à jour vos informations puis validez. Seuls les champs modifiés seront envoyés.
+        </p>
+      </header>
+
+      <form class="profile-edit__form" [formGroup]="form" (ngSubmit)="onSubmit()">
+
+
+        <app-input
+          mode="file"
+          [control]="avatarNameControl"
+          name="avatar"
+          label="Avatar"
+          placeholder="Choisir une image…"
+          accept="image/*"
+          (fileChange)="onAvatarSelected($event)"
+        />
+
+        <app-input
+          [control]="form.controls.username"
+          name="username"
+          label="Nom d'utilisateur"
+          placeholder="Votre pseudo"
+        />
+
+        <app-input
+          [control]="form.controls.firstName"
+          name="firstName"
+          label="Prénom"
+          placeholder="Votre prénom"
+        />
+
+        <app-input
+          [control]="form.controls.lastName"
+          name="lastName"
+          label="Nom"
+          placeholder="Votre nom"
+        />
+
+        <app-input
+          mode="tel"
+          [control]="form.controls.phone"
+          name="phone"
+          label="Téléphone"
+          placeholder="Entrez votre numéro"
+          [preferredCountries]="['mg','fr']"
+          [separateDialCode]="true"
+        />
+
+        <app-input
+          mode="select"
+          [control]="form.controls.gender"
+          name="gender"
+          label="Genre"
+          [options]="[
+            { value: 'Homme', label: 'Masculin' },
+            { value: 'Femme', label: 'Féminin' },
+            { value: 'Non défini', label: 'Autre' }
+          ]"
+        />
+
+        <app-input
+          type="date"
+          [control]="form.controls.birthday"
+          name="birthday"
+          label="Date de naissance"
+        />
+
+        <div class="profile-edit__actions">
+          <app-button
+            type="button"
+            text="Annuler"
+            variant="stroked"
+            color="primary"
+            [isenabled]="!loading"
+            (click)="onCancel()"
+          />
+
+          <app-button
+            type="submit"
+            text="Enregistrer"
+            variant="raised"
+            color="accent"
+            [isenabled]="!loading"
+            [loading]="loading"
+            [fullWidth]="false"
+          />
+        </div>
+
+      </form>
+    </div>
+  </section>
+</app-page>
+

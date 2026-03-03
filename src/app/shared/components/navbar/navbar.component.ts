@@ -54,7 +54,7 @@ export class NavbarComponent {
   }
 
   onEditProfile(): void {
-    // no-op (sera câblé plus tard)
+    this.router.navigateByUrl('/profile/edit');
   }
 
   async onLogout(): Promise<void> {
