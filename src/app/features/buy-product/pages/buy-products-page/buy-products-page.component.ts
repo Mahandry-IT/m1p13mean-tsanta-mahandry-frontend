@@ -88,10 +88,58 @@ export class BuyProductsPageComponent implements OnInit {
         if (this.selectedStoreId && !this.stores.some((s) => s.id === this.selectedStoreId)) {
           this.selectedStoreId = null;
         }
+
+        // Si des items sont déjà chargés, recalculer l'état favori en fonction du store sélectionné
+        this.markFavoritesOnCurrentItems();
       },
       error: (err: any) => this.toast.error(err?.message ?? 'Erreur lors du chargement des boutiques'),
     });
   }
+
+  private markFavoritesOnCurrentItems(): void {
+    const comp = this.storeProductCards;
+    if (!comp) return;
+
+    const items: any[] = Array.isArray((comp as any).items) ? (comp as any).items : [];
+    if (!items.length) return;
+
+    for (const row of items) {
+      const pid = String(row?._id ?? row?.id ?? '').trim();
+      if (!pid) continue;
+
+      const sid = String(this.selectedStoreId ?? row?.storeId ?? '').trim();
+      if (!sid) continue;
+
+      const isFav = this.favoriteIdByKey.has(this.favKey(pid, sid));
+      try {
+        (row as any).isFavorite = isFav;
+      } catch {
+        // ignore
+      }
+    }
+
+    // forcer un refresh UI (OnPush dans le composant enfants)
+    try {
+      (comp as any).cdr?.markForCheck?.();
+    } catch {
+      // ignore
+    }
+  }
+
+  /**
+   * Hook appelé par StoreProductCards à chaque chargement de page (refresh, pagination, filtre, etc.).
+   * On y projette `isFavorite` sur les rows en fonction du cache `/favorites/me`.
+   */
+  itemsMapper = (items: any[]): any[] => {
+    const list = Array.isArray(items) ? items : [];
+    return list.map((row) => {
+      const pid = String(row?._id ?? row?.id ?? '').trim();
+      const sid = String(this.selectedStoreId ?? row?.storeId ?? '').trim();
+      const isFav = !!pid && !!sid && this.favoriteIdByKey.has(this.favKey(pid, sid));
+      // On évite de muter l'objet original (OnPush)
+      return { ...row, isFavorite: isFav };
+    });
+  };
 
   private loadMyFavorites(): void {
     this.api.get<any>('/favorites/me').subscribe({
@@ -106,9 +154,12 @@ export class BuyProductsPageComponent implements OnInit {
           const fid = String(f?.favoriteId ?? f?._id ?? f?.id ?? '').trim();
           if (pid && sid && fid) this.favoriteIdByKey.set(this.favKey(pid, sid), fid);
         }
+
+        // Recharger la liste pour que itemsMapper recalcule isFavorite (cas: favoris chargés après produits)
+        this.storeProductCards?.load();
       },
       error: () => {
-        // silencieux: l'écran reste utilisable même si les favoris ne chargent pas
+        // silencieux
       },
     });
   }
@@ -234,6 +285,7 @@ export class BuyProductsPageComponent implements OnInit {
           const fid = String(res?.data?.favorite?.favoriteId ?? res?.data?.favorite?._id ?? res?.data?.favorite?.id ?? '').trim();
           if (fid) this.favoriteIdByKey.set(this.favKey(productId, storeId), fid);
           this.toast.success('Ajouté aux favoris');
+          this.markFavoritesOnCurrentItems();
         },
         error: (err) => {
           this.toast.error(err?.message ?? 'Erreur lors de l\'ajout du favori');
@@ -257,6 +309,7 @@ export class BuyProductsPageComponent implements OnInit {
       next: () => {
         this.favoriteIdByKey.delete(this.favKey(productId, storeId));
         this.toast.success('Retiré des favoris');
+        this.markFavoritesOnCurrentItems();
       },
       error: (err) => {
         this.toast.error(err?.message ?? 'Erreur lors de la suppression du favori');
