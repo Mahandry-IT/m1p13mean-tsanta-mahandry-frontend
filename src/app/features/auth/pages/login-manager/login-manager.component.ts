@@ -26,11 +26,11 @@ export class LoginManagerComponent {
 
   // Valeurs par défaut (à adapter à tes comptes de test)
   readonly form = new FormGroup({
-    email: new FormControl<string>('owner.centre@example.com', {
+    email: new FormControl<string>('mamy.rakotoarivelo@gmail.com', {
       nonNullable: true,
       validators: [Validators.required, Validators.email],
     }),
-    password: new FormControl<string>('ChangeMe123!', {
+    password: new FormControl<string>('Wn89g9sEVWRI', {
       nonNullable: true,
       validators: [Validators.required, Validators.minLength(6)],
     }),

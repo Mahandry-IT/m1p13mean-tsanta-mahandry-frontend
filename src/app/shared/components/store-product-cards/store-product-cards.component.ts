@@ -536,7 +536,7 @@ export class StoreProductCardsComponent<TItem extends Record<string, any>> imple
     try {
       return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(price);
     } catch {
-      return `${price} €`;
+      return `${price} Ar`;
     }
   }
 
