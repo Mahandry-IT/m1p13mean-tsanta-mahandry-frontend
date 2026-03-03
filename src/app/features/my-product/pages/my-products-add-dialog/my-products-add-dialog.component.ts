@@ -54,7 +54,7 @@ export class MyProductsAddDialogComponent implements OnInit {
     }
 
     this.loadingProducts = true;
-    this.api.get<any>('/products/my-stores', { storeId: this.data.storeId }).subscribe({
+    this.api.get<any>('/products/').subscribe({
       next: (res) => {
         const data = res?.data ?? res;
         // support: {items}, {products}, array
