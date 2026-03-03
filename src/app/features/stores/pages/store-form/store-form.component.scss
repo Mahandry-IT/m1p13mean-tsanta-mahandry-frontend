@@ -1,82 +1,114 @@
 // ── Design tokens ──────────────────────────────────────────────────────────
-$gradient-primary : linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-$color-primary    : #667eea;
-$color-secondary  : #764ba2;
-$color-error      : #e03131;
-$color-text       : #1a1a2e;
-$color-text-muted : #6b7280;
-$color-border     : rgba(102, 126, 234, 0.14);
-$color-surface    : #ffffff;
-$color-surface-alt: #f8f7ff;
-$font-body        : 'Segoe UI', system-ui, sans-serif;
-$shadow-card      : 0 4px 24px rgba(102, 126, 234, 0.10), 0 1px 4px rgba(0,0,0,0.05);
+$gradient-primary  : linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+$gradient-surface  : linear-gradient(160deg, #f0eeff 0%, #f8f7ff 60%, #ffffff 100%);
+$color-primary     : #667eea;
+$color-secondary   : #764ba2;
+$color-error       : #e03131;
+$color-text        : #1a1a2e;
+$color-text-muted  : #6b7280;
+$color-border      : rgba(102, 126, 234, 0.18);
+$color-surface     : #ffffff;
+$color-surface-alt : #f8f7ff;
+$font-body         : 'Segoe UI', system-ui, sans-serif;
+$shadow-btn        : 0 4px 16px rgba(102, 126, 234, 0.35);
 
-// ── Animations ─────────────────────────────────────────────────────────────
 @keyframes dialog-in {
-  from { opacity: 0; transform: translateY(14px) scale(0.97); }
+  from { opacity: 0; transform: translateY(20px) scale(0.96); }
   to   { opacity: 1; transform: translateY(0) scale(1); }
 }
-
 @keyframes icon-pop {
-  0%   { transform: scale(0.5); opacity: 0; }
-  70%  { transform: scale(1.12); }
-  100% { transform: scale(1); opacity: 1; }
+  0%   { transform: scale(0.4) rotate(-10deg); opacity: 0; }
+  60%  { transform: scale(1.15) rotate(2deg); }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+@keyframes field-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes field-in {
-  from { opacity: 0; transform: translateY(6px); }
-  to   { opacity: 1; transform: translateY(0); }
+// ── FIX debordement: le host occupe exactement le conteneur Material ────────
+:host {
+  display  : block;
+  width    : 100%;
+  max-width: 100%;
+  overflow : hidden;
 }
 
 // ── Conteneur ──────────────────────────────────────────────────────────────
 .store-form-dialog {
-  font-family: $font-body;
-  min-width  : 440px;
-  max-width  : 520px;
-  animation  : dialog-in 0.28s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  font-family : $font-body;
+  width       : 100%;
+  max-width   : 100%;
+  box-sizing  : border-box;
+  overflow    : hidden;
+  animation   : dialog-in 0.32s cubic-bezier(0.34, 1.4, 0.64, 1) both;
+
+  * { box-sizing: border-box; }
 }
 
 // ── En-tête ────────────────────────────────────────────────────────────────
 .store-form-dialog__header {
-  display        : flex;
-  flex-direction : column;
-  align-items    : center;
-  padding        : 36px 32px 20px;
-  text-align     : center;
-  background     : $color-surface-alt;
-  border-bottom  : 1.5px solid $color-border;
-  position       : relative;
+  display       : flex;
+  flex-direction: column;
+  align-items   : center;
+  padding       : 40px 32px 28px;
+  text-align    : center;
+  background    : $gradient-surface;
+  border-bottom : 1.5px solid $color-border;
+  position      : relative;
+  overflow      : hidden;
 
-  // Bande gradient en haut
   &::before {
-    content      : '';
-    position     : absolute;
-    top          : 0; left: 0; right: 0;
-    height       : 3px;
-    background   : $gradient-primary;
-    border-radius: 0;
+    content   : '';
+    position  : absolute;
+    top: 0; left: 0; right: 0;
+    height    : 4px;
+    background: $gradient-primary;
+  }
+  &::after {
+    content       : '';
+    position      : absolute;
+    top: -80px; right: -80px;
+    width: 220px; height: 220px;
+    border-radius : 50%;
+    background    : radial-gradient(circle, rgba(102,126,234,0.08) 0%, transparent 70%);
+    pointer-events: none;
   }
 }
 
 .store-form-dialog__icon-wrap {
-  animation: icon-pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s both;
-  margin-bottom: 12px;
+  position     : relative;
+  z-index      : 1;
+  animation    : icon-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s both;
+  margin-bottom: 16px;
+
+  &::before {
+    content       : '';
+    position      : absolute;
+    bottom: -50px; left: -90px;
+    width: 180px; height: 180px;
+    border-radius : 50%;
+    background    : radial-gradient(circle, rgba(118,75,162,0.07) 0%, transparent 70%);
+    pointer-events: none;
+  }
 }
 
 .store-form-dialog__icon {
-  width          : 60px;
-  height         : 60px;
+  width          : 68px;
+  height         : 68px;
   border-radius  : 50%;
-  background     : linear-gradient(135deg, rgba(102,126,234,0.12), rgba(118,75,162,0.12));
-  border         : 2px solid rgba(102, 126, 234, 0.2);
+  background     : linear-gradient(135deg, rgba(102,126,234,0.14), rgba(118,75,162,0.10));
+  border         : 2px solid rgba(102, 126, 234, 0.22);
   display        : flex;
   align-items    : center;
   justify-content: center;
+  box-shadow     : 0 4px 20px rgba(102, 126, 234, 0.15),
+  inset 0 1px 0 rgba(255,255,255,0.8);
 
   mat-icon {
-    font-size: 26px !important;
-    width    : 26px !important;
-    height   : 26px !important;
+    font-size : 28px !important;
+    width     : 28px !important;
+    height    : 28px !important;
     background: $gradient-primary;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -85,124 +117,246 @@ $shadow-card      : 0 4px 24px rgba(102, 126, 234, 0.10), 0 1px 4px rgba(0,0,0,0
 }
 
 .store-form-dialog__title {
-  font-size  : 18px;
-  font-weight: 700;
-  color      : $color-text;
-  margin     : 0 0 4px;
-  line-height: 1.3;
+  font-size     : 20px;
+  font-weight   : 800;
+  color         : $color-text;
+  margin        : 0 0 6px;
+  letter-spacing: -0.3px;
+  position      : relative;
+  z-index       : 1;
 }
 
 .store-form-dialog__subtitle {
   font-size  : 13px;
   color      : $color-text-muted;
   margin     : 0;
-  line-height: 1.5;
+  line-height: 1.6;
+  max-width  : 320px;
+  position   : relative;
+  z-index    : 1;
 }
 
-// ── Corps formulaire ───────────────────────────────────────────────────────
+// ── Corps ──────────────────────────────────────────────────────────────────
 .store-form-dialog__body {
-  padding: 24px 32px 8px;
+  padding   : 28px 32px 12px;
+  background: $color-surface;
 }
 
 .store-form-dialog__grid {
   display              : grid;
-  grid-template-columns: 1fr 1fr;
-  gap                  : 16px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap                  : 20px;
+  padding-top          : 10px; // ← espace pour les labels flottants Material
 
-  // Chaque champ s'anime en cascade
-  .sf-field:nth-child(1) { animation: field-in 0.25s ease 0.10s both; }
-  .sf-field:nth-child(2) { animation: field-in 0.25s ease 0.15s both; }
-  .sf-field:nth-child(3) { animation: field-in 0.25s ease 0.20s both; }
-  .sf-field:nth-child(4) { animation: field-in 0.25s ease 0.25s both; }
+  .sf-field:nth-child(1) { animation: field-in 0.28s ease 0.12s both; }
+  .sf-field:nth-child(2) { animation: field-in 0.28s ease 0.18s both; }
+  .sf-field:nth-child(3) { animation: field-in 0.28s ease 0.24s both; }
+  .sf-field:nth-child(4) { animation: field-in 0.28s ease 0.30s both; }
+  .sf-field:nth-child(5) { animation: field-in 0.28s ease 0.36s both; }
 }
 
-// ── Champ ──────────────────────────────────────────────────────────────────
 .sf-field {
   display       : flex;
   flex-direction: column;
-  gap           : 6px;
+  gap           : 5px;
+  min-width     : 0;
+  overflow      : visible; // ← était "hidden", ce qui coupait les labels flottants
 }
 
-.sf-field__label {
-  display    : flex;
-  align-items: center;
-  gap        : 5px;
-  font-size  : 11px;
-  font-weight: 700;
-  letter-spacing: 0.6px;
-  text-transform: uppercase;
-  color      : $color-text-muted;
+// ── Override app-input Material outline ───────────────────────────────────
+.sf-field ::ng-deep {
+  mat-form-field { width: 100%; max-width: 100%; }
 
-  mat-icon {
-    font-size: 14px !important;
-    width    : 14px !important;
-    height   : 14px !important;
-    color    : $color-primary;
-    opacity  : 0.7;
-  }
-}
+  .mdc-notched-outline__leading  { border-radius: 14px 0 0 14px !important; border-color: $color-border !important; border-width: 1.5px !important; }
+  .mdc-notched-outline__trailing { border-radius: 0 14px 14px 0 !important; border-color: $color-border !important; border-width: 1.5px !important; }
+  .mdc-notched-outline__notch    { border-color: $color-border !important; border-width: 1.5px !important; }
 
-.sf-field__input-wrap {
-  background   : $color-surface;
-  border       : 1.5px solid $color-border;
-  border-radius: 12px;
-  padding      : 0 14px;
-  height       : 44px;
-  display      : flex;
-  align-items  : center;
-  transition   : border-color 0.2s ease, box-shadow 0.2s ease;
-  box-shadow   : 0 1px 4px rgba(102, 126, 234, 0.06);
+  .mdc-text-field__ripple,
+  .mdc-line-ripple,
+  .mat-mdc-form-field-focus-overlay { display: none !important; }
 
-  &:focus-within {
-    border-color: $color-primary;
-    box-shadow  : 0 0 0 3px rgba(102, 126, 234, 0.12),
-    0 1px 4px rgba(102, 126, 234, 0.08);
+  .mat-mdc-text-field-wrapper:hover .mdc-notched-outline__leading,
+  .mat-mdc-text-field-wrapper:hover .mdc-notched-outline__trailing,
+  .mat-mdc-text-field-wrapper:hover .mdc-notched-outline__notch { border-color: rgba(102,126,234,0.38) !important; }
+
+  .mat-mdc-form-field.mat-focused .mdc-notched-outline__leading,
+  .mat-mdc-form-field.mat-focused .mdc-notched-outline__trailing,
+  .mat-mdc-form-field.mat-focused .mdc-notched-outline__notch { border-color: $color-primary !important; border-width: 2px !important; }
+
+  .mat-mdc-floating-label { font-size: 13px !important; font-weight: 500 !important; color: $color-text-muted !important; }
+
+  input.mat-mdc-input-element,
+  textarea.mat-mdc-input-element {
+    font-size: 14px !important; font-weight: 500 !important;
+    color: $color-text !important; caret-color: $color-primary !important;
+    &::placeholder { color: rgba(107,114,128,0.45) !important; font-weight: 400 !important; }
+    &:disabled     { color: $color-text-muted !important; }
   }
 
-  &:hover:not(.sf-field__input-wrap--disabled) {
-    border-color: rgba(102, 126, 234, 0.35);
+  mat-error { font-size: 11px !important; font-weight: 500 !important; color: $color-error !important; }
+
+  // ── FIX phone input ────────────────────────────────────────────────────
+  .app-input__tel-wrapper {
+    display       : flex;
+    flex-direction: column;
+    width         : 100%;
+    gap           : 6px;
   }
 
-  // Mode lecture seule
-  &--disabled {
-    background: $color-surface-alt;
-    cursor    : default;
+  // Label "Téléphone" aligné comme les labels Material
+  .app-input__label {
+    font-size     : 12px;
+    font-weight   : 600;
+    color         : $color-text-muted;
+    letter-spacing: 0.2px;
+    margin-left   : 4px;
+    transition    : color 0.2s;
 
-    .sf-field__input {
-      cursor: default;
-      color : $color-text-muted;
+    .app-input__tel-wrapper:focus-within & { color: $color-primary; }
+    .app-input__tel-wrapper--error &       { color: $color-error; }
+  }
+
+  // Le pill principal
+  .app-input__tel .iti {
+    width        : 100%;
+    height       : 52px;
+    display      : block;
+    position     : relative;
+    border       : 1.5px solid $color-border;
+    border-radius: 14px;
+    background   : $color-surface-alt;
+    box-sizing   : border-box;
+    overflow     : hidden;
+    transition   : border-color 0.2s ease, box-shadow 0.2s ease;
+
+    &:hover { border-color: rgba(102,126,234,0.38); }
+
+    .app-input__tel-wrapper:focus-within & {
+      border-color: $color-primary;
+      border-width: 2px;
+      box-shadow  : 0 0 0 3px rgba(102,126,234,0.12);
+    }
+
+    .app-input__tel-wrapper--error & {
+      border-color: $color-error !important;
     }
   }
-}
 
-.sf-field__input {
-  width      : 100%;
-  border     : none;
-  outline    : none;
-  background : transparent;
-  font-family: $font-body;
-  font-size  : 14px;
-  font-weight: 500;
-  color      : $color-text;
-  caret-color: $color-primary;
-
-  &::placeholder {
-    color  : rgba(107, 114, 128, 0.5);
-    font-weight: 400;
+  // Flag container
+  .app-input__tel .iti__flag-container {
+    position  : absolute;
+    top: 0; left: 0; bottom: 0;
+    display   : flex;
+    align-items: stretch;
+    z-index   : 2;
+    overflow  : visible;
   }
 
-  &:disabled {
-    color : $color-text-muted;
-    cursor: default;
-  }
-}
+  // Zone drapeau cliquable
+  .app-input__tel .iti__selected-flag {
+    display      : flex;
+    align-items  : center;
+    gap          : 7px;
+    padding      : 0 12px 0 14px;
+    height       : 100%;
+    background   : rgba(102,126,234,0.05);
+    border       : none;
+    border-right : 1.5px solid $color-border;
+    border-radius: 12px 0 0 12px;
+    cursor       : pointer;
+    outline      : none;
+    transition   : background 0.15s ease;
+    white-space  : nowrap;
 
-.sf-field__error {
-  font-size : 11px;
-  color     : $color-error;
-  font-weight: 500;
-  padding-left: 4px;
-  animation : field-in 0.2s ease both;
+    &:hover { background: rgba(102,126,234,0.10); }
+  }
+
+  // Drapeau (sprite géré par la lib — ne pas modifier width/height)
+  .app-input__tel .iti__flag {
+    border-radius: 2px;
+    box-shadow   : 0 0 1px rgba(0,0,0,0.25);
+  }
+
+  // Indicatif +261
+  .app-input__tel .iti__selected-dial-code {
+    font-size  : 13px;
+    font-weight: 600;
+    color      : $color-text;
+    font-family: $font-body;
+  }
+
+  // Flèche
+  .app-input__tel .iti__arrow {
+    width       : 0; height: 0;
+    border-left : 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top  : 5px solid $color-text-muted;
+    flex-shrink : 0;
+    transition  : transform 0.2s ease;
+
+    &.iti__arrow--up {
+      border-top   : none;
+      border-bottom: 5px solid $color-primary;
+    }
+  }
+
+  // Input natif tel
+  .app-input__tel input[type='tel'],
+  .app-input__tel input.iti__tel-input {
+    position    : absolute;
+    top: 0; left: 0;
+    width       : 100%;
+    height      : 100%;
+    border      : none;
+    background  : transparent;
+    padding     : 0 16px 0 115px;
+    font-size   : 14px;
+    font-weight : 500;
+    color       : $color-text;
+    caret-color : $color-primary;
+    outline     : none;
+    font-family : $font-body;
+    box-sizing  : border-box;
+
+    &::placeholder { color: rgba(107,114,128,0.45); font-size: 14px; }
+  }
+
+  // Dropdown pays
+  .app-input__tel .iti__country-list {
+    left: 0 !important; right: 0 !important;
+    width: 100% !important; min-width: 0 !important; max-width: 100% !important;
+    z-index: 2000;
+    box-sizing: border-box;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(102,126,234,0.15), 0 2px 8px rgba(0,0,0,0.06);
+    border: 1px solid $color-border;
+  }
+
+  // Erreur tel
+  .app-input__error {
+    font-size  : 11px;
+    font-weight: 500;
+    color      : $color-error;
+    display    : flex;
+    align-items: center;
+    gap        : 5px;
+    margin-left: 4px;
+
+    &::before {
+      content        : '!';
+      display        : inline-flex;
+      align-items    : center;
+      justify-content: center;
+      width          : 14px;
+      height         : 14px;
+      border-radius  : 50%;
+      background     : $color-error;
+      color          : #fff;
+      font-size      : 9px;
+      font-weight    : 800;
+      flex-shrink    : 0;
+    }
+  }
 }
 
 // ── Actions ────────────────────────────────────────────────────────────────
@@ -210,83 +364,77 @@ $shadow-card      : 0 4px 24px rgba(102, 126, 234, 0.10), 0 1px 4px rgba(0,0,0,0
   display        : flex;
   justify-content: flex-end;
   gap            : 10px;
-  padding        : 16px 32px 28px;
+  padding        : 20px 32px 32px;
   border-top     : 1.5px solid $color-border;
-  margin-top     : 16px;
+  background     : $color-surface;
+  margin-top     : 4px;
 }
 
 // ── Boutons ────────────────────────────────────────────────────────────────
 .sf-btn {
-  display        : inline-flex;
-  align-items    : center;
-  justify-content: center;
-  gap            : 6px;
-  height         : 44px;
-  padding        : 0 24px;
-  border-radius  : 50px;
-  font-family    : $font-body;
-  font-size      : 14px;
-  font-weight    : 600;
-  cursor         : pointer;
-  border         : none;
-  transition     : all 0.2s ease;
-  outline        : none;
+  display      : inline-flex;
+  align-items  : center;
+  gap          : 7px;
+  height       : 46px;
+  padding      : 0 28px;
+  border-radius: 50px;
+  font-family  : $font-body;
+  font-size    : 14px;
+  font-weight  : 600;
+  cursor       : pointer;
+  border       : none;
+  transition   : all 0.22s cubic-bezier(0.34, 1.3, 0.64, 1);
+  outline      : none;
 
-  mat-icon {
-    font-size: 17px !important;
-    width    : 17px !important;
-    height   : 17px !important;
-  }
+  mat-icon { font-size: 17px !important; width: 17px !important; height: 17px !important; transition: transform 0.2s ease; }
 
   &--cancel {
     background  : $color-surface;
     color       : $color-text-muted;
     border      : 1.5px solid $color-border;
-    box-shadow  : $shadow-card;
+    box-shadow  : 0 1px 4px rgba(102,126,234,0.06);
 
     &:hover {
       background  : $color-surface-alt;
-      border-color: rgba(102, 126, 234, 0.35);
+      border-color: rgba(102,126,234,0.3);
       color       : $color-text;
-      transform   : translateY(-1px);
+      transform   : translateY(-2px);
+      box-shadow  : 0 4px 14px rgba(102,126,234,0.10);
     }
-
     &:active { transform: translateY(0); }
   }
 
   &--submit {
     background: $gradient-primary;
     color     : #ffffff;
-    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.35);
+    box-shadow: $shadow-btn;
+    position  : relative;
+    overflow  : hidden;
 
-    mat-icon { color: rgba(255,255,255,0.9) !important; }
-
-    &:hover {
-      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.50);
-      transform : translateY(-1px);
+    &::before {
+      content   : '';
+      position  : absolute;
+      top: 0; left: -100%; bottom: 0; width: 60%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent);
+      transition: left 0.45s ease;
     }
 
+    mat-icon { color: rgba(255,255,255,0.92) !important; }
+
+    &:hover {
+      box-shadow: 0 8px 28px rgba(102,126,234,0.52);
+      transform : translateY(-2px);
+      &::before { left: 150%; }
+      mat-icon  { transform: scale(1.1); }
+    }
     &:active { transform: translateY(0); }
   }
 }
 
 // ── Responsive ─────────────────────────────────────────────────────────────
-@media (max-width: 480px) {
-  .store-form-dialog {
-    min-width: unset;
-  }
-
-  .store-form-dialog__grid {
-    grid-template-columns: 1fr;
-  }
-
+@media (max-width: 500px) {
+  .store-form-dialog__grid { grid-template-columns: 1fr; }
   .store-form-dialog__header,
-  .store-form-dialog__body {
-    padding-left : 20px;
-    padding-right: 20px;
-  }
-
-  .store-form-dialog__actions {
-    padding: 16px 20px 24px;
-  }
+  .store-form-dialog__body,
+  .store-form-dialog__actions { padding-left: 20px; padding-right: 20px; }
 }
