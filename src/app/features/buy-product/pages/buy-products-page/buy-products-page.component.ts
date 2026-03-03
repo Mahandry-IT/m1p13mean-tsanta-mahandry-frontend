@@ -96,6 +96,27 @@ export class BuyProductsPageComponent implements OnInit {
     });
   }
 
+  /**
+   * Met à jour l'UI des coeurs sans refetch la liste.
+   * IMPORTANT: gère aussi le mode "Tous" (selectedStoreId=null) en passant par itemsMapper logique.
+   */
+  private refreshFavoritesUi(): void {
+    const comp = this.storeProductCards;
+    if (!comp) return;
+    const items: any[] = Array.isArray((comp as any).items) ? (comp as any).items : [];
+    if (!items.length) return;
+
+    // on applique le mapping directement
+    const mapped = this.itemsMapper(items);
+    try {
+      (comp as any).items = mapped;
+      (comp as any).cdr?.markForCheck?.();
+    } catch {
+      // fallback: mutation simple
+      this.markFavoritesOnCurrentItems();
+    }
+  }
+
   private markFavoritesOnCurrentItems(): void {
     const comp = this.storeProductCards;
     if (!comp) return;
@@ -107,18 +128,18 @@ export class BuyProductsPageComponent implements OnInit {
       const pid = String(row?._id ?? row?.id ?? '').trim();
       if (!pid) continue;
 
-      const sid = String(this.selectedStoreId ?? row?.storeId ?? '').trim();
-      if (!sid) continue;
-
-      const isFav = this.favoriteIdByKey.has(this.favKey(pid, sid));
-      try {
-        (row as any).isFavorite = isFav;
-      } catch {
-        // ignore
+      // si store sélectionné => check couple
+      if (this.selectedStoreId) {
+        const isFav = this.favoriteIdByKey.has(this.favKey(pid, this.selectedStoreId));
+        try { (row as any).isFavorite = isFav; } catch {}
+        continue;
       }
+
+      // mode Tous => favori si au moins un store
+      const isFavAny = this.isFavoriteProduct(pid);
+      try { (row as any).isFavorite = isFavAny; } catch {}
     }
 
-    // forcer un refresh UI (OnPush dans le composant enfants)
     try {
       (comp as any).cdr?.markForCheck?.();
     } catch {
@@ -130,14 +151,38 @@ export class BuyProductsPageComponent implements OnInit {
    * Hook appelé par StoreProductCards à chaque chargement de page (refresh, pagination, filtre, etc.).
    * On y projette `isFavorite` sur les rows en fonction du cache `/favorites/me`.
    */
+  private storeIdOfRow(row: any): string | null {
+    const direct = String(row?.storeId ?? '').trim();
+    if (direct) return direct;
+
+    const sd = Array.isArray(row?.storeData) ? row.storeData : [];
+    const first = sd.find((x: any) => String(x?.storeId ?? '').trim());
+    const fromSd = String(first?.storeId ?? '').trim();
+    return fromSd || null;
+  }
+
+  private isFavoriteProduct(pid: string): boolean {
+    // true si le produit est en favori dans au moins une boutique
+    for (const k of this.favoriteIdByKey.keys()) {
+      if (k.startsWith(`${pid}:`)) return true;
+    }
+    return false;
+  }
+
   itemsMapper = (items: any[]): any[] => {
     const list = Array.isArray(items) ? items : [];
     return list.map((row) => {
       const pid = String(row?._id ?? row?.id ?? '').trim();
-      const sid = String(this.selectedStoreId ?? row?.storeId ?? '').trim();
-      const isFav = !!pid && !!sid && this.favoriteIdByKey.has(this.favKey(pid, sid));
-      // On évite de muter l'objet original (OnPush)
-      return { ...row, isFavorite: isFav };
+
+      // Si une boutique est sélectionnée, on check (productId, selectedStoreId)
+      if (this.selectedStoreId) {
+        const isFav = !!pid && this.favoriteIdByKey.has(this.favKey(pid, this.selectedStoreId));
+        return { ...row, isFavorite: isFav };
+      }
+
+      // Mode "Tous": on met le coeur actif si le produit est favori dans AU MOINS une boutique
+      const isFavAny = !!pid && this.isFavoriteProduct(pid);
+      return { ...row, isFavorite: isFavAny };
     });
   };
 
@@ -269,10 +314,12 @@ export class BuyProductsPageComponent implements OnInit {
 
   onFavoriteChange(ev: { row: any; isFavorite: boolean }): void {
     const productId = String(ev?.row?._id ?? ev?.row?.id ?? '').trim();
-    const storeId = String(this.selectedStoreId ?? ev?.row?.storeId ?? '').trim();
+
+    // storeId requis par l'API
+    const storeId = String(this.selectedStoreId ?? this.storeIdOfRow(ev?.row) ?? '').trim();
 
     if (!productId || !storeId) {
-      this.toast.error('Choix du magasin et du produit requis pour gérer les favoris.');
+      this.toast.error('Sélectionnez une boutique (storeId) pour gérer les favoris.');
       // rollback UI (le composant a déjà togglé)
       try { (ev.row as any).isFavorite = !ev.isFavorite; } catch {}
       return;
@@ -280,17 +327,27 @@ export class BuyProductsPageComponent implements OnInit {
 
     // AJOUT
     if (ev.isFavorite) {
+      // Optimiste: on marque le couple comme favori tout de suite (favoriteId à combler après)
+      this.favoriteIdByKey.set(this.favKey(productId, storeId), this.favoriteIdByKey.get(this.favKey(productId, storeId)) ?? '__pending__');
+      this.refreshFavoritesUi();
+
       this.api.post<any>('/favorites/me', { productId, storeId }).subscribe({
         next: (res: any) => {
           const fid = String(res?.data?.favorite?.favoriteId ?? res?.data?.favorite?._id ?? res?.data?.favorite?.id ?? '').trim();
-          if (fid) this.favoriteIdByKey.set(this.favKey(productId, storeId), fid);
+          // si l'API ne renvoie pas l'id, on re-sync depuis /favorites/me
+          if (fid) {
+            this.favoriteIdByKey.set(this.favKey(productId, storeId), fid);
+            this.refreshFavoritesUi();
+          } else {
+            this.loadMyFavorites();
+          }
           this.toast.success('Ajouté aux favoris');
-          this.markFavoritesOnCurrentItems();
         },
         error: (err) => {
           this.toast.error(err?.message ?? 'Erreur lors de l\'ajout du favori');
-          // rollback
-          try { (ev.row as any).isFavorite = false; } catch {}
+          // rollback + resync
+          this.favoriteIdByKey.delete(this.favKey(productId, storeId));
+          this.refreshFavoritesUi();
         },
       });
       return;
@@ -298,23 +355,29 @@ export class BuyProductsPageComponent implements OnInit {
 
     // SUPPRESSION
     const favoriteId = this.favoriteIdByKey.get(this.favKey(productId, storeId)) ?? '';
-    if (!favoriteId) {
-      this.toast.error('Impossible de supprimer: favoriteId introuvable.');
+    if (!favoriteId || favoriteId === '__pending__') {
+      // si pending ou manquant, resync
+      this.loadMyFavorites();
+      this.toast.error('Impossible de supprimer: favori non synchronisé.');
       // rollback
       try { (ev.row as any).isFavorite = true; } catch {}
       return;
     }
 
+    // Optimiste: enlever tout de suite
+    this.favoriteIdByKey.delete(this.favKey(productId, storeId));
+    this.refreshFavoritesUi();
+
     this.api.delete<any>(`/favorites/me/${encodeURIComponent(favoriteId)}`).subscribe({
       next: () => {
-        this.favoriteIdByKey.delete(this.favKey(productId, storeId));
         this.toast.success('Retiré des favoris');
-        this.markFavoritesOnCurrentItems();
+        this.refreshFavoritesUi();
       },
       error: (err) => {
         this.toast.error(err?.message ?? 'Erreur lors de la suppression du favori');
         // rollback
-        try { (ev.row as any).isFavorite = true; } catch {}
+        this.favoriteIdByKey.set(this.favKey(productId, storeId), favoriteId);
+        this.refreshFavoritesUi();
       },
     });
   }
