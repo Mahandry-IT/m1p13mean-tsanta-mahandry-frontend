@@ -1,3 +1,5 @@
+import { parsePhoneNumberFromString } from 'libphonenumber-js';
+
 export function formatDateTime(value: unknown, locale = 'fr-FR'): string {
   if (value === null || value === undefined || value === '') return '';
 
@@ -42,16 +44,9 @@ export function toNationalPhone(value: unknown, defaultCountry: string = 'MG'): 
   const raw = String(value).trim();
   if (!raw) return '';
 
-  // Lazy import (évite certains soucis SSR/bundle, et ne charge la lib que si utilisée)
   try {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const lib = require('libphonenumber-js') as typeof import('libphonenumber-js');
-    const phone = lib.parsePhoneNumberFromString(raw, defaultCountry as any);
-
-    // Si parsing OK, retourne la partie nationale (sans +xxx)
-    if (phone) {
-      return phone.nationalNumber;
-    }
+    const phone = parsePhoneNumberFromString(raw, defaultCountry as any);
+    if (phone) return phone.nationalNumber;
   } catch {
     // ignore et fallback
   }
