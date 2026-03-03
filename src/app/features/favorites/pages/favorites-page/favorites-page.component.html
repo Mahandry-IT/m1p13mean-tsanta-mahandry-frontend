@@ -1,0 +1,20 @@
+<app-shell>
+  <app-page headTitle="Mes favoris">
+
+    <app-store-product-cards
+      [endpoint]="endpoint"
+      [listEndpoint]="listEndpoint"
+      itemsKey="favorites"
+      titleField="name"
+      imageField="images"
+      [isInfonable]="true"
+      [isFavorisable]="true"
+      favField="isFavorite"
+      [itemsMapper]="itemsMapper"
+      [priceResolver]="priceResolver"
+      (info)="onInfo($event)"
+      (favoriteChange)="onFavoriteChange($event)"
+    ></app-store-product-cards>
+
+  </app-page>
+</app-shell>

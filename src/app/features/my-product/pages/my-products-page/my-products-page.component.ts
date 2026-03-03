@@ -171,8 +171,6 @@ export class MyProductsPageComponent implements OnInit {
   get listFilters(): Record<string, any> {
     return {
       ...(this.selectedStoreId ? { storeId: this.selectedStoreId } : {}),
-      page: 1,
-      limit: 20,
       sortBy: 'createdAt',
       sortDir: 'desc',
     };

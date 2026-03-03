@@ -6,7 +6,7 @@
       <div class="store-form-dialog__icon">
         <mat-icon>
           {{ isInfo ? 'store' : (isCreate ? 'add_business' : 'edit_outline') }}
-        </mat-icon>      
+        </mat-icon>
       </div>
     </div>
     <h2 class="store-form-dialog__title">
@@ -25,76 +25,63 @@
 
         <!-- Nom -->
         <div class="sf-field">
-          <label class="sf-field__label">
-            <mat-icon>storefront</mat-icon>
-            Nom de la boutique
-          </label>
-          <div class="sf-field__input-wrap" [class.sf-field__input-wrap--disabled]="isInfo">
-            <input class="sf-field__input" formControlName="name" placeholder="ex : Magasin Centre-Ville" />
-          </div>
-          <span class="sf-field__error"
-                *ngIf="form.get('name')?.invalid && form.get('name')?.touched">
-            Le nom est requis (max 100 caractères).
-          </span>
+          <app-input
+            [control]="$any(form.get('name'))"
+            name="name"
+            label="Nom de la boutique"
+            placeholder="ex : Magasin Centre-Ville"
+            [required]="true"
+            [maxLength]="100"
+          ></app-input>
         </div>
 
         <!-- Adresse -->
         <div class="sf-field">
-          <label class="sf-field__label">
-            <mat-icon>place</mat-icon>
-            Adresse
-          </label>
-          <div class="sf-field__input-wrap" [class.sf-field__input-wrap--disabled]="isInfo">
-            <input class="sf-field__input" formControlName="address" placeholder="ex : 123 Rue Principale" />
-          </div>
-          <span class="sf-field__error"
-                *ngIf="form.get('address')?.invalid && form.get('address')?.touched">
-            L'adresse est requise (max 255 caractères).
-          </span>
+          <app-input
+            [control]="$any(form.get('address'))"
+            name="address"
+            label="Adresse"
+            placeholder="ex : 123 Rue Principale"
+            [required]="true"
+            [maxLength]="255"
+          ></app-input>
+        </div>
+
+
+        <!-- Email -->
+        <div class="sf-field">
+          <app-input
+            type="email"
+            [control]="$any(form.get('email'))"
+            name="email"
+            label="Email"
+            placeholder="ex : contact@store.com"
+            [required]="true"
+          ></app-input>
         </div>
 
         <!-- Téléphone -->
         <div class="sf-field">
-          <label class="sf-field__label">
-            <mat-icon>phone</mat-icon>
-            Téléphone
-          </label>
-          <div class="sf-field__input-wrap" [class.sf-field__input-wrap--disabled]="isInfo">
-            <input class="sf-field__input" formControlName="phone" placeholder="ex : +33123456789" />
-          </div>
-          <span class="sf-field__error"
-                *ngIf="form.get('phone')?.invalid && form.get('phone')?.touched">
-            Le téléphone est requis.
-          </span>
-        </div>
-
-        <!-- Email -->
-        <div class="sf-field">
-          <label class="sf-field__label">
-            <mat-icon>alternate_email</mat-icon>
-            Email
-          </label>
-          <div class="sf-field__input-wrap" [class.sf-field__input-wrap--disabled]="isInfo">
-            <input class="sf-field__input" formControlName="email" type="email" placeholder="ex : contact@store.com" />
-          </div>
-          <span class="sf-field__error"
-                *ngIf="form.get('email')?.invalid && form.get('email')?.touched">
-            Un email valide est requis.
-          </span>
+          <app-input
+            mode="tel"
+            [control]="$any(form.get('phone'))"
+            name="phone"
+            label="Téléphone"
+            placeholder="ex : +261 34 12 345 67"
+            [required]="true"
+          ></app-input>
         </div>
 
         <!-- Statut (lecture seule) - Seulement si pas en création -->
         <div class="sf-field" *ngIf="!isCreate">
-          <label class="sf-field__label">
-            <mat-icon>flag</mat-icon>
-            Statut
-          </label>
-          <div class="sf-field__input-wrap sf-field__input-wrap--disabled">
-            <input class="sf-field__input" formControlName="status" />
-          </div>
+          <app-input
+            [control]="$any(form.get('status'))"
+            name="status"
+            label="Statut"
+            [disabled]="true"
+          ></app-input>
         </div>
 
-        
       </div>
     </div>
 

@@ -29,6 +29,8 @@ export function formatThousands(value: unknown, locale = 'fr-FR'): string {
 
   return new Intl.NumberFormat(locale, {
     maximumFractionDigits: 20,
+    style: 'currency',
+    currency: 'MGA'
   }).format(n);
 }
 
