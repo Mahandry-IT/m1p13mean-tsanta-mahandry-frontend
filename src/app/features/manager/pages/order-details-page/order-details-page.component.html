@@ -1,0 +1,210 @@
+<app-shell>
+  <div class="order-details-page" [class.cancelled]="isCancelled()">
+    <div class="order-container">
+
+      <!-- Back Button -->
+      <button class="back-btn" (click)="goBack()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+        Retour aux commandes
+      </button>
+
+      <!-- Loading -->
+      <div *ngIf="loading" class="loading-state">
+        <div class="spinner"></div>
+        <p>Chargement de la commande...</p>
+      </div>
+
+      <!-- Error -->
+      <div *ngIf="!loading && error" class="error-state">
+        <div class="error-icon">⚠️</div>
+        <p>{{ error }}</p>
+        <button class="btn btn-primary" (click)="loadOrder()">Réessayer</button>
+      </div>
+
+      <!-- Order Content -->
+      <div *ngIf="!loading && !error && order" class="order-content">
+
+        <!-- Status Pipeline (TOP - Interactive) -->
+        <div class="pipeline-section" [class.cancelled]="isCancelled()" [class.delivered]="isDelivered()" [class.pending]="isPending()">
+          <div class="pipeline-header">
+            <h2>
+              <span *ngIf="isCancelled()" class="cancelled-badge">❌ Commande annulée</span>
+              <span *ngIf="isDelivered()" class="delivered-badge">🎉 Commande livrée</span>
+              <span *ngIf="isPending()" class="pending-badge">🟡 En attente de confirmation client</span>
+              <span *ngIf="!isCancelled() && !isDelivered() && !isPending()">Progression de la commande</span>
+            </h2>
+            <span class="order-number">{{ order.orderNumber }}</span>
+          </div>
+
+          <!-- Info message for pending orders -->
+          <div *ngIf="isPending()" class="info-message">
+            <span class="info-icon">ℹ️</span>
+            <span>Cette commande est encore un panier. Le client doit la confirmer avant que vous puissiez la traiter.</span>
+          </div>
+
+          <div class="pipeline-track">
+            <div class="pipeline-line">
+              <div class="pipeline-line-fill" [style.width.%]="getCurrentStepOrder() / (pipelineSteps.length - 1) * 100"></div>
+            </div>
+            
+            <div class="pipeline-steps">
+              <div 
+                *ngFor="let step of pipelineSteps" 
+                class="pipeline-step"
+                [class.done]="isStepDone(step.key)"
+                [class.current]="isStepCurrent(step.key)"
+                [class.clickable]="isStepClickable(step.key)"
+                [class.disabled]="!isStepClickable(step.key) && !isStepDone(step.key)"
+                (click)="isStepClickable(step.key) && updateStatus(step.key)">
+                <div class="step-circle">
+                  <span class="step-icon">{{ step.icon }}</span>
+                  <span *ngIf="isStepClickable(step.key) && !updatingStatus" class="step-action">▶</span>
+                  <span *ngIf="isStepClickable(step.key) && updatingStatus" class="step-loading">
+                    <span class="spinner-sm"></span>
+                  </span>
+                </div>
+                <div class="step-label">{{ step.label }}</div>
+                <div *ngIf="isStepClickable(step.key)" class="step-hint">Cliquez pour {{ step.actionLabel }}</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Next Action Button (prominent) - only for manager-actionable statuses -->
+          <div *ngIf="getNextStep() && !updatingStatus && canManagerUpdate()" class="next-action">
+            <button class="btn btn-next" (click)="updateStatus(getNextStep()!.key)">
+              <span class="btn-icon">{{ getNextStep()!.icon }}</span>
+              {{ getNextStep()!.actionLabel }} la commande
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="9 18 15 12 9 6"/>
+              </svg>
+            </button>
+          </div>
+
+          <!-- Cancel Button - only for confirmed or shipped -->
+          <div *ngIf="canCancel()" class="cancel-action">
+            <button class="btn btn-cancel" (click)="cancelOrder()" [disabled]="updatingStatus">
+              <span *ngIf="!updatingStatus">❌ Annuler la commande</span>
+              <span *ngIf="updatingStatus" class="spinner-sm"></span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Order Info Grid -->
+        <div class="info-grid">
+          <!-- Customer Info -->
+          <div class="info-card">
+            <div class="card-header">
+              <span class="card-icon">👤</span>
+              <h3>Client</h3>
+            </div>
+            <div class="card-body">
+              <div class="info-row">
+                <span class="label">Nom</span>
+                <span class="value">{{ getCustomerName() }}</span>
+              </div>
+              <div class="info-row">
+                <span class="label">Email</span>
+                <span class="value">{{ getCustomerEmail() }}</span>
+              </div>
+              <div class="info-row">
+                <span class="label">Téléphone</span>
+                <span class="value">{{ getCustomerPhone() }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Order Info -->
+          <div class="info-card">
+            <div class="card-header">
+              <span class="card-icon">📋</span>
+              <h3>Commande</h3>
+            </div>
+            <div class="card-body">
+              <div class="info-row">
+                <span class="label">Numéro</span>
+                <span class="value mono">{{ order.orderNumber }}</span>
+              </div>
+              <div class="info-row">
+                <span class="label">Date</span>
+                <span class="value">{{ order.createdAt | date:'dd/MM/yyyy à HH:mm' }}</span>
+              </div>
+              <div class="info-row">
+                <span class="label">Statut</span>
+                <span class="value status-badge" [class]="'status-' + order.status">
+                  {{ getStatusLabel(order.status) }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Items Table -->
+        <div class="items-section">
+          <div class="section-header">
+            <span class="section-icon">🛒</span>
+            <h3>Articles commandés ({{ order.items.length }})</h3>
+          </div>
+          
+          <div class="items-table-wrapper">
+            <table class="items-table">
+              <thead>
+                <tr>
+                  <th>Produit</th>
+                  <th>Boutique</th>
+                  <th class="text-center">Qté</th>
+                  <th class="text-right">Prix unitaire</th>
+                  <th class="text-right">Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let item of order.items" [class.cancelled]="isCancelled()">
+                  <td class="product-cell">
+                    <div class="product-info">
+                      <img *ngIf="item.productImage || item.image" [src]="item.productImage || item.image" alt="" class="product-thumb">
+                      <div class="product-thumb placeholder" *ngIf="!item.productImage && !item.image">📦</div>
+                      <span class="product-name">{{ item.productName || item.name || 'Produit' }}</span>
+                    </div>
+                  </td>
+                  <td class="store-cell">
+                    <span class="store-name">{{ item.storeName || item.store?.name || '—' }}</span>
+                  </td>
+                  <td class="text-center qty-cell">{{ item.quantity }}</td>
+                  <td class="text-right price-cell">{{ formatCurrency(item.unitPriceNum) }}</td>
+                  <td class="text-right total-cell">{{ formatCurrency(item.totalPriceNum) }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Order Summary -->
+          <div class="order-summary">
+            <div class="summary-row">
+              <span>Sous-total</span>
+              <span>{{ formatCurrency(order.subtotal) }}</span>
+            </div>
+            <div class="summary-row" *ngIf="order.tax > 0">
+              <span>Taxes</span>
+              <span>{{ formatCurrency(order.tax) }}</span>
+            </div>
+            <div class="summary-row total">
+              <span>Total</span>
+              <span [class.cancelled-price]="isCancelled()">{{ formatCurrency(order.total) }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Notes -->
+        <div *ngIf="order.notes" class="notes-section">
+          <div class="section-header">
+            <span class="section-icon">📝</span>
+            <h3>Notes</h3>
+          </div>
+          <p class="notes-content">{{ order.notes }}</p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</app-shell>

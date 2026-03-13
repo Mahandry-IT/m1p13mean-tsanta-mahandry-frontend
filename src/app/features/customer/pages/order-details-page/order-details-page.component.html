@@ -1,0 +1,224 @@
+<app-shell>
+  <div class="order-page">
+    
+    <!-- ══════ LOADING STATE ══════ -->
+    <div *ngIf="loading" class="order-modal">
+      <div class="modal-bar"></div>
+      <div class="modal-head">
+        <div class="modal-icon"><span class="spinner"></span></div>
+        <div class="modal-title">Chargement…</div>
+        <div class="modal-sub">Veuillez patienter</div>
+      </div>
+    </div>
+
+    <!-- ══════ ERROR STATE ══════ -->
+    <div *ngIf="!loading && error" class="order-modal">
+      <div class="modal-bar modal-bar--error"></div>
+      <div class="modal-head">
+        <div class="modal-icon modal-icon--error">⚠️</div>
+        <div class="modal-title">Erreur</div>
+        <div class="modal-sub">{{ error }}</div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" (click)="loadOrder()">Réessayer</button>
+      </div>
+    </div>
+
+    <!-- ══════ ORDER NOT FOUND ══════ -->
+    <div *ngIf="!loading && !error && !order" class="order-modal">
+      <div class="modal-bar"></div>
+      <div class="modal-head">
+        <div class="modal-icon">📦</div>
+        <div class="modal-title">Commande introuvable</div>
+        <div class="modal-sub">La commande demandée n'existe pas ou a été supprimée</div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="goToCart()">Mon panier</button>
+        <button class="btn btn-primary" (click)="goToProducts()">Découvrir les produits</button>
+      </div>
+    </div>    <!-- ══════ ORDER LOADED ══════ -->
+    <div *ngIf="!loading && !error && order" class="order-modal" [class.order-modal--cancelled]="isCancelled()">
+      <div class="modal-bar" [ngClass]="'modal-bar--' + getBannerType()"></div>
+
+      <!-- Header -->
+      <div class="modal-head">
+        <div class="modal-icon" [ngClass]="'modal-icon--' + getBannerType()">
+          {{ getPageIcon() }}
+        </div>
+        <div class="modal-title">{{ getPageTitle() }}</div>
+        <div class="modal-sub">{{ order.orderNumber || order.id }} · {{ order.createdAt | date:'d MMMM yyyy' }}</div>
+        <div class="status-row">
+          <span class="status-badge" [ngClass]="'status-' + (order.status || 'pending')">
+            {{ getStatusLabel(order.status) }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Body -->
+      <div class="modal-body">
+
+        <!-- Status banner (adapté selon le statut) -->
+        <div class="status-banner" [ngClass]="'status-banner--' + getBannerType()">
+          <div class="banner-icon">{{ getBannerIcon() }}</div>
+          <div class="banner-text">
+            <strong>{{ getBannerTitle() }}</strong>
+            <span>{{ getBannerMessage() }}</span>
+          </div>
+        </div>
+
+        <!-- Info fields -->
+        <div class="field-grid">
+          <div class="field">
+            <div class="field-label">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              Date de commande
+            </div>
+            <div class="field-value">{{ order.createdAt | date:'dd/MM/yyyy HH:mm' }}</div>
+          </div>
+          <div class="field">
+            <div class="field-label">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+              Statut
+            </div>
+            <div class="field-value">{{ getStatusLabel(order.status) }}</div>
+          </div>
+        </div>
+
+        <!-- Items table -->
+        <div class="items-section">
+          <div class="items-title">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+            Articles commandés ({{ order.items.length }})
+          </div>
+          <table class="items-table">
+            <thead>
+              <tr>
+                <th>Produit</th>
+                <th>Qté</th>
+                <th>Prix unitaire</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of order.items">
+                <td class="item-name">{{ item.productName || item.name || 'Produit' }}</td>
+                <td class="item-qty">× {{ item.quantity }}</td>
+                <td>{{ formatCurrency(item.unitPriceNum) }}</td>
+                <td class="item-total">{{ formatCurrency(item.totalPriceNum) }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Totals -->
+        <div class="totals">
+          <div class="total-row">
+            <span>Sous-total</span>
+            <span>{{ formatCurrency(order.subtotal) }}</span>
+          </div>
+          <div class="total-row">
+            <span>Taxe</span>
+            <span>{{ formatCurrency(order.tax) }}</span>
+          </div>
+          <div class="total-row total-row--main">
+            <span>Total</span>
+            <span>{{ formatCurrency(order.total) }}</span>
+          </div>
+        </div>
+
+        <!-- PDF Downloads Section -->
+        <div class="pdf-section" *ngIf="canDownloadOrderPdf() || canDownloadReceiptPdf()">
+          <div class="pdf-title">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/>
+              <line x1="16" y1="17" x2="8" y2="17"/>
+              <polyline points="10 9 9 9 8 9"/>
+            </svg>
+            Documents disponibles
+          </div>
+          <div class="pdf-buttons">
+            <!-- Bon de commande (confirmed, shipped) -->
+            <button 
+              *ngIf="canDownloadOrderPdf()" 
+              class="btn btn-pdf btn-pdf--order"
+              (click)="downloadOrderPdf()"
+              [disabled]="downloadingOrder">
+              <span *ngIf="!downloadingOrder" class="btn-content">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                  <polyline points="7 10 12 15 17 10"/>
+                  <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                <span class="btn-text">
+                  <strong>Bon de commande</strong>
+                  <small>Télécharger le PDF</small>
+                </span>
+              </span>
+              <span *ngIf="downloadingOrder" class="btn-loading">
+                <span class="spinner-sm"></span>
+                Téléchargement...
+              </span>
+            </button>
+
+            <!-- Reçu (delivered only) -->
+            <button 
+              *ngIf="canDownloadReceiptPdf()" 
+              class="btn btn-pdf btn-pdf--receipt"
+              (click)="downloadReceiptPdf()"
+              [disabled]="downloadingReceipt">
+              <span *ngIf="!downloadingReceipt" class="btn-content">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                  <polyline points="7 10 12 15 17 10"/>
+                  <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                <span class="btn-text">
+                  <strong>Reçu de paiement</strong>
+                  <small>Télécharger le PDF</small>
+                </span>
+              </span>
+              <span *ngIf="downloadingReceipt" class="btn-loading">
+                <span class="spinner-sm"></span>
+                Téléchargement...
+              </span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Pipeline / History -->
+        <div class="history-section">
+          <div class="history-title">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            Suivi de commande
+          </div>
+          <div class="timeline">
+            <div class="tl-item" *ngFor="let step of pipelineSteps" [class.is-done]="isStepDone(step.key)" [class.is-active]="order.status === step.key">
+              <div class="tl-dot-wrap">
+                <div class="tl-dot">{{ step.icon }}</div>
+                <div class="tl-line"></div>
+              </div>
+              <div class="tl-content">
+                <div class="tl-action">{{ step.label }}</div>
+                <div class="tl-meta" *ngIf="isStepDone(step.key)">Étape complétée</div>
+                <div class="tl-meta" *ngIf="!isStepDone(step.key)">En attente</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Footer -->
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="goToCart()">Mon panier</button>
+        <button class="btn btn-primary" (click)="goToProducts()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+          Continuer les achats
+        </button>
+      </div>
+    </div>
+
+  </div>
+</app-shell>

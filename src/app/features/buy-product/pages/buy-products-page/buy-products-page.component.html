@@ -46,11 +46,13 @@
       [filterControls]="productFilters"
       [isInfonable]="true"
       [isFavorisable]="true"
+      [isAddToCartable]="true"
       [itemsMapper]="itemsMapper"
       [priceTemplate]="buyPriceTpl"
       [priceResolver]="priceResolver"
       (info)="onInfo($event)"
       (favoriteChange)="onFavoriteChange($event)"
+      (addToCart)="onAddToCart($event)"
     ></app-store-product-cards>
 
   </app-page>

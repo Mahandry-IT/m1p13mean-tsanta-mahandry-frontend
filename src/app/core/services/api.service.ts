@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { HttpClient, HttpParams, HttpErrorResponse } from '@angular/common/http';
+import { Observable, throwError } from 'rxjs';
+import { timeout, catchError } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 
 @Injectable({
@@ -8,6 +9,9 @@ import { environment } from '../../../environments/environment';
 })
 export class ApiService {
   private readonly baseUrl = environment.apiUrl;
+  
+  // Timeout for file downloads (2 minutes - PDF generation can take time)
+  private readonly DOWNLOAD_TIMEOUT = 120000;
 
   constructor(private readonly http: HttpClient) {}
 
@@ -28,9 +32,44 @@ export class ApiService {
   delete<T>(path: string, body?: unknown): Observable<T> {
     return this.http.delete<T>(`${this.baseUrl}${path}`, body !== undefined ? { body } : undefined);
   }
-
   patch<T>(path: string, body: unknown): Observable<T> {
     return this.http.patch<T>(`${this.baseUrl}${path}`, body);
+  }
+  /**
+   * Download a file as Blob (for PDF downloads, etc.)
+   * Includes timeout handling and error formatting
+   */
+  getBlob(path: string, params?: Record<string, string | number | boolean | null | undefined>): Observable<Blob> {
+    return this.http.get(`${this.baseUrl}${path}`, {
+      params: this.toHttpParams(params),
+      responseType: 'blob',
+    }).pipe(
+      timeout(this.DOWNLOAD_TIMEOUT),
+      catchError((error: HttpErrorResponse | Error) => this.handleBlobError(error))
+    );
+  }
+
+  /**
+   * Handle blob download errors with user-friendly messages
+   */
+  private handleBlobError(error: HttpErrorResponse | Error): Observable<never> {
+    let message = 'Erreur lors du téléchargement du fichier';
+    
+    if (error.name === 'TimeoutError') {
+      message = 'Le téléchargement a pris trop de temps. Veuillez réessayer.';
+    } else if (error instanceof HttpErrorResponse) {
+      if (error.status === 0) {
+        message = 'Impossible de contacter le serveur. Vérifiez votre connexion.';
+      } else if (error.status === 404) {
+        message = 'Le fichier demandé n\'existe pas.';
+      } else if (error.status === 403) {
+        message = 'Vous n\'avez pas accès à ce fichier.';
+      } else if (error.status >= 500) {
+        message = 'Erreur serveur. Veuillez réessayer plus tard.';
+      }
+    }
+    
+    return throwError(() => new Error(message));
   }
 
   private toHttpParams(params?: Record<string, any>): HttpParams {

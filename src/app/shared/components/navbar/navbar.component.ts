@@ -4,6 +4,7 @@ import { firstValueFrom } from 'rxjs';
 import { AuthService, UserResponse } from '../../../core/services/auth.service';
 import { MenuService } from '../../../core/services/menu.service';
 import { MenuModalService } from '../menu-modal/menu-modal.service';
+import { ToastService } from '../../../core/services/toast.service';
 
 export interface NavbarUser {
   username?: string | null;
@@ -25,6 +26,7 @@ export class NavbarComponent {
     private readonly menus: MenuService,
     private readonly menuModal: MenuModalService,
     private readonly router: Router,
+    private readonly toast: ToastService,
   ) {}
 
   /**
@@ -50,7 +52,28 @@ export class NavbarComponent {
       badge: (m.badgeCount ?? m.badgeText ?? m.badge ?? null) as string | number | null,
     }));
 
-    await firstValueFrom(this.menuModal.openWithItems(items, 'Menu'));
+    // Open menu modal and wait for selected path
+    const selectedPath = await firstValueFrom(this.menuModal.openWithItems(items, 'Menu')) as string | null;
+    if (!selectedPath) return;
+
+    // Try navigating to the exact path returned by backend
+    try {
+      const ok = await this.router.navigateByUrl(selectedPath).catch(() => false);
+      if (ok) return;
+    } catch {
+      // ignore and try fallback
+    }
+
+    // Fallback: try without leading slash (some routes are declared without it)
+    const alt = selectedPath.replace(/^\//, '');
+    try {
+      await this.router.navigateByUrl(alt);
+      return;
+    } catch {
+      // final failure
+    }
+
+    this.toast.error('Impossible de naviguer vers la page demandée.');
   }
 
   onEditProfile(): void {

@@ -14,8 +14,9 @@ const routes: Routes = [
   { path: 'types', loadChildren: () => import('./features/types/types-module').then(m => m.TypesModule) },
   { path: 'my-product', loadChildren: () => import('./features/my-product/my-product-module').then(m => m.MyProductModule) },
   { path: 'buy-product', loadChildren: () => import('./features/buy-product/buy-product-module').then(m => m.BuyProductModule) },
-  { path: 'favorites', loadChildren: () => import('./features/favorites/favorites-module').then(m => m.FavoritesModule) },
-  { path: 'promotions', loadChildren: () => import('./features/promotions/promotions-module').then(m => m.PromotionsModule) },
+  { path: 'favorites', loadChildren: () => import('./features/favorites/favorites-module').then(m => m.FavoritesModule) },  { path: 'promotions', loadChildren: () => import('./features/promotions/promotions-module').then(m => m.PromotionsModule) },
+  { path: 'customer', loadChildren: () => import('./features/customer/customer-module').then(m => m.CustomerModule) },
+  { path: 'manager', loadChildren: () => import('./features/manager/manager-module').then(m => m.ManagerModule) },
 ];
 
 @NgModule({

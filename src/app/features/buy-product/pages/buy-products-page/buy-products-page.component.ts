@@ -1,5 +1,7 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
+import { lastValueFrom } from 'rxjs';
+import { AddToCartDialogComponent } from '../../../../shared/components/add-to-cart-dialog/add-to-cart-dialog.component';
 
 import { ApiService } from '../../../../core/services/api.service';
 import { ToastService } from '../../../../core/services/toast.service';
@@ -378,5 +380,39 @@ export class BuyProductsPageComponent implements OnInit {
         this.refreshFavoritesUi();
       },
     });
+  }
+
+  async onAddToCart(row: any): Promise<void> {
+    const productId = String(row?._id ?? row?.id ?? '').trim();
+    const storeId = String(this.selectedStoreId ?? this.storeIdOfRow(row) ?? '').trim();
+    if (!productId || !storeId) {
+      this.toast.error('Sélectionnez une boutique valide pour ajouter au panier.');
+      return;
+    }
+
+    try {
+      const dialogRef = this.dialog.open(AddToCartDialogComponent, {
+        width: '420px',
+        maxWidth: '96vw',
+        data: { product: row, storeId, defaultQuantity: 1 }
+      });
+
+      const res = await lastValueFrom(dialogRef.afterClosed());
+      if (!res || !res.quantity) return;
+
+      const payload = { productId, storeId, quantity: Number(res.quantity) };
+      this.api.post<any>('/orders/add-to-cart', payload).subscribe({
+        next: (resp: any) => {
+          this.toast.success('Ajouté au panier');
+          this.storeProductCards?.load();
+        },
+        error: (err: any) => {
+          this.toast.error(err?.message ?? 'Erreur lors de l\'ajout au panier');
+        }
+      });
+    } catch (e) {
+      console.error('error opening add to cart dialog', e);
+      this.toast.error('Impossible d\'ouvrir le dialogue.');
+    }
   }
 }
