@@ -416,6 +416,64 @@ button.store-product-cards__add {
   }
 }
 
+/* Style for the inline add-to-cart icon button placed in card actions */
+button.store-product-cards__addcart-btn {
+  width        : 36px !important;
+  height       : 36px !important;
+  border-radius: 10px !important;
+  background   : linear-gradient(90deg, rgba(102,126,234,0.06), rgba(118,75,162,0.04)) !important;
+  border       : 1px solid rgba(102,126,234,0.12) !important;
+  box-shadow   : 0 6px 18px rgba(102,126,234,0.06) !important;
+  display      : inline-flex !important;
+  align-items   : center !important;
+  justify-content: center !important;
+  transition   : transform 0.12s ease, box-shadow 0.12s ease !important;
+  margin-right : 6px !important;
+
+  mat-icon {
+    color: $color-secondary !important;
+    font-size: 18px !important;
+  }
+
+  &:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 10px 30px rgba(102,126,234,0.12) !important;
+    background: linear-gradient(90deg, rgba(102,126,234,0.12), rgba(118,75,162,0.08)) !important;
+  }
+}
+
+/* Remove the old absolute gallery cart button if present */
+.store-product-cards__cart { display: none !important; }
+
+/* Add-to-cart dialog styles (scoped): use ::ng-deep to reach mat-dialog internals if needed */
+::ng-deep .mat-mdc-dialog-container .add-to-cart-dialog {
+  font-family: $font-body;
+  padding: 18px 20px;
+  min-width: 320px;
+  max-width: 92vw;
+}
+
+::ng-deep .add-to-cart-dialog h2[mat-dialog-title] {
+  margin: 0 0 8px 0;
+  font-size: 18px;
+  color: $color-text;
+}
+
+::ng-deep .add-to-cart-dialog mat-dialog-content p { margin: 0 0 12px 0; color: $color-text-muted; }
+
+::ng-deep .add-to-cart-dialog mat-form-field .mat-mdc-form-field-flex {
+  padding: 0 12px !important;
+}
+
+::ng-deep .add-to-cart-dialog button[mat-flat-button] {
+  min-width: 120px;
+  background: $gradient-primary !important;
+  color: #fff !important;
+  box-shadow: 0 8px 28px rgba(102,126,234,0.16) !important;
+}
+
+::ng-deep .add-to-cart-dialog button[mat-button] { color: $color-text-muted !important; }
+
 // ── Thumbnails ─────────────────────────────────────────────────────────────
 .store-product-cards__gallery-thumbs {
   display        : flex;

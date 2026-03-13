@@ -143,10 +143,16 @@
           </div>
         </ng-container>
 
-        <mat-card-actions align="end" *ngIf="isInfonable || isEditable || isDeletable">
+        <mat-card-actions align="end" *ngIf="isInfonable || isEditable || isDeletable || isAddToCartable">
           <button *ngIf="isInfonable" mat-icon-button type="button" matTooltip="Infos" (click)="info.emit(row)">
             <mat-icon>info_outline</mat-icon>
           </button>
+
+          <!-- Add to cart button next to Info -->
+          <button *ngIf="isAddToCartable" mat-icon-button class="store-product-cards__addcart-btn" type="button" matTooltip="Ajouter au panier" (click)="onAddToCart(row)">
+            <mat-icon>add_shopping_cart</mat-icon>
+          </button>
+
           <button *ngIf="isEditable" mat-icon-button type="button" matTooltip="Modifier" (click)="edit.emit(row)">
             <mat-icon>edit_outline</mat-icon>
           </button>

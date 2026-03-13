@@ -81,10 +81,14 @@ export class StoreProductCardsComponent<TItem extends Record<string, any>> imple
   /** Champ booléen du row indiquant si c'est en favori (par défaut: 'isFavorite') */
   @Input() favField = 'isFavorite';
 
+  /** Permet d'afficher un bouton "Ajouter au panier" sur chaque carte */
+  @Input() isAddToCartable = false;
+
   @Output() edit = new EventEmitter<TItem>();
   @Output() delete = new EventEmitter<TItem>();
   @Output() info = new EventEmitter<TItem>();
   @Output() add = new EventEmitter<void>();
+  @Output() addToCart = new EventEmitter<TItem>();
   @Output() favoriteChange = new EventEmitter<{ row: TItem; isFavorite: boolean }>();
 
   searchCtrl = new FormControl<string>('', { nonNullable: true });
@@ -751,6 +755,12 @@ export class StoreProductCardsComponent<TItem extends Record<string, any>> imple
 
     this.favoriteChange.emit({ row, isFavorite: next });
     this.cdr.markForCheck();
+  }
+
+  /** Emit event to request adding this product to cart (parent handles dialog / API) */
+  onAddToCart(row: TItem, ev?: Event): void {
+    if (ev) { ev.stopPropagation(); }
+    this.addToCart.emit(row);
   }
 
   trackById = (_: number, row: TItem) => (row as any)?._id ?? (row as any)?.id ?? _;

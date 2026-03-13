@@ -1,0 +1,249 @@
+<app-shell>
+  <app-page headTitle="Tableau de Bord Manager">
+    <div class="dashboard-container">
+      <header class="dashboard-header">
+        <h1 class="dashboard-title">Dashboard Manager</h1>
+        <p class="dashboard-subtitle">Gérez vos boutiques et suivez vos performances</p>
+      </header>
+
+      <!-- Section Filtres -->
+      <section class="dashboard-section filters-section">
+        <div class="filters-card">
+          <h3 class="section-title">Filtres</h3>
+          <div class="filters-row">
+            <div class="filter-group">
+              <label for="startDate">Date début</label>
+              <input type="date" id="startDate" [(ngModel)]="startDate" class="date-input" />
+            </div>
+            <div class="filter-group">
+              <label for="endDate">Date fin</label>
+              <input type="date" id="endDate" [(ngModel)]="endDate" class="date-input" />
+            </div>
+            <div class="filter-group stores-filter" *ngIf="availableStores.length > 0">
+              <label>Boutiques</label>
+              <div class="store-chips">
+                <button
+                  *ngFor="let store of availableStores"
+                  class="store-chip"
+                  [class.selected]="isStoreSelected(store.id)"
+                  (click)="toggleStoreSelection(store.id)">
+                  {{ store.name }}
+                </button>
+              </div>
+            </div>
+            <button class="btn-apply" (click)="onRefresh()">
+              <span>Appliquer</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Loading State -->
+      <div *ngIf="loading" class="loading-state">
+        <div class="spinner"></div>
+        <p>Chargement des données...</p>
+      </div>
+
+      <!-- Error State -->
+      <div *ngIf="error" class="error-state">
+        <p>{{ error }}</p>
+        <button class="btn-retry" (click)="onRefresh()">Réessayer</button>
+      </div>
+
+      <!-- Section Métriques Globales -->
+      <section class="dashboard-section metrics-section" *ngIf="globalMetrics && !loading">
+        <h3 class="section-title">Vue d'ensemble</h3>
+        <div class="metrics-grid">
+          <div class="metric-card revenue">
+            <div class="metric-icon">💰</div>
+            <div class="metric-content">
+              <span class="metric-label">Revenu Total</span>
+              <span class="metric-value">{{ formatCurrency(globalMetrics.totalRevenue) }}</span>
+            </div>
+          </div>
+          <div class="metric-card orders">
+            <div class="metric-icon">📦</div>
+            <div class="metric-content">
+              <span class="metric-label">Commandes</span>
+              <span class="metric-value">{{ formatNumber(globalMetrics.totalOrders) }}</span>
+            </div>
+          </div>
+          <div class="metric-card stores">
+            <div class="metric-icon">🏪</div>
+            <div class="metric-content">
+              <span class="metric-label">Boutiques Actives</span>
+              <span class="metric-value">{{ globalMetrics.activeStores }} / {{ globalMetrics.totalStores }}</span>
+            </div>
+          </div>
+          <div class="metric-card products">
+            <div class="metric-icon">🛍️</div>
+            <div class="metric-content">
+              <span class="metric-label">Produits</span>
+              <span class="metric-value">{{ formatNumber(globalMetrics.totalProducts) }}</span>
+            </div>
+          </div>
+          <div class="metric-card customers">
+            <div class="metric-icon">👥</div>
+            <div class="metric-content">
+              <span class="metric-label">Clients</span>
+              <span class="metric-value">{{ formatNumber(globalMetrics.totalCustomers) }}</span>
+            </div>
+          </div>
+          <div class="metric-card average">
+            <div class="metric-icon">📊</div>
+            <div class="metric-content">
+              <span class="metric-label">Panier Moyen</span>
+              <span class="metric-value">{{ formatCurrency(globalMetrics.averageOrderValue) }}</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section Boutiques -->
+      <section class="dashboard-section stores-section" *ngIf="storesSummary.length > 0 && !loading">
+        <h3 class="section-title">Mes Boutiques</h3>
+        <div class="stores-grid">
+          <div class="store-card" *ngFor="let store of storesSummary">
+            <div class="store-header">
+              <h4 class="store-name">{{ store.storeName }}</h4>
+              <span class="store-status" [ngClass]="getStatusClass(store.status)">
+                {{ getStatusLabel(store.status) }}
+              </span>
+            </div>
+            <div class="store-metrics">
+              <div class="store-metric">
+                <span class="store-metric-value">{{ formatCurrency(store.revenue) }}</span>
+                <span class="store-metric-label">Revenu</span>
+              </div>
+              <div class="store-metric">
+                <span class="store-metric-value">{{ store.orders }}</span>
+                <span class="store-metric-label">Commandes</span>
+              </div>
+              <div class="store-metric">
+                <span class="store-metric-value">{{ store.products }}</span>
+                <span class="store-metric-label">Produits</span>
+              </div>
+              <div class="store-metric">
+                <span class="store-metric-value">{{ store.customers }}</span>
+                <span class="store-metric-label">Clients</span>
+              </div>
+            </div>
+            <div class="store-alerts" *ngIf="store.lowStockAlerts > 0 || store.pendingOrders > 0">
+              <span class="alert-badge warning" *ngIf="store.lowStockAlerts > 0">
+                ⚠️ {{ store.lowStockAlerts }} stock bas
+              </span>
+              <span class="alert-badge info" *ngIf="store.pendingOrders > 0">
+                🕐 {{ store.pendingOrders }} en attente
+              </span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section Graphiques -->
+      <section class="dashboard-section charts-section" *ngIf="analytics && !loading">
+        <h3 class="section-title">Analytiques</h3>
+        <div class="charts-grid">
+          <div class="chart-card">
+            <h4 class="chart-title">Évolution du Revenu</h4>
+            <div class="chart-container">
+              <canvas #revenueCanvas></canvas>
+            </div>
+          </div>
+          <div class="chart-card">
+            <h4 class="chart-title">Évolution des Commandes</h4>
+            <div class="chart-container">
+              <canvas #ordersCanvas></canvas>
+            </div>
+          </div>
+          <div class="chart-card">
+            <h4 class="chart-title">Performance par Boutique</h4>
+            <div class="chart-container doughnut">
+              <canvas #storesCanvas></canvas>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section Tables -->
+      <section class="dashboard-section tables-section" *ngIf="analytics && !loading">
+        <h3 class="section-title">Classements</h3>
+        <div class="tables-grid">
+          <div class="table-card">
+            <h4 class="table-title">Top Produits</h4>
+            <table class="data-table" *ngIf="topProducts.length > 0; else noProducts">
+              <thead>
+                <tr>
+                  <th>Produit</th>
+                  <th>Vendus</th>
+                  <th>Revenu</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let p of topProducts">
+                  <td>{{ p.name }}</td>
+                  <td>{{ p.totalSold }}</td>
+                  <td>{{ formatCurrency(p.revenue) }}</td>
+                </tr>
+              </tbody>
+            </table>
+            <ng-template #noProducts>
+              <p class="no-data">Aucune donnée disponible</p>
+            </ng-template>
+          </div>
+
+          <div class="table-card">
+            <h4 class="table-title">Top Boutiques</h4>
+            <table class="data-table" *ngIf="topStores.length > 0; else noStores">
+              <thead>
+                <tr>
+                  <th>Boutique</th>
+                  <th>Revenu</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let s of topStores">
+                  <td>{{ s.name }}</td>
+                  <td>{{ formatCurrency(s.revenue) }}</td>
+                </tr>
+              </tbody>
+            </table>
+            <ng-template #noStores>
+              <p class="no-data">Aucune donnée disponible</p>
+            </ng-template>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section Alertes -->
+      <section class="dashboard-section alerts-section" *ngIf="(lowStockAlerts.length > 0 || pendingOrders.length > 0) && !loading">
+        <h3 class="section-title">Alertes</h3>
+        <div class="alerts-grid">
+          <!-- Low Stock Alerts -->
+          <div class="alert-card warning" *ngIf="lowStockAlerts.length > 0">
+            <h4 class="alert-title">⚠️ Stock Bas</h4>
+            <ul class="alert-list">
+              <li *ngFor="let alert of lowStockAlerts">
+                <strong>{{ alert.productName }}</strong> ({{ alert.storeName }})
+                <br>
+                <small>Stock: {{ alert.currentStock }} / Min: {{ alert.minStock }}</small>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Pending Orders -->
+          <div class="alert-card info" *ngIf="pendingOrders.length > 0">
+            <h4 class="alert-title">🕐 Commandes en Attente</h4>
+            <ul class="alert-list">
+              <li *ngFor="let order of pendingOrders">
+                <strong>{{ order.orderNumber }}</strong> - {{ order.customerName }}
+                <br>
+                <small>{{ formatCurrency(order.total) }} • {{ formatDate(order.createdAt) }}</small>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </section>
+    </div>
+  </app-page>
+</app-shell>

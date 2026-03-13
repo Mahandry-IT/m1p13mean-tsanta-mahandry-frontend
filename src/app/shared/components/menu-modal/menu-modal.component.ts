@@ -56,8 +56,8 @@ export class MenuModalComponent {
   }
 
   async onMenuClick(item: MenuModalItem): Promise<void> {
+    // close the dialog and return the path to the caller; navigation is handled by the caller
     this.dialogRef.close(item.path);
-    await this.router.navigateByUrl(item.path);
   }
 
   get sortedItems(): MenuModalItem[] {
