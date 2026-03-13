@@ -1,10 +1,6 @@
 import { Component, OnInit, ViewChild, ElementRef, OnDestroy, AfterViewInit, ChangeDetectorRef } from '@angular/core';
 import { DashboardService } from '../../dashboard.service';
 import Chart from 'chart.js/auto';
-import { MANAGER_DASHBOARD_MOCK } from '../../mock/manager-dashboard.mock';
-
-// ⚠️ Mettre à false pour utiliser l'API réelle
-const USE_MOCK_DATA = true;
 
 @Component({
   selector: 'app-manager-dashboard',
@@ -43,6 +39,10 @@ export class ManagerDashboardComponent implements OnInit, OnDestroy, AfterViewIn
   private ordersChart: Chart | null = null;
   private storesChart: Chart | null = null;
 
+  // View lifecycle helpers to avoid race between data & view rendering
+  private viewReady = false;
+  private needCreateCharts = false;
+
   @ViewChild('revenueCanvas') revenueCanvas!: ElementRef<HTMLCanvasElement>;
   @ViewChild('ordersCanvas') ordersCanvas!: ElementRef<HTMLCanvasElement>;
   @ViewChild('storesCanvas') storesCanvas!: ElementRef<HTMLCanvasElement>;
@@ -53,7 +53,16 @@ export class ManagerDashboardComponent implements OnInit, OnDestroy, AfterViewIn
     this.load();
   }
 
-  ngAfterViewInit(): void {}
+  ngAfterViewInit(): void {
+    // Mark that the view (and canvas elements) are available
+    this.viewReady = true;
+    if (this.needCreateCharts) {
+      // If data arrived before the view was ready, create charts now
+      this.needCreateCharts = false;
+      // small timeout to ensure DOM painted
+      setTimeout(() => this.createCharts(), 50);
+    }
+  }
 
   ngOnDestroy(): void {
     this.destroyCharts();
@@ -95,25 +104,20 @@ export class ManagerDashboardComponent implements OnInit, OnDestroy, AfterViewIn
     this.loading = true;
     this.error = null;
 
-    if (USE_MOCK_DATA) {
-      setTimeout(() => {
-        this.processResponse(MANAGER_DASHBOARD_MOCK);
-      }, 500);
-    } else {
-      this.dashboardService.getManagerDashboard({
-        startDate: this.startDate,
-        endDate: this.endDate,
-        storeIds: this.selectedStoreIds.length > 0 ? this.selectedStoreIds : undefined
-      }).subscribe({
-        next: (res) => this.processResponse(res),
-        error: (err) => {
-          console.error('Dashboard API error:', err);
-          this.error = err?.message || 'Erreur lors du chargement du dashboard';
-          this.loading = false;
-          this.cdr.detectChanges();
-        }
-      });
-    }
+    // Use real API for manager dashboard
+    this.dashboardService.getManagerDashboard({
+      startDate: this.startDate,
+      endDate: this.endDate,
+      storeIds: this.selectedStoreIds.length > 0 ? this.selectedStoreIds : undefined
+    }).subscribe({
+      next: (res) => this.processResponse(res),
+      error: (err) => {
+        console.error('Dashboard API error:', err);
+        this.error = err?.message || 'Erreur lors du chargement du dashboard';
+        this.loading = false;
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   private processResponse(res: any): void {
@@ -166,14 +170,14 @@ export class ManagerDashboardComponent implements OnInit, OnDestroy, AfterViewIn
         // Orders Evolution
         if (Array.isArray(payload.analytics.ordersEvolution)) {
           this.ordersLabels = payload.analytics.ordersEvolution.map((o: any) => this.parseMonthLabel(o.month));
-          this.ordersSeries = payload.analytics.ordersEvolution.map((o: any) => o.count);
+          this.ordersSeries = payload.analytics.ordersEvolution.map((o: any) => this.parseDecimal(o.count));
         }
 
         // Top Stores
         this.topStores = Array.isArray(payload.analytics.topPerformingStores)
           ? payload.analytics.topPerformingStores.map((s: any) => ({
-              id: s._id,
-              name: s.storeName,
+              id: s.storeId ?? s._id ?? s.id,
+              name: s.storeName ?? s.name ?? (`Store ${s.storeId ?? s._id ?? ''}`),
               revenue: this.parseDecimal(s.revenue)
             }))
           : [];
@@ -181,8 +185,8 @@ export class ManagerDashboardComponent implements OnInit, OnDestroy, AfterViewIn
         // Top Products
         this.topProducts = Array.isArray(payload.analytics.topProductsAcrossStores)
           ? payload.analytics.topProductsAcrossStores.map((p: any) => ({
-              name: p.productName,
-              totalSold: p.totalSold,
+              name: p.productName ?? p.name ?? 'Produit',
+              totalSold: p.totalSold ?? p.totalSoldAcross ?? 0,
               revenue: this.parseDecimal(p.revenue)
             }))
           : [];
@@ -191,8 +195,30 @@ export class ManagerDashboardComponent implements OnInit, OnDestroy, AfterViewIn
       // Alerts
       if (payload.alerts) {
         this.alerts = payload.alerts;
-        this.lowStockAlerts = Array.isArray(payload.alerts.lowStock) ? payload.alerts.lowStock : [];
-        this.pendingOrders = Array.isArray(payload.alerts.pendingOrders) ? payload.alerts.pendingOrders : [];
+        // Normalize low stock alerts: backend may send 'stock' and no minStock
+        this.lowStockAlerts = Array.isArray(payload.alerts.lowStock)
+          ? payload.alerts.lowStock.map((a: any) => ({
+              _id: a._id ?? a.id,
+              storeId: a.storeId ?? a.storeId,
+              storeName: a.storeName ?? a.store ?? 'Boutique',
+              productName: a.productName ?? a.name ?? 'Produit',
+              currentStock: a.stock ?? a.currentStock ?? 0,
+              minStock: a.minStock ?? a.min ?? null
+            }))
+          : [];
+
+        // Normalize pending orders: ensure orderNumber, customerName, total, createdAt exist
+        this.pendingOrders = Array.isArray(payload.alerts.pendingOrders)
+          ? payload.alerts.pendingOrders.map((o: any) => ({
+              storeId: o.storeId ?? o.storeId,
+              storeName: o.storeName ?? o.store ?? 'Boutique',
+              orderId: o.orderId ?? o.id,
+              orderNumber: o.orderNumber ?? o.orderNo ?? o.orderId ?? '—',
+              customerName: o.customerName ?? o.customer ?? 'Client',
+              total: this.parseDecimal(o.total ?? o.amount ?? 0),
+              createdAt: o.createdAt ?? o.createdAtDate ?? null
+            }))
+          : [];
       }
 
     } catch (e) {
@@ -201,7 +227,12 @@ export class ManagerDashboardComponent implements OnInit, OnDestroy, AfterViewIn
       this.loading = false;
       this.cdr.detectChanges();
       if (this.analytics) {
-        setTimeout(() => this.createCharts(), 200);
+        // Create charts only if the view is ready, otherwise mark to create later
+        if (this.viewReady) {
+          setTimeout(() => this.createCharts(), 100);
+        } else {
+          this.needCreateCharts = true;
+        }
       }
     }
   }
@@ -225,6 +256,10 @@ export class ManagerDashboardComponent implements OnInit, OnDestroy, AfterViewIn
 
   private createCharts(): void {
     this.destroyCharts();
+
+    // Debug logs to ensure canvases and series are available
+    console.log('createCharts: revenueCanvas=', !!this.revenueCanvas?.nativeElement, 'ordersCanvas=', !!this.ordersCanvas?.nativeElement, 'storesCanvas=', !!this.storesCanvas?.nativeElement);
+    console.log('createCharts: revenueSeries.length=', this.revenueSeries.length, 'ordersSeries.length=', this.ordersSeries.length, 'topStores.length=', this.topStores.length);
 
     // Revenue Chart
     if (this.revenueCanvas?.nativeElement && this.revenueSeries.length > 0) {
@@ -255,6 +290,8 @@ export class ManagerDashboardComponent implements OnInit, OnDestroy, AfterViewIn
           }
         }
       });
+    } else {
+      console.warn('Revenue chart not created: canvas or data missing');
     }
 
     // Orders Chart
@@ -280,6 +317,8 @@ export class ManagerDashboardComponent implements OnInit, OnDestroy, AfterViewIn
           }
         }
       });
+    } else {
+      console.warn('Orders chart not created: canvas or data missing');
     }
 
     // Stores Performance Chart (Doughnut)
@@ -303,6 +342,8 @@ export class ManagerDashboardComponent implements OnInit, OnDestroy, AfterViewIn
           }
         }
       });
+    } else {
+      console.warn('Stores doughnut not created: canvas or data missing');
     }
   }
 

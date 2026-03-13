@@ -1,10 +1,8 @@
 import { Component, OnInit, ViewChild, ElementRef, OnDestroy, AfterViewInit, ChangeDetectorRef } from '@angular/core';
 import { DashboardService } from '../../dashboard.service';
 import Chart from 'chart.js/auto';
-import { ADMIN_DASHBOARD_MOCK } from '../../mock/admin-dashboard.mock';
 
-// ⚠️ Mettre à false pour utiliser l'API réelle
-const USE_MOCK_DATA = true;
+
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -100,23 +98,15 @@ export class AdminDashboardComponent implements OnInit, OnDestroy, AfterViewInit
     this.loading = true;
     this.error = null;
 
-    // Utiliser les données mockées ou l'API réelle
-    if (USE_MOCK_DATA) {
-      // Simuler un délai réseau
-      setTimeout(() => {
-        this.processResponse(ADMIN_DASHBOARD_MOCK);
-      }, 500);
-    } else {
-      this.dashboardService.getAdminDashboard({ startDate: this.startDate, endDate: this.endDate }).subscribe({
-        next: (res) => this.processResponse(res),
-        error: (err) => {
-          console.error('Dashboard API error:', err);
-          this.error = err?.message || 'Erreur lors du chargement du dashboard';
-          this.loading = false;
-          this.cdr.detectChanges();
-        }
-      });
-    }
+    this.dashboardService.getAdminDashboard({ startDate: this.startDate, endDate: this.endDate }).subscribe({
+      next: (res) => this.processResponse(res),
+      error: (err) => {
+        console.error('Dashboard API error:', err);
+        this.error = err?.message || 'Erreur lors du chargement du dashboard';
+        this.loading = false;
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   private processResponse(res: any): void {
@@ -163,7 +153,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy, AfterViewInit
         this.topProducts = Array.isArray(charts.topProducts)
           ? charts.topProducts.map((p: any) => ({
               id: p._id,
-              name: p.name || p._id,
+              name: p.productName || p._id,
               totalQuantity: p.totalQuantity,
               totalRevenue: this.parseDecimal(p.totalRevenue)
             }))
@@ -172,7 +162,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy, AfterViewInit
         this.topStores = Array.isArray(charts.topStores)
           ? charts.topStores.map((s: any) => ({
               id: s._id,
-              name: s.name || s._id,
+              name: s.storeName || s._id,
               totalRevenue: this.parseDecimal(s.totalRevenue),
               totalOrders: s.totalOrders
             }))
