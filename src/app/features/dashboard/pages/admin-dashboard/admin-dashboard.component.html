@@ -1,0 +1,171 @@
+<app-shell>
+  <app-page headTitle="Tableau de Bord Admin">
+    <div class="dashboard-container">
+      <header class="dashboard-header">
+        <h1 class="dashboard-title">Dashboard Administrateur</h1>
+        <p class="dashboard-subtitle">Vue d'ensemble de votre plateforme</p>
+      </header>
+
+    <!-- Section Filtres -->
+    <section class="dashboard-section filters-section">
+      <div class="filters-card">
+        <h3 class="section-title">Filtrer par période</h3>
+        <div class="filters-row">
+          <div class="filter-group">
+            <label for="startDate">Date début</label>
+            <input type="date" id="startDate" [(ngModel)]="startDate" class="date-input" />
+          </div>
+          <div class="filter-group">
+            <label for="endDate">Date fin</label>
+            <input type="date" id="endDate" [(ngModel)]="endDate" class="date-input" />
+          </div>
+          <button class="btn-apply" (click)="onRefresh()">
+            <span>Appliquer</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Loading State -->
+    <div *ngIf="loading" class="loading-state">
+      <div class="spinner"></div>
+      <p>Chargement des données...</p>
+    </div>
+
+    <!-- Error State -->
+    <div *ngIf="error" class="error-state">
+      <p>{{ error }}</p>
+      <button class="btn-retry" (click)="onRefresh()">Réessayer</button>
+    </div>
+
+    <!-- Section Métriques -->
+    <section class="dashboard-section metrics-section" *ngIf="metrics && !loading">
+      <h3 class="section-title">Vue d'ensemble</h3>
+      <div class="metrics-grid">
+        <div class="metric-card revenue">
+          <div class="metric-icon">💰</div>
+          <div class="metric-content">
+            <span class="metric-label">Revenu Total</span>
+            <span class="metric-value">{{ formatCurrency(metrics.totalRevenue) }}</span>
+          </div>
+        </div>
+        <div class="metric-card orders">
+          <div class="metric-icon">📦</div>
+          <div class="metric-content">
+            <span class="metric-label">Commandes</span>
+            <span class="metric-value">{{ formatNumber(metrics.totalOrders) }}</span>
+          </div>
+        </div>
+        <div class="metric-card users">
+          <div class="metric-icon">👥</div>
+          <div class="metric-content">
+            <span class="metric-label">Utilisateurs</span>
+            <span class="metric-value">{{ formatNumber(metrics.totalUsers) }}</span>
+          </div>
+        </div>
+        <div class="metric-card products">
+          <div class="metric-icon">🛍️</div>
+          <div class="metric-content">
+            <span class="metric-label">Produits</span>
+            <span class="metric-value">{{ formatNumber(metrics.totalProducts) }}</span>
+          </div>
+        </div>
+        <div class="metric-card stores">
+          <div class="metric-icon">🏪</div>
+          <div class="metric-content">
+            <span class="metric-label">Boutiques</span>
+            <span class="metric-value">{{ formatNumber(metrics.totalStores) }}</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section Graphiques -->
+    <section class="dashboard-section charts-section" *ngIf="charts && !loading">
+      <h3 class="section-title">Évolutions</h3>
+      <div class="charts-grid">
+        <!-- Revenu -->
+        <div class="chart-card">
+          <h4 class="chart-title">Évolution du Revenu</h4>
+          <div class="chart-container">
+            <canvas #revenueCanvas></canvas>
+          </div>
+        </div>
+        <!-- Commandes -->
+        <div class="chart-card">
+          <h4 class="chart-title">Évolution des Commandes</h4>
+          <div class="chart-container">
+            <canvas #ordersCanvas></canvas>
+          </div>
+        </div>
+        <!-- Utilisateurs -->
+        <div class="chart-card">
+          <h4 class="chart-title">Évolution des Utilisateurs</h4>
+          <div class="chart-container">
+            <canvas #usersCanvas></canvas>
+          </div>
+        </div>
+        <!-- Statuts -->
+        <div class="chart-card">
+          <h4 class="chart-title">Répartition des Commandes</h4>
+          <div class="chart-container doughnut">
+            <canvas #statusCanvas></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section Tables -->
+    <section class="dashboard-section tables-section" *ngIf="charts && !loading">
+      <h3 class="section-title">Classements</h3>
+      <div class="tables-grid">        <!-- Top Produits -->
+        <div class="table-card">
+          <h4 class="table-title">Top Produits</h4>
+          <table class="data-table" *ngIf="topProducts.length > 0; else noProducts">
+            <thead>
+              <tr>
+                <th>Produit</th>
+                <th>Quantité</th>
+                <th>Revenu</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let p of topProducts">
+                <td>{{ p.name }}</td>
+                <td>{{ p.totalQuantity }}</td>
+                <td>{{ formatCurrency(p.totalRevenue) }}</td>
+              </tr>
+            </tbody>
+          </table>
+          <ng-template #noProducts>
+            <p class="no-data">Aucune donnée disponible</p>
+          </ng-template>
+        </div>
+
+        <!-- Top Boutiques -->
+        <div class="table-card">
+          <h4 class="table-title">Top Boutiques</h4>
+          <table class="data-table" *ngIf="topStores.length > 0; else noStores">
+            <thead>
+              <tr>
+                <th>Boutique</th>
+                <th>Commandes</th>
+                <th>Revenu</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let s of topStores">
+                <td>{{ s.name }}</td>
+                <td>{{ s.totalOrders }}</td>
+                <td>{{ formatCurrency(s.totalRevenue) }}</td>
+              </tr>
+            </tbody>
+          </table>
+          <ng-template #noStores>
+            <p class="no-data">Aucune donnée disponible</p>
+          </ng-template>
+        </div>      </div>
+    </section>
+    </div>
+  </app-page>
+</app-shell>
