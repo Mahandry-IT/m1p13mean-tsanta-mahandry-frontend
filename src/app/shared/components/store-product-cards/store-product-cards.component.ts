@@ -141,6 +141,19 @@ export class StoreProductCardsComponent<TItem extends Record<string, any>> imple
    */
   @Input() priceResolver: ((row: TItem) => Partial<Pick<StoreProductCardsPriceTemplateContext<TItem>, 'basePrice' | 'finalPrice' | 'hasPromo' | 'promoPercent'>> | null) | null = null;
 
+  /**
+   * Permet au parent de transformer / enrichir les items après chargement (ex: favorites -> product).
+   * Si async, retourner une Promise.
+   */
+  @Input() itemsMapper: ((items: TItem[]) => TItem[] | Promise<TItem[]>) | null = null;
+
+  /**
+   * Source de vérité côté UI pour la taille de page.
+   * Important: certains backends renvoient toujours `pagination.limit=20` même si on demande 10.
+   * On ne doit pas laisser cette valeur écraser le choix utilisateur.
+   */
+  pageSizeState = 20;
+
   constructor(
     private readonly resourceList: ResourceListService,
     private readonly api: ApiService,
@@ -160,6 +173,16 @@ export class StoreProductCardsComponent<TItem extends Record<string, any>> imple
       this.loadRemoteOptions();
     }
 
+    if (changes['pageSize']) {
+      const next = Number(changes['pageSize'].currentValue);
+      if (Number.isFinite(next) && next > 0 && this.pagination.limit !== next) {
+        this.pagination = { ...this.pagination, page: 1, limit: next };
+        this.pageSizeState = next;
+        this.lastLoadSignature = null;
+        this.triggerLoadIfNeeded(false);
+      }
+    }
+
     if (changes['listEndpoint'] || changes['itemsKey']) {
       this.triggerLoadIfNeeded(true);
       return;
@@ -174,6 +197,12 @@ export class StoreProductCardsComponent<TItem extends Record<string, any>> imple
   ngOnInit(): void {
     this.setupFilterControls();
     this.loadRemoteOptions();
+
+    // init pagination.limit depuis l'input pageSize
+    if (this.pageSize && this.pagination.limit !== this.pageSize) {
+      this.pagination = { ...this.pagination, limit: this.pageSize };
+    }
+    this.pageSizeState = this.pagination.limit;
 
     if (this.listEndpoint) {
       this.triggerLoadIfNeeded(true);
@@ -207,7 +236,8 @@ export class StoreProductCardsComponent<TItem extends Record<string, any>> imple
 
   private triggerLoadIfNeeded(resetPage = false): void {
     if (resetPage) {
-      this.pagination = { ...this.pagination, page: 1, limit: this.pageSize };
+      // reset uniquement la page. Ne pas forcer limit ici, sinon le paginator repasse à 20.
+      this.pagination = { ...this.pagination, page: 1 };
     }
 
     const sig = this.computeLoadSignature();
@@ -431,21 +461,61 @@ export class StoreProductCardsComponent<TItem extends Record<string, any>> imple
 
     const uiFilters = this.uiFilterParams();
 
+    const requestedLimit = this.pagination.limit;
+
     this.resourceList
       .fetchPage<TItem>({
         endpoint: this.listEndpoint,
         page: this.pagination.page,
-        limit: this.pagination.limit,
+        limit: requestedLimit,
         q: this.searchCtrl.value,
         filters: { ...(this.filters ?? {}), ...uiFilters, ...sortParams },
         itemsKey: this.itemsKey,
       })
       .subscribe({
         next: (res) => {
-          this.items = res.items;
-          this.pagination = res.pagination;
-          this.loading = false;
-          this.cdr.markForCheck();
+          const applyItems = (mapped: TItem[]) => {
+            this.items = mapped;
+
+            // Le backend peut renvoyer une pagination "incorrecte" sur limit.
+            // On fusionne donc en gardant notre limit demandé.
+            const p = res.pagination ?? this.pagination;
+            this.pagination = {
+              ...this.pagination,
+              ...p,
+              page: p.page ?? this.pagination.page,
+              total: p.total ?? this.pagination.total,
+              totalPages: p.totalPages ?? this.pagination.totalPages,
+              hasPrev: p.hasPrev ?? this.pagination.hasPrev,
+              hasNext: p.hasNext ?? this.pagination.hasNext,
+              limit: requestedLimit,
+            };
+            this.pageSizeState = requestedLimit;
+
+            this.loading = false;
+            this.cdr.markForCheck();
+          };
+
+          if (this.itemsMapper) {
+            try {
+              const out = this.itemsMapper(res.items);
+              if (out && typeof (out as any).then === 'function') {
+                (out as Promise<TItem[]>).then(
+                  (mapped) => applyItems(mapped ?? []),
+                  () => applyItems(res.items),
+                );
+                return;
+              }
+              applyItems((out as TItem[]) ?? res.items);
+              return;
+            } catch {
+              // fallback
+              applyItems(res.items);
+              return;
+            }
+          }
+
+          applyItems(res.items);
         },
         error: (err: ApiError) => {
           this.error = err;
@@ -458,6 +528,7 @@ export class StoreProductCardsComponent<TItem extends Record<string, any>> imple
 
   onPage(event: any): void {
     this.pagination = { ...this.pagination, page: event.pageIndex + 1, limit: event.pageSize };
+    this.pageSizeState = event.pageSize;
     this.triggerLoadIfNeeded(false);
   }
 
@@ -534,7 +605,7 @@ export class StoreProductCardsComponent<TItem extends Record<string, any>> imple
     if (this.priceFormatter) return this.priceFormatter(price);
     if (price === null) return '—';
     try {
-      return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(price);
+      return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'MGA' }).format(price);
     } catch {
       return `${price} Ar`;
     }
